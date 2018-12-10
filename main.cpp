@@ -13,7 +13,6 @@ int main(int argc, char **argv)
     app.setOrganizationName("Studs Everywhere");
 
     MainWindow mainWindow;
-//    mainWindow.setWindowState(Qt::Maximized);
     mainWindow.showMaximized();
 
     return app.exec();

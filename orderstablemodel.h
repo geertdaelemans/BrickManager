@@ -4,7 +4,6 @@
 #include "bricklink.h"
 
 #include <QtCore>
-//#include <QtNetwork>
 
 class OrdersTableModel : public QAbstractTableModel
 {

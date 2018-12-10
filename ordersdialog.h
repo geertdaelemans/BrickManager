@@ -16,10 +16,9 @@ public:
     explicit OrdersDialog(QWidget *parent = nullptr);
     ~OrdersDialog();
 
-    void updateStatus();
 private slots:
-    void on_pushButton_clicked();
     void on_checkBoxFiled_stateChanged(int arg1);
+    void on_view_clicked(const QModelIndex &index);
 
 private:
     OrdersTableModel *model;
