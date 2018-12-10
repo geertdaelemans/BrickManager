@@ -19,3 +19,6 @@ FORMS += \
     mainwindow.ui \
     ordersdialog.ui
 
+DISTFILES += \
+    README.md
+
