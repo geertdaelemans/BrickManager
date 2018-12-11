@@ -1,12 +1,14 @@
 #include "ordersdialog.h"
 #include "orderstablemodel.h"
 #include "ui_ordersdialog.h"
+#include "mainwindow.h"
 
 OrdersDialog::OrdersDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::OrdersDialog)
 {
     model = new OrdersTableModel(this);
+
     ui->setupUi(this);
     ui->view->setModel(model);
 //    ui->view->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -25,7 +27,13 @@ void OrdersDialog::on_checkBoxFiled_stateChanged(int arg1)
     model->updateOrders();
 }
 
-void OrdersDialog::on_view_clicked(const QModelIndex &index)
+void OrdersDialog::on_pushButton_clicked()
 {
-    qDebug() << "Clicked on order#" + ui->view->model()->data(ui->view->model()->index(index.row(), 0)).toString();
+    QItemSelectionModel *select = ui->view->selectionModel();
+    QModelIndexList rows = select->selectedRows(); // return selected row(s)
+    QList<QString> list;
+    foreach(QModelIndex index, rows) {
+        list.append(ui->view->model()->data(ui->view->model()->index(index.row(), 0)).toString());
+    }
+    emit ordersSelected(list);
 }

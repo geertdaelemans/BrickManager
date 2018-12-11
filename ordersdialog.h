@@ -15,10 +15,16 @@ class OrdersDialog : public QDialog
 public:
     explicit OrdersDialog(QWidget *parent = nullptr);
     ~OrdersDialog();
+    QWidget *parent;
+    void openTab();
+
+signals:
+    void ordersSelected(QList<QString> orderIDs);
 
 private slots:
     void on_checkBoxFiled_stateChanged(int arg1);
-    void on_view_clicked(const QModelIndex &index);
+
+    void on_pushButton_clicked();
 
 private:
     OrdersTableModel *model;

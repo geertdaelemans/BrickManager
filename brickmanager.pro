@@ -6,19 +6,23 @@ HEADERS += \
     bricklink.h \
     mainwindow.h \
     ordersdialog.h \
-    orderstablemodel.h
+    orderstablemodel.h \
+    inventory.h
 
 SOURCES += \
     main.cpp \
     bricklink.cpp \
     mainwindow.cpp \
     ordersdialog.cpp \
-    orderstalblemodel.cpp
+    orderstalblemodel.cpp \
+    inventory.cpp
 
 FORMS += \
     mainwindow.ui \
-    ordersdialog.ui
+    ordersdialog.ui \
+    inventory.ui
 
 DISTFILES += \
-    README.md
+    README.md \
+    LICENSE
 
