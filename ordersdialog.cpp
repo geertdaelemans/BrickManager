@@ -9,8 +9,8 @@ OrdersDialog::OrdersDialog(QWidget *parent) :
     model = new OrdersTableModel(this);
     ui->setupUi(this);
     ui->view->setModel(model);
-    ui->view->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->view->setAlternatingRowColors(true);
+//    ui->view->setSelectionBehavior(QAbstractItemView::SelectRows);
+//    ui->view->setAlternatingRowColors(true);
     model->updateOrders();
 }
 

@@ -16,7 +16,7 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
     int columnCount(const QModelIndex &parent) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-
+    void clearOrders();
     QAbstractOAuth::Status status() const;
 
     bool filed = false;

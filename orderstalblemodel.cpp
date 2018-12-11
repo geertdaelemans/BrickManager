@@ -113,6 +113,13 @@ QAbstractOAuth::Status OrdersTableModel::status() const
     return bricklink.status();
 }
 
+void OrdersTableModel::clearOrders()
+{
+   this->beginResetModel();
+   orders.clear();
+   this->endResetModel();
+}
+
 void OrdersTableModel::switchFiled(int state)
 {
     filed = (state == Qt::Checked);
@@ -146,6 +153,7 @@ void OrdersTableModel::parseJson()
         QJsonObject jsonObject = jsonResponse.object();
         const auto array = jsonObject["data"].toArray();
         if (array.size()) {
+            clearOrders();
             beginInsertRows(QModelIndex(), 0, array.size() - 1);
             auto before = orders.begin();
             for (const auto &value : array) {
