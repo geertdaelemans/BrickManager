@@ -7,7 +7,8 @@ HEADERS += \
     mainwindow.h \
     ordersdialog.h \
     orderstablemodel.h \
-    inventory.h
+    inventory.h \
+    inventorytablemodel.h
 
 SOURCES += \
     main.cpp \
@@ -15,7 +16,8 @@ SOURCES += \
     mainwindow.cpp \
     ordersdialog.cpp \
     orderstalblemodel.cpp \
-    inventory.cpp
+    inventory.cpp \
+    inventorytablemodel.cpp
 
 FORMS += \
     mainwindow.ui \

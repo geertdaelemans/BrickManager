@@ -63,7 +63,8 @@ void MainWindow::openInventoryTab(QList<QString> orderIDs)
         int numberOfTabs = ui->tabWidget->count();
         if(tabs.indexOf("Order#" + orderID) == -1)
         {
-            ui->tabWidget->addTab(new Inventory, "Order#" + orderID);
+            Inventory *inv = new Inventory(this, orderID.toInt());
+            ui->tabWidget->addTab(inv, "Order#" + orderID);
             ui->tabWidget->setCurrentIndex(numberOfTabs);
         }
     }
