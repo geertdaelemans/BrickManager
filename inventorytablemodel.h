@@ -2,8 +2,12 @@
 #define INVENTORYTABLEMODEL_H
 
 #include "bricklink.h"
+#include "category.h"
+#include "colors.h"
 
 #include <QtCore>
+
+class MainWindow;
 
 class InventoryTableModel : public QAbstractTableModel
 {
@@ -17,6 +21,8 @@ public:
     int columnCount(const QModelIndex &parent) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     void clearParts();
+    Category cat;
+    Colors col;
 
 public slots:
     void updateParts(int orderID);
@@ -25,13 +31,13 @@ private:
     Q_DISABLE_COPY(InventoryTableModel)
 
     void parseJson();
-
     struct Part {
         int inventory_id;
         QString item_no;
         QString item_name;
         QString item_type;
         int category_id;
+        QString category_name;
         int color_id;
         QString color_name;
         int quantity;
@@ -46,10 +52,12 @@ private:
         QString remarks;
         QString description;
         double weight;
+        int batchNumber;
     };
 
     QList<Part> parts;
     BrickLink bricklink;
+
 };
 
 #endif // INVENTORYTABLEMODEL_H

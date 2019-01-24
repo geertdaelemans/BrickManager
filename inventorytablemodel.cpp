@@ -1,4 +1,6 @@
 #include "inventorytablemodel.h"
+#include "mainwindow.h"
+#include "category.h"
 
 #include <QtGui>
 #include <QtCore>
@@ -20,9 +22,9 @@ int InventoryTableModel::rowCount(const QModelIndex &parent) const
 
 QVariant InventoryTableModel::data(const QModelIndex &index, int role) const
 {
+
     if (role != Qt::DisplayRole)
         return QVariant();
-
     auto it = parts.begin();
     std::advance(it, index.row());
     switch (index.column())
@@ -36,35 +38,35 @@ QVariant InventoryTableModel::data(const QModelIndex &index, int role) const
     case 3:
         return it->item_type;
     case 4:
-        return QString::number(it->category_id);
+        return it->category_name;
     case 5:
-        return QString::number(it->color_id);
-    case 6:
         return it->color_name;
-    case 7:
+    case 6:
         return QString::number(it->quantity);
-    case 8:
+    case 7:
         return it->new_or_used;
-    case 9:
+    case 8:
         return it->completeness;
-    case 10:
+    case 9:
         return QString::number(it->unit_price);
-    case 11:
+    case 10:
         return QString::number(it->unit_price_final);
-    case 12:
+    case 11:
         return QString::number(it->disp_unit_price);
-    case 13:
+    case 12:
         return QString::number(it->disp_unit_price_final);
-    case 14:
+    case 13:
         return it->currency_code;
-    case 15:
+    case 14:
         return it->disp_currency_code;
-    case 16:
+    case 15:
         return it->remarks;
-    case 17:
+    case 16:
         return it->description;
-    case 18:
+    case 17:
         return QString::number(it->weight);
+    case 18:
+        return QString::number(it->batchNumber);
     }
     return QVariant();
 }
@@ -90,35 +92,35 @@ QVariant InventoryTableModel::headerData(int section, Qt::Orientation orientatio
         case 3:
             return QStringLiteral("Item Type");
         case 4:
-            return QStringLiteral("Category ID");
+            return QStringLiteral("Category");
         case 5:
-            return QStringLiteral("Color ID");
-        case 6:
             return QStringLiteral("Color");
-        case 7:
+        case 6:
             return QStringLiteral("Quantity");
-        case 8:
+        case 7:
             return QStringLiteral("Condition");
-        case 9:
+        case 8:
             return QStringLiteral("Completeness");
-        case 10:
+        case 9:
             return QStringLiteral("Unit Price");
-        case 11:
+        case 10:
             return QStringLiteral("Unit Price Final");
-        case 12:
+        case 11:
             return QStringLiteral("Unit Price Buyer");
-        case 13:
+        case 12:
             return QStringLiteral("Unit Price Buyer Final");
-        case 14:
+        case 13:
             return QStringLiteral("Currency");
-        case 15:
+        case 14:
             return QStringLiteral("Currency User");
-        case 16:
+        case 15:
             return QStringLiteral("Remarks");
-        case 17:
+        case 16:
             return QStringLiteral("Description");
-        case 18:
+        case 17:
             return QStringLiteral("Weight");
+        case 18:
+            return QStringLiteral("Batch");
         }
     }
     return section;
@@ -136,7 +138,6 @@ void InventoryTableModel::updateParts(int orderID)
     QUrl url("https://api.bricklink.com/api/store/v1/orders/" + QString::number(orderID) + "/items");
     QVariantMap parameters;
     QNetworkReply *reply = bricklink.get(url, parameters);
-
     connect(reply, &QNetworkReply::finished, this, &InventoryTableModel::parseJson);
 }
 
@@ -156,7 +157,9 @@ void InventoryTableModel::parseJson()
         QJsonDocument jsonResponse = QJsonDocument::fromJson(strReply.toUtf8());
         QJsonObject jsonObject = jsonResponse.object();
         QJsonArray batchArray = jsonObject.value("data").toArray();
+        int batchNumber = 0;
         foreach(const QJsonValue &batch, batchArray) {
+            batchNumber++;
             QJsonArray itemArray = batch.toArray();
             beginInsertRows(QModelIndex(), 0, itemArray.size() - 1);
             auto before = parts.end();
@@ -168,8 +171,9 @@ void InventoryTableModel::parseJson()
                     object.value("item").toObject().value("name").toString(),
                     object.value("item").toObject().value("type").toString(),
                     object.value("item").toObject().value("category_id").toInt(),
+                    cat.getCategory(object.value("item").toObject().value("category_id").toInt()),
                     object.value("color_id").toInt(),
-                    object.value("color_name").toString(),
+                    col.getColor(object.value("color_id").toInt()),
                     object.value("quantity").toInt(),
                     object.value("new_or_used").toString(),
                     object.value("completeness").toString(),
@@ -181,7 +185,8 @@ void InventoryTableModel::parseJson()
                     object.value("disp_currency_code").toString(),
                     object.value("remarks").toString(),
                     object.value("description").toString(),
-                    object.value("weight").toVariant().toDouble()
+                    object.value("weight").toVariant().toDouble(),
+                    batchNumber
                 });
                 std::advance(before, 1);
             }

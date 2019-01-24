@@ -1,7 +1,6 @@
 #include "ordersdialog.h"
 #include "orderstablemodel.h"
 #include "ui_ordersdialog.h"
-#include "mainwindow.h"
 
 OrdersDialog::OrdersDialog(QWidget *parent) :
     QDialog(parent),
@@ -9,10 +8,13 @@ OrdersDialog::OrdersDialog(QWidget *parent) :
 {
     model = new OrdersTableModel(this);
 
+    proxyModel = new QSortFilterProxyModel(this);
+    proxyModel->setSourceModel(model);
+    proxyModel->sort(1, Qt::DescendingOrder);
+
     ui->setupUi(this);
-    ui->view->setModel(model);
-//    ui->view->setSelectionBehavior(QAbstractItemView::SelectRows);
-//    ui->view->setAlternatingRowColors(true);
+    ui->view->setModel(proxyModel);
+
     model->updateOrders();
 }
 

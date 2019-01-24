@@ -8,16 +8,20 @@ HEADERS += \
     ordersdialog.h \
     orderstablemodel.h \
     inventory.h \
-    inventorytablemodel.h
+    inventorytablemodel.h \
+    category.h \
+    colors.h
 
 SOURCES += \
     main.cpp \
     bricklink.cpp \
     mainwindow.cpp \
     ordersdialog.cpp \
-    orderstalblemodel.cpp \
     inventory.cpp \
-    inventorytablemodel.cpp
+    inventorytablemodel.cpp \
+    category.cpp \
+    orderstablemodel.cpp \
+    colors.cpp
 
 FORMS += \
     mainwindow.ui \

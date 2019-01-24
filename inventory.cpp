@@ -8,8 +8,12 @@ Inventory::Inventory(QWidget *parent, int orderID) :
 {
     model = new InventoryTableModel(this);
 
+    proxyModel = new QSortFilterProxyModel(this);
+    proxyModel->setSourceModel(model);
+
     ui->setupUi(this);
-    ui->tableView->setModel(model);
+    ui->tableView->setModel(proxyModel);
+
     model->updateParts(orderID);
 }
 

@@ -28,6 +28,7 @@ private slots:
 
 private:
     OrdersTableModel *model;
+    QSortFilterProxyModel *proxyModel;
     Ui::OrdersDialog *ui;
 };
 

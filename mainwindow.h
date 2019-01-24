@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include "ordersdialog.h"
+#include "category.h"
+#include "colors.h"
 
 #include <QMainWindow>
 
@@ -16,6 +18,8 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    Category cat;
+    Colors col;
 
 public slots:
     void openInventoryTab(QList<QString>);

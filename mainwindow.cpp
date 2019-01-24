@@ -5,6 +5,9 @@
 
 #include <QMessageBox>
 
+QMap<int, QString> Category::categories;
+QMap<int, QString> Colors::colors;
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -37,7 +40,7 @@ void MainWindow::on_actionExit_triggered()
 void MainWindow::on_actionAbout_triggered()
 {
     QMessageBox::about(this, tr("About Brick Manager"),
-            tr("<p>The <b>BrickLink Manager</b> application is being developed by Geert Daelemans.</p>"));
+            tr("<p>The <b>Brick Manager</b> application is being developed by Geert Daelemans.</p>"));
 }
 
 void MainWindow::on_actionAboutQt_triggered()

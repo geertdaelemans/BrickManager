@@ -4,6 +4,8 @@
 #include <QWidget>
 #include "inventorytablemodel.h"
 
+class MainWindow;
+
 namespace Ui {
 class Inventory;
 }
@@ -19,6 +21,7 @@ public:
 private:
     InventoryTableModel *model;
     Ui::Inventory *ui;
+    QSortFilterProxyModel *proxyModel;
 };
 
 #endif // INVENTORY_H
