@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "ordersdialog.h"
+#include "settingsdialog.h"
 #include "inventory.h"
 
 #include <QMessageBox>
@@ -30,6 +31,13 @@ void MainWindow::on_actionOrders_triggered()
     QObject::connect(ordersDialog, SIGNAL(ordersSelected(QList<QString>)), this, SLOT(openInventoryTab(QList<QString>)));
 
     ordersDialog->exec();
+}
+
+void MainWindow::on_actionSettings_triggered()
+{
+    settingsDialog = new SettingsDialog(this);
+
+    settingsDialog->exec();
 }
 
 void MainWindow::on_actionExit_triggered()

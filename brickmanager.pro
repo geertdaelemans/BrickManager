@@ -10,7 +10,8 @@ HEADERS += \
     inventory.h \
     inventorytablemodel.h \
     category.h \
-    colors.h
+    colors.h \
+    settingsdialog.h
 
 SOURCES += \
     main.cpp \
@@ -21,12 +22,14 @@ SOURCES += \
     inventorytablemodel.cpp \
     category.cpp \
     orderstablemodel.cpp \
-    colors.cpp
+    colors.cpp \
+    settingsdialog.cpp
 
 FORMS += \
     mainwindow.ui \
     ordersdialog.ui \
-    inventory.ui
+    inventory.ui \
+    settingsdialog.ui
 
 DISTFILES += \
     README.md \

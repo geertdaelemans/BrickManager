@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "ordersdialog.h"
+#include "settingsdialog.h"
 #include "category.h"
 #include "colors.h"
 
@@ -31,9 +32,12 @@ private slots:
     void on_actionAboutQt_triggered();
     void on_tabWidget_tabCloseRequested(int index);
 
+    void on_actionSettings_triggered();
+
 private:
     Ui::MainWindow *ui;
     OrdersDialog *ordersDialog;
+    SettingsDialog *settingsDialog;
 };
 
 #endif // MAINWINDOW_H

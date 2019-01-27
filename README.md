@@ -1,7 +1,14 @@
 # BrickManager
 A tool to manage my LEGO brick collection.
 
-In order to get this code snippet to work, you have to add key/secret pairs to the bricklink.cpp file.
-You can apply for these values on the Bricklink.com site (https://www.bricklink.com/v2/api/register_consumer.page)
+In order to get this code snippet to work, you have to first set BrickLink key/secret pairs in the settings diaglog (Extras > Settings... > Connection).
+You can apply for these values on the Bricklink.com site (https://www.bricklink.com/v2/api/register_consumer.page).
+
+Currently supported features:
+* List your current orders
+* List your filed orders
+* Get inventory of each order
+
+This is still a work in progress... many features still need to be implemented.
 
 Good luck!
