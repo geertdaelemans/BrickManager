@@ -1,7 +1,9 @@
 #include "settingsdialog.h"
+#include "bricklink.h"
 #include "ui_settingsdialog.h"
 
 #include <QtCore>
+#include <QMessageBox>
 
 SettingsDialog::SettingsDialog(QWidget *parent) :
     QDialog(parent),
@@ -12,8 +14,10 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 
     ui->setupUi(this);
 
+    // GENERAL panel
     ui->lblGeneral->setText("No General Settings yet...");
 
+    // CONNECTION panel
     // Retrieve OAuth1 credentials
     QSettings settings;
     ui->consumerKey->setText(settings.value("credentials/consumerKey").toString());
@@ -36,4 +40,13 @@ void SettingsDialog::on_buttonBox_accepted()
     settings.setValue("credentials/consumerSecret", ui->consumerSecret->text());
     settings.setValue("credentials/tokenValue", ui->tokenValue->text());
     settings.setValue("credentials/tokenSecret", ui->tokenSecret->text());
+}
+
+void SettingsDialog::on_btnCheckConnection_clicked()
+{
+    this->on_buttonBox_accepted();
+    BrickLink brickLink;
+    if(brickLink.checkConnection(this)) {
+        QMessageBox::information(this, "Connection", "Connection validated.");
+    }
 }

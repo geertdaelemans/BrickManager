@@ -1,5 +1,4 @@
 #include "inventory.h"
-#include "inventorytablemodel.h"
 #include "ui_inventory.h"
 
 Inventory::Inventory(QWidget *parent, int orderID) :

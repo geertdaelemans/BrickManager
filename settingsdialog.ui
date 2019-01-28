@@ -19,7 +19,7 @@
      <item>
       <widget class="QTabWidget" name="tabWidget">
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="General">
         <attribute name="title">
@@ -82,6 +82,13 @@
          </item>
          <item>
           <widget class="QLineEdit" name="tokenSecret"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnCheckConnection">
+           <property name="text">
+            <string>Check Connection</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>

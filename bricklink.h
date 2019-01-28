@@ -1,8 +1,6 @@
 #ifndef BRICKLINK_H
 #define BRICKLINK_H
 
-#include <QtCore>
-#include <QtNetwork>
 #include <QtNetworkAuth>
 
 class BrickLink : public QOAuth1
@@ -11,6 +9,7 @@ class BrickLink : public QOAuth1
 
 public:
     BrickLink(QObject *parent = nullptr);
+    bool checkConnection(QObject *parent = nullptr);
 
 private:
     Q_DISABLE_COPY(BrickLink)

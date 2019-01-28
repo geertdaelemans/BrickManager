@@ -13,8 +13,6 @@ public:
     explicit Colors();
     ~Colors();
     QString getColor(int index);
-
-public:
     void importColors();
 
 private:

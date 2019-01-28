@@ -13,8 +13,6 @@ public:
     explicit Category();
     ~Category();
     QString getCategory(int index);
-
-public:
     void importCategories();
 
 private:
