@@ -18,7 +18,7 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     void clearOrders();
     QAbstractOAuth::Status status() const;
-
+    QObject *p_parent;
     bool filed = false;
 
 public slots:

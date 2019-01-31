@@ -1,4 +1,5 @@
 #include "orderstablemodel.h"
+#include "ordersdialog.h"
 
 #include <QtGui>
 #include <QtCore>
@@ -6,6 +7,7 @@
 
 OrdersTableModel::OrdersTableModel(QObject *parent) : QAbstractTableModel(parent)
 {
+    p_parent = parent;
 }
 
 int OrdersTableModel::rowCount(const QModelIndex &parent) const
@@ -27,35 +29,35 @@ QVariant OrdersTableModel::data(const QModelIndex &index, int role) const
     std::advance(it, index.row());
     switch (index.column())
     {
-    case 0:
+    case OrdersDialog::OrderID:
         return QString::number(it->order_id);
-    case 1:
+    case OrdersDialog::DateOrdered:
         return it->date_ordered;
-    case 2:
+    case OrdersDialog::SellerName:
         return it->seller_name;
-    case 3:
+    case OrdersDialog::StoreName:
         return it->store_name;
-    case 4:
+    case OrdersDialog::BuyerName:
         return it->buyer_name;
-    case 5:
+    case OrdersDialog::TotalCount:
         return it->total_count;
-    case 6:
+    case OrdersDialog::UniqueCount:
         return it->unique_count;
-    case 7:
+    case OrdersDialog::Status:
         return it->status;
-    case 8:
+    case OrdersDialog::PaymentMethod:
         return it->payment_method;
-    case 9:
+    case OrdersDialog::PaymentStatus:
         return it->payment_status;
-    case 10:
+    case OrdersDialog::PaymentDatePaid:
         return it->payment_date_paid;
-    case 11:
+    case OrdersDialog::PaymentCurrencyCode:
         return it->payment_currency_code;
-    case 12:
+    case OrdersDialog::CostSubtotal:
         return it->cost_subtotal;
-    case 13:
+    case OrdersDialog::CostGrandTotal:
         return it->cost_grand_total;
-    case 14:
+    case OrdersDialog::CostCurrencyCode:
         return it->cost_currency_code;
     }
     return QVariant();
@@ -72,38 +74,9 @@ QVariant OrdersTableModel::headerData(int section, Qt::Orientation orientation, 
         return QVariant();
 
     if (orientation == Qt::Horizontal) {
-        switch (section) {
-        case 0:
-            return QStringLiteral("Order Id");
-        case 1:
-            return QStringLiteral("Date Ordered");
-        case 2:
-            return QStringLiteral("Seller Name");
-        case 3:
-            return QStringLiteral("Store Name");
-        case 4:
-            return QStringLiteral("Buyer Name");
-        case 5:
-            return QStringLiteral("Total Count");
-        case 6:
-            return QStringLiteral("Unique Count");
-        case 7:
-            return QStringLiteral("Status");
-        case 8:
-            return QStringLiteral("Method");
-        case 9:
-            return QStringLiteral("Status");
-        case 10:
-            return QStringLiteral("Date Paid");
-        case 11:
-            return QStringLiteral("Currency");
-        case 12:
-            return QStringLiteral("Subtotal");
-        case 13:
-            return QStringLiteral("Grand Total");
-        case 14:
-            return QStringLiteral("Currency");
-        }
+        OrdersDialog::Field field = static_cast<OrdersDialog::Field>(section);
+        qobject_cast<OrdersDialog *> (p_parent)->setVisibility(field);
+        return OrdersDialog::getHeader(field);
     }
     return section;
 }

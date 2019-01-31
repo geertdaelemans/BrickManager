@@ -8,6 +8,7 @@ Currently supported features:
 * List your current orders
 * List your filed orders
 * Get inventory of each order
+* Pop-up window to (un)hide columns
 
 This is still a work in progress... many features still need to be implemented.
 
