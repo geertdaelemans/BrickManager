@@ -1,6 +1,7 @@
 #include "inventorytablemodel.h"
 #include "mainwindow.h"
 #include "category.h"
+#include "inventory.h"
 
 #include <QtGui>
 #include <QtCore>
@@ -8,6 +9,7 @@
 
 InventoryTableModel::InventoryTableModel(QObject *parent) : QAbstractTableModel(parent)
 {
+    p_parent = parent;
 }
 
 int InventoryTableModel::rowCount(const QModelIndex &parent) const
@@ -29,43 +31,47 @@ QVariant InventoryTableModel::data(const QModelIndex &index, int role) const
     std::advance(it, index.row());
     switch (index.column())
     {
-    case 0:
+    case Inventory::InventoryID:
         return QString::number(it->inventory_id);
-    case 1:
+    case Inventory::ItemNo:
         return it->item_no;
-    case 2:
+    case Inventory::ItemName:
         return it->item_name;
-    case 3:
+    case Inventory::ItemType:
         return it->item_type;
-    case 4:
+    case Inventory::CategoryID:
+        return QString::number(it->category_id);
+    case Inventory::CategoryName:
         return it->category_name;
-    case 5:
+    case Inventory::ColorId:
+        return QString::number(it->color_id);
+    case Inventory::ColorName:
         return it->color_name;
-    case 6:
+    case Inventory::Quantity:
         return QString::number(it->quantity);
-    case 7:
+    case Inventory::NewOrUsed:
         return it->new_or_used;
-    case 8:
+    case Inventory::Completeness:
         return it->completeness;
-    case 9:
+    case Inventory::UnitPrice:
         return QString::number(it->unit_price);
-    case 10:
+    case Inventory::UnitPriceFinal:
         return QString::number(it->unit_price_final);
-    case 11:
+    case Inventory::DispUnitPrice:
         return QString::number(it->disp_unit_price);
-    case 12:
+    case Inventory::DispUnitPriceFinal:
         return QString::number(it->disp_unit_price_final);
-    case 13:
+    case Inventory::CurrencyCode:
         return it->currency_code;
-    case 14:
+    case Inventory::DispCurrencyCode:
         return it->disp_currency_code;
-    case 15:
+    case Inventory::Remarks:
         return it->remarks;
-    case 16:
+    case Inventory::Description:
         return it->description;
-    case 17:
+    case Inventory::Weight:
         return QString::number(it->weight);
-    case 18:
+    case Inventory::BatchNumber:
         return QString::number(it->batchNumber);
     }
     return QVariant();
@@ -73,55 +79,18 @@ QVariant InventoryTableModel::data(const QModelIndex &index, int role) const
 
 int InventoryTableModel::columnCount(const QModelIndex &) const
 {
-    return 19;
+    return 21;
 }
 
 QVariant InventoryTableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role != Qt::DisplayRole)
-        return QVariant();
+        return QVariant();    
 
     if (orientation == Qt::Horizontal) {
-        switch (section) {
-        case 0:
-            return QStringLiteral("ID");
-        case 1:
-            return QStringLiteral("Item Number");
-        case 2:
-            return QStringLiteral("Item Name");
-        case 3:
-            return QStringLiteral("Item Type");
-        case 4:
-            return QStringLiteral("Category");
-        case 5:
-            return QStringLiteral("Color");
-        case 6:
-            return QStringLiteral("Quantity");
-        case 7:
-            return QStringLiteral("Condition");
-        case 8:
-            return QStringLiteral("Completeness");
-        case 9:
-            return QStringLiteral("Unit Price");
-        case 10:
-            return QStringLiteral("Unit Price Final");
-        case 11:
-            return QStringLiteral("Unit Price Buyer");
-        case 12:
-            return QStringLiteral("Unit Price Buyer Final");
-        case 13:
-            return QStringLiteral("Currency");
-        case 14:
-            return QStringLiteral("Currency User");
-        case 15:
-            return QStringLiteral("Remarks");
-        case 16:
-            return QStringLiteral("Description");
-        case 17:
-            return QStringLiteral("Weight");
-        case 18:
-            return QStringLiteral("Batch");
-        }
+        Inventory::Field field = static_cast<Inventory::Field>(section);
+        qobject_cast<Inventory *> (p_parent)->setVisibility(field);
+        return Inventory::getHeader(field);
     }
     return section;
 }

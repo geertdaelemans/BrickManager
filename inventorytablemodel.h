@@ -23,6 +23,7 @@ public:
     void clearParts();
     Category cat;
     Colors col;
+    QObject *p_parent;
 
 public slots:
     void updateParts(int orderID);

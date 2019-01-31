@@ -26,6 +26,8 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void on_view_doubleClicked(const QModelIndex &index);
+
 private:
     OrdersTableModel *model;
     QSortFilterProxyModel *proxyModel;

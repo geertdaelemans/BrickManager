@@ -14,6 +14,7 @@ OrdersDialog::OrdersDialog(QWidget *parent) :
 
     ui->setupUi(this);
     ui->view->setModel(proxyModel);
+    ui->view->horizontalHeader()->setSectionsMovable(true);
 
     model->updateOrders();
 }
@@ -38,4 +39,11 @@ void OrdersDialog::on_pushButton_clicked()
         list.append(ui->view->model()->data(ui->view->model()->index(index.row(), 0)).toString());
     }
     emit ordersSelected(list);
+}
+
+void OrdersDialog::on_view_doubleClicked(const QModelIndex &index)
+{
+    Q_UNUSED(index);
+
+    OrdersDialog::on_pushButton_clicked();
 }
