@@ -32,6 +32,46 @@ QSqlError SqlDatabase::addCategory(int category_id, const QString &category_name
     return q.lastError();
 }
 
+QSqlError SqlDatabase::addUserInventory(int inventory_id, const QString &item_no, const QString &item_name, const QString &item_type, int item_category_id,
+                              int color_id, const QString &color_name, int quantity, const QString &new_or_used, const QString &completeness,
+                              double unit_price, int bind_id, const QString &description, const QString &remarks, int bulk, bool is_retain,
+                              bool is_stock_room, QDateTime date_created, double my_cost, int sale_rate, int tier_quantity1,
+                              int tier_quantity2, int tier_quantity3, double tier_price1, double tier_price2, double tier_price3,
+                              double my_weight)
+{
+    QSqlQuery q;
+    if (!q.prepare(QLatin1String("insert into userinventories(inventory_id, item_no, item_name, item_type, item_category_id, color_id, color_name, quantity, new_or_used, completeness, unit_price, bind_id, description, remarks, bulk, is_retain, is_stock_room, date_created, my_cost, sale_rate, tier_quantity1, tier_quantity2, tier_quantity3, tier_price1, tier_price2, tier_price3, my_weight) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")))
+        return q.lastError();
+    q.addBindValue(inventory_id);
+    q.addBindValue(item_no);
+    q.addBindValue(item_name);
+    q.addBindValue(item_type);
+    q.addBindValue(item_category_id);
+    q.addBindValue(color_id);
+    q.addBindValue(color_name);
+    q.addBindValue(quantity);
+    q.addBindValue(new_or_used);
+    q.addBindValue(completeness);
+    q.addBindValue(unit_price);
+    q.addBindValue(bind_id);
+    q.addBindValue(description);
+    q.addBindValue(remarks);
+    q.addBindValue(bulk);
+    q.addBindValue(is_retain);
+    q.addBindValue(is_stock_room);
+    q.addBindValue(date_created);
+    q.addBindValue(my_cost);
+    q.addBindValue(sale_rate);
+    q.addBindValue(tier_quantity1);
+    q.addBindValue(tier_quantity2);
+    q.addBindValue(tier_quantity3);
+    q.addBindValue(tier_price1);
+    q.addBindValue(tier_price2);
+    q.addBindValue(tier_price3);
+    q.addBindValue(my_weight);
+    q.exec();
+    return q.lastError();
+}
 
 /**
  * Returns color name by id
@@ -70,6 +110,7 @@ QString SqlDatabase::getCategoryById(int category_id)
     return output;
 }
 
+
 /**
  * Initializes the SQL database and creates the common tables
  * @param none
@@ -78,7 +119,8 @@ QString SqlDatabase::getCategoryById(int category_id)
 QSqlError SqlDatabase::initDb()
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("./database.db");
+//    db.setDatabaseName("./database.db");
+    db.setDatabaseName(":memory:");
 
     if (!db.open())
         return db.lastError();
@@ -93,6 +135,10 @@ QSqlError SqlDatabase::initDb()
     if (!tables.contains("categories", Qt::CaseInsensitive))
         if (!q.exec(QLatin1String("create table categories(category_id integer primary key, category_name varchar, parent_id integer)")))
             return q.lastError();
+    if (!tables.contains("userinventories", Qt::CaseInsensitive))
+        if (!q.exec(QLatin1String("create table userinventories(inventory_id integer primary key, item_no varchar, item_name varchar, item_type varchar, item_category_id integer, color_id integer, color_name varchar, quantity integer, new_or_used varchar, completeness varchar, unit_price varchar, bind_id integer, description varchar, remarks varchar, bulk integer, is_retain varchar, is_stock_room varchar, date_created varchar, my_cost varchar, sale_rate integer, tier_quantity1 integer, tier_quantity2 integer, tier_quantity3 integer, tier_price1 varchar, tier_price2 varchar, tier_price3 varchar, my_weight varchar)")))
+            return q.lastError();
+
 
     qDebug() << "Database initialized...";
 

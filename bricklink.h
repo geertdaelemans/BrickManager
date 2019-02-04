@@ -12,12 +12,14 @@ public:
     bool checkConnection(QObject *parent = nullptr);
     void importCategories();
     void importColors();
-    void parseJsonCategories();
-    void parseJsonColors();
+    void importUserInventory();
     static QJsonArray validateBricklinkResponse(QObject* obj);
 
 private:
     Q_DISABLE_COPY(BrickLink)
+    void parseJsonCategories();
+    void parseJsonColors();
+    void parseJsonUserInventory();
 };
 
 #endif // BRICKLINK_H

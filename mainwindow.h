@@ -35,6 +35,10 @@ private slots:
 
     void on_actionCategories_triggered();
 
+    void on_actionMy_Inventory_triggered();
+
+    void on_actionColors_triggered();
+
 private:
     Ui::MainWindow *ui;
     OrdersDialog *ordersDialog;

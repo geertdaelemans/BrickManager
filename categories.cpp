@@ -3,7 +3,7 @@
 
 #include <QtWidgets>
 
-Categories::Categories(QWidget *parent) :
+Categories::Categories(QWidget *parent, const QString &table) :
     QDialog(parent),
     ui(new Ui::Categories)
 {
@@ -12,15 +12,25 @@ Categories::Categories(QWidget *parent) :
     // Create the data model:
     model = new QSqlRelationalTableModel(ui->tableView);
     model->setEditStrategy(QSqlTableModel::OnManualSubmit);
-    model->setTable("categories");
+    model->setTable(table);
 
     // Remember the indexes of the columns:
     int idIdx = model->fieldIndex("category_id");
     int nameIdx = model->fieldIndex("category_name");
+    int parentIdx = model->fieldIndex("parent_id");
 
     // Set the localized header captions:
     model->setHeaderData(idIdx, Qt::Horizontal, tr("ID"));
     model->setHeaderData(nameIdx, Qt::Horizontal, tr("Naam"));
+    model->setHeaderData(parentIdx, Qt::Horizontal, tr("Parent"));
+
+    proxyModel = new QSortFilterProxyModel(this);
+    proxyModel->setSourceModel(model);
+
+    // Set the model and hide the ID column:
+    ui->tableView->setModel(proxyModel);
+    ui->tableView->horizontalHeader()->setSectionsMovable(true);
+    ui->tableView->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
 
     // Populate the model:
     if (!model->select()) {
@@ -28,8 +38,7 @@ Categories::Categories(QWidget *parent) :
         return;
     }
 
-    // Set the model and hide the ID column:
-    ui->tableView->setModel(model);
+
 }
 
 void Categories::showError(const QSqlError &err)

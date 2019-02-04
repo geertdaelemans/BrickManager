@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     bricklink.importColors();
     bricklink.importCategories();
+    bricklink.importUserInventory();
 
     Q_UNUSED(mydB)
 }
@@ -58,9 +59,21 @@ void MainWindow::on_actionStore_Inventory_triggered()
     }
 }
 
-void MainWindow::on_actionCategories_triggered()
+void MainWindow::on_actionMy_Inventory_triggered()
 {
     categories = new Categories(this);
+    categories->exec();
+}
+
+void MainWindow::on_actionColors_triggered()
+{
+    categories = new Categories(this, "colors");
+    categories->exec();
+}
+
+void MainWindow::on_actionCategories_triggered()
+{
+    categories = new Categories(this, "categories");
     categories->exec();
 }
 
@@ -112,5 +125,3 @@ void MainWindow::openInventoryTab(QList<QString> orderIDs)
     }
     ordersDialog->close();
 }
-
-

@@ -63,7 +63,11 @@
      <string>File</string>
     </property>
     <addaction name="actionOrders"/>
+    <addaction name="separator"/>
     <addaction name="actionStore_Inventory"/>
+    <addaction name="actionMy_Inventory"/>
+    <addaction name="separator"/>
+    <addaction name="actionColors"/>
     <addaction name="actionCategories"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
@@ -122,6 +126,16 @@
   <action name="actionCategories">
    <property name="text">
     <string>Categories</string>
+   </property>
+  </action>
+  <action name="actionColors">
+   <property name="text">
+    <string>Colors</string>
+   </property>
+  </action>
+  <action name="actionMy_Inventory">
+   <property name="text">
+    <string>My Inventory</string>
    </property>
   </action>
  </widget>
