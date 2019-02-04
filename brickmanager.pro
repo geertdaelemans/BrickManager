@@ -1,4 +1,4 @@
-QT = core widgets network networkauth
+QT = core widgets network networkauth sql
 requires(qtConfig(tableview))
 CONFIG -= app_bundle
 
@@ -10,8 +10,9 @@ HEADERS += \
     inventory.h \
     inventorytablemodel.h \
     category.h \
-    colors.h \
-    settingsdialog.h
+    settingsdialog.h \
+    sqldatabase.h \
+    categories.h
 
 SOURCES += \
     main.cpp \
@@ -22,14 +23,16 @@ SOURCES += \
     inventorytablemodel.cpp \
     category.cpp \
     orderstablemodel.cpp \
-    colors.cpp \
-    settingsdialog.cpp
+    settingsdialog.cpp \
+    sqldatabase.cpp \
+    categories.cpp
 
 FORMS += \
     mainwindow.ui \
     ordersdialog.ui \
     inventory.ui \
-    settingsdialog.ui
+    settingsdialog.ui \
+    categories.ui
 
 DISTFILES += \
     README.md \

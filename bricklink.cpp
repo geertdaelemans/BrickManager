@@ -1,4 +1,5 @@
 #include "bricklink.h"
+#include "sqldatabase.h"
 
 #include <QtCore>
 #include <QtNetwork>
@@ -17,6 +18,7 @@ BrickLink::BrickLink(QObject *parent) :
                 settings.value("credentials/tokenValue").toString(),
                 settings.value("credentials/tokenSecret").toString());
 }
+
 
 bool BrickLink::checkConnection(QObject *parent)
 {
@@ -39,4 +41,55 @@ bool BrickLink::checkConnection(QObject *parent)
         return false;
     }
     return true;
+}
+
+
+void BrickLink::importColors()
+{
+    QUrl url("https://api.bricklink.com/api/store/v1/colors");
+    QVariantMap parameters;
+    QNetworkReply *reply = this->get(url, parameters);
+
+    connect(reply, &QNetworkReply::finished, this, &BrickLink::parseJsonColors);
+}
+
+void BrickLink::parseJsonColors()
+{
+    QJsonArray array = BrickLink::validateBricklinkResponse(sender());
+    if (array.size()) {
+        for (auto value : array) {
+            Q_ASSERT(value.isObject());
+            const auto object = value.toObject();
+            int index = object.value("color_id").toInt();
+            QString name = object.value("color_name").toString();
+            QString code = object.value("color_code").toString();
+            QString type = object.value("color_type").toString();
+            SqlDatabase::addColor(index, name, code, type);
+        }
+    }
+}
+
+
+/*
+ * Checks the reply comming from the HTTP GET request and returns the data.
+ * @param incomming reply following the HTTP GET request.
+ * @return JSON array containing the requested data.
+ */
+QJsonArray BrickLink::validateBricklinkResponse(QObject* obj) {
+    auto reply = qobject_cast<QNetworkReply*>(obj);
+    Q_ASSERT(reply);
+    QJsonParseError parseError;
+    QJsonArray output;
+    const auto data = reply->readAll();
+    const auto document = QJsonDocument::fromJson(data, &parseError);
+    if (parseError.error) {
+        qCritical() << "BrickLink connection error while parsing JSON. Error at:" << parseError.offset
+                    << parseError.errorString();
+    } else {
+        QString strReply = static_cast<QString>(data);
+        QJsonDocument jsonResponse = QJsonDocument::fromJson(strReply.toUtf8());
+        QJsonObject jsonObject = jsonResponse.object();
+        output = jsonObject.value("data").toArray();
+    }
+    return output;
 }

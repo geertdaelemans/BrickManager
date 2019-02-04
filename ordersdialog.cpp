@@ -81,7 +81,6 @@ void OrdersDialog::setVisibility(Field field, bool visible) {
     }
 }
 
-
 void OrdersDialog::on_checkBoxFiled_stateChanged(int arg1)
 {
     model->switchFiled(arg1);

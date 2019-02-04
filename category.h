@@ -12,13 +12,11 @@ class Category : public QObject
 public:
     explicit Category();
     ~Category();
-    QString getCategory(int index);
     void importCategories();
 
 private:
     BrickLink bricklink;
     void parseJson();
-    static QMap<int, QString> categories;
 };
 
 #endif // CATEGORY_H

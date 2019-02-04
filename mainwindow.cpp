@@ -3,11 +3,10 @@
 #include "ordersdialog.h"
 #include "settingsdialog.h"
 #include "inventory.h"
+#include "sqldatabase.h"
+#include "categories.h"
 
 #include <QMessageBox>
-
-QMap<int, QString> Category::categories;
-QMap<int, QString> Colors::colors;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -15,12 +14,19 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->tabWidget->clear();
+
+    SqlDatabase mydB = SqlDatabase();
+
+    bricklink.importColors();
+
+    Q_UNUSED(mydB)
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
+
 
 void MainWindow::on_actionOrders_triggered()
 {
@@ -31,6 +37,30 @@ void MainWindow::on_actionOrders_triggered()
     QObject::connect(ordersDialog, SIGNAL(ordersSelected(QList<QString>)), this, SLOT(openInventoryTab(QList<QString>)));
 
     ordersDialog->exec();
+}
+
+void MainWindow::on_actionStore_Inventory_triggered()
+{
+    int numberOfTabs = ui->tabWidget->count();
+    QList<QString> tabs;
+    for(int i = 0; i < numberOfTabs; i++)
+    {
+        tabs.append(ui->tabWidget->tabText(i));
+    }
+    int index = tabs.indexOf("Store Inventory");
+    if( index == -1) {
+        Inventory *inv = new Inventory(this);
+        ui->tabWidget->addTab(inv, "Store Inventory");
+        ui->tabWidget->setCurrentIndex(numberOfTabs);
+    } else {
+        ui->tabWidget->setCurrentIndex(index);
+    }
+}
+
+void MainWindow::on_actionCategories_triggered()
+{
+    categories = new Categories(this);
+    categories->exec();
 }
 
 void MainWindow::on_actionSettings_triggered()
@@ -81,3 +111,5 @@ void MainWindow::openInventoryTab(QList<QString> orderIDs)
     }
     ordersDialog->close();
 }
+
+
