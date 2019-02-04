@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     SqlDatabase mydB = SqlDatabase();
 
     bricklink.importColors();
+    bricklink.importCategories();
 
     Q_UNUSED(mydB)
 }

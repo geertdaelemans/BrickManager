@@ -70,10 +70,15 @@ QString SqlDatabase::getCategoryById(int category_id)
     return output;
 }
 
+/**
+ * Initializes the SQL database and creates the common tables
+ * @param none
+ * @return QSqlError code
+ */
 QSqlError SqlDatabase::initDb()
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("d:/database.db");
+    db.setDatabaseName("./database.db");
 
     if (!db.open())
         return db.lastError();

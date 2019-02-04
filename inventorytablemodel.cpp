@@ -1,6 +1,5 @@
 #include "inventorytablemodel.h"
 #include "mainwindow.h"
-#include "category.h"
 #include "inventory.h"
 #include "sqldatabase.h"
 

@@ -10,7 +10,9 @@ class BrickLink : public QOAuth1
 public:
     BrickLink(QObject *parent = nullptr);
     bool checkConnection(QObject *parent = nullptr);
+    void importCategories();
     void importColors();
+    void parseJsonCategories();
     void parseJsonColors();
     static QJsonArray validateBricklinkResponse(QObject* obj);
 

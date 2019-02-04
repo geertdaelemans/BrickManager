@@ -9,7 +9,6 @@ HEADERS += \
     orderstablemodel.h \
     inventory.h \
     inventorytablemodel.h \
-    category.h \
     settingsdialog.h \
     sqldatabase.h \
     categories.h
@@ -21,7 +20,6 @@ SOURCES += \
     ordersdialog.cpp \
     inventory.cpp \
     inventorytablemodel.cpp \
-    category.cpp \
     orderstablemodel.cpp \
     settingsdialog.cpp \
     sqldatabase.cpp \

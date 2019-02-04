@@ -3,7 +3,6 @@
 
 #include "ordersdialog.h"
 #include "settingsdialog.h"
-#include "category.h"
 #include "categories.h"
 #include "bricklink.h"
 
@@ -21,7 +20,6 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    Category cat;
 
 public slots:
     void openInventoryTab(QList<QString>);
