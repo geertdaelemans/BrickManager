@@ -107,22 +107,14 @@ QString InventoryTableModel::getDataForTable(const QModelIndex &index) const
     }
 }
 
+
 void InventoryTableModel::updateParts(int orderID)
 {
     QUrl url;
-    if(orderID == 0) {
-        url = "https://api.bricklink.com/api/store/v1/inventories";
-
-    } else {
-        url = "https://api.bricklink.com/api/store/v1/orders/" + QString::number(orderID) + "/items";
-    }
+    url = "https://api.bricklink.com/api/store/v1/orders/" + QString::number(orderID) + "/items";
     QVariantMap parameters;
     QNetworkReply *reply = bricklink.get(url, parameters);
-    if(orderID == 0) {
-        connect(reply, &QNetworkReply::finished, this, &InventoryTableModel::parseJsonUserInventory);
-    } else {
-        connect(reply, &QNetworkReply::finished, this, &InventoryTableModel::parseJsonOrderItem);
-    }
+    connect(reply, &QNetworkReply::finished, this, &InventoryTableModel::parseJsonOrderItem);
 }
 
 
@@ -166,43 +158,5 @@ void InventoryTableModel::parseJsonOrderItem()
         }
         endInsertRows();
     }
-    return;
-}
-
-void InventoryTableModel::parseJsonUserInventory()
-{
-    QJsonArray itemArray = BrickLink::validateBricklinkResponse(sender());
-    beginInsertRows(QModelIndex(), 0, itemArray.size() - 1);
-    auto before = parts.end();
-    foreach(const QJsonValue &item, itemArray) {
-        QJsonObject object = item.toObject();
-        before = parts.insert(before, OrderItem{
-            object.value("inventory_id").toInt(),
-            Item{
-                object.value("item").toObject().value("no").toString(),
-                object.value("item").toObject().value("name").toString(),
-                object.value("item").toObject().value("type").toString(),
-                object.value("item").toObject().value("category_id").toInt(),
-                SqlDatabase::getCategoryById(object.value("item").toObject().value("category_id").toInt())
-            },
-            object.value("color_id").toInt(),
-            SqlDatabase::getColorById(object.value("color_id").toInt()),
-            object.value("quantity").toInt(),
-            object.value("new_or_used").toString(),
-            "N/A",
-            object.value("unit_price").toVariant().toDouble(),
-            0.00,
-            0.00,
-            0.00,
-            "N/A",
-            "N/A",
-            object.value("remarks").toString(),
-            object.value("description").toString(),
-            object.value("my_weight").toVariant().toDouble(),
-            0
-        });
-        std::advance(before, 1);
-    }
-    endInsertRows();
     return;
 }

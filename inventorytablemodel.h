@@ -27,7 +27,6 @@ private:
     Q_DISABLE_COPY(InventoryTableModel)
 
     void parseJsonOrderItem();
-    void parseJsonUserInventory();
 
     struct Item {
         QString no;
@@ -57,32 +56,6 @@ private:
         int batchNumber;
     };
 
-    struct UserInventory {
-        int inventory_id;
-        Item test;
-        int color_id;
-        QString color_name;
-        int quantity;
-        QString new_or_used;
-        QString completeness;
-        double unit_price;
-        int bind_id;
-        QString description;
-        QString remarks;
-        int bulk;
-        bool is_retain;
-        bool is_stock_room;
-        QDateTime date_created;
-        double my_cost;
-        int sale_rate;
-        int tier_quantity1;
-        int tier_quantity2;
-        int tier_quantity3;
-        double tier_price1;
-        double tier_price2;
-        double tier_price3;
-        double my_weight;
-    };
     QList<OrderItem> parts;
     BrickLink bricklink;
 };

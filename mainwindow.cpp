@@ -5,6 +5,7 @@
 #include "inventory.h"
 #include "sqldatabase.h"
 #include "categories.h"
+#include "datamodels.h"
 
 #include <QMessageBox>
 
@@ -41,40 +42,32 @@ void MainWindow::on_actionOrders_triggered()
     ordersDialog->exec();
 }
 
-void MainWindow::on_actionStore_Inventory_triggered()
-{
-    int numberOfTabs = ui->tabWidget->count();
-    QList<QString> tabs;
-    for(int i = 0; i < numberOfTabs; i++)
-    {
-        tabs.append(ui->tabWidget->tabText(i));
-    }
-    int index = tabs.indexOf("Store Inventory");
-    if( index == -1) {
-        Inventory *inv = new Inventory(this);
-        ui->tabWidget->addTab(inv, "Store Inventory");
-        ui->tabWidget->setCurrentIndex(numberOfTabs);
-    } else {
-        ui->tabWidget->setCurrentIndex(index);
-    }
-}
 
 void MainWindow::on_actionMy_Inventory_triggered()
 {
-    categories = new Categories(this);
-    categories->exec();
+    listModel = new ListModel(this, Tables::userinventories);
+    QString header = "My Inventory";
+    int numberOfTabs = ui->tabWidget->count();
+    if(tabs.indexOf(header) == -1)
+    {
+        ui->tabWidget->addTab(listModel, header);
+        ui->tabWidget->setCurrentIndex(numberOfTabs);
+        tabs.append(header);
+    } else {
+        ui->tabWidget->setCurrentIndex(tabs.indexOf(header));
+    }
 }
 
 void MainWindow::on_actionColors_triggered()
 {
-    categories = new Categories(this, "colors");
-    categories->exec();
+    listModel = new ListModel(this, Tables::colors);
+    listModel->exec();
 }
 
 void MainWindow::on_actionCategories_triggered()
 {
-    categories = new Categories(this, "categories");
-    categories->exec();
+    listModel = new ListModel(this, Tables::categories);
+    listModel->exec();
 }
 
 void MainWindow::on_actionSettings_triggered()
@@ -103,12 +96,12 @@ void MainWindow::on_actionAboutQt_triggered()
 void MainWindow::on_tabWidget_tabCloseRequested(int index)
 {
     ui->tabWidget->removeTab(index);
+    tabs.removeAt(index);
 }
 
 void MainWindow::openInventoryTab(QList<QString> orderIDs)
 {
     int numberOfTabs = ui->tabWidget->count();
-    QList<QString> tabs;
     for(int i = 0; i < numberOfTabs; i++)
     {
         tabs.append(ui->tabWidget->tabText(i));

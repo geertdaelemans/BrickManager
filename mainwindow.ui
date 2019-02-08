@@ -55,7 +55,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -64,7 +64,6 @@
     </property>
     <addaction name="actionOrders"/>
     <addaction name="separator"/>
-    <addaction name="actionStore_Inventory"/>
     <addaction name="actionMy_Inventory"/>
     <addaction name="separator"/>
     <addaction name="actionColors"/>
@@ -116,11 +115,6 @@
   <action name="actionSettings">
    <property name="text">
     <string>Settings...</string>
-   </property>
-  </action>
-  <action name="actionStore_Inventory">
-   <property name="text">
-    <string>Store Inventory</string>
    </property>
   </action>
   <action name="actionCategories">

@@ -11,7 +11,8 @@ HEADERS += \
     inventorytablemodel.h \
     settingsdialog.h \
     sqldatabase.h \
-    categories.h
+    categories.h \
+    datamodels.h
 
 SOURCES += \
     main.cpp \
@@ -23,7 +24,8 @@ SOURCES += \
     orderstablemodel.cpp \
     settingsdialog.cpp \
     sqldatabase.cpp \
-    categories.cpp
+    datamodels.cpp \
+    listmodel.cpp
 
 FORMS += \
     mainwindow.ui \

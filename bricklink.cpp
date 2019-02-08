@@ -104,11 +104,6 @@ void BrickLink::parseJsonColors()
     }
 }
 
-
-// ("bind_id", "bulk", "color_id", "color_name", "date_created", "description", "inventory_id", "is_retain", "is_stock_room", "item", "my_cost", "my_weight", "new_or_used", "quantity", "remarks", "sale_rate", "tier_price1", "tier_price2", "tier_price3", "tier_quantity1", "tier_quantity2", "tier_quantity3", "unit_price")
-
-
-
 void BrickLink::parseJsonUserInventory()
 {
     QJsonArray array = BrickLink::validateBricklinkResponse(sender());
