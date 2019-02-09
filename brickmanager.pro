@@ -34,8 +34,8 @@ FORMS += \
     ordersdialog.ui \
     inventory.ui \
     settingsdialog.ui \
-    categories.ui \
-    simplepopup.ui
+    simplepopup.ui \
+    listmodel.ui
 
 DISTFILES += \
     README.md \
