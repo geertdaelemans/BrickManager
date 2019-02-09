@@ -3,7 +3,7 @@
 
 #include "ordersdialog.h"
 #include "settingsdialog.h"
-#include "categories.h"
+#include "listmodel.h"
 #include "bricklink.h"
 
 #include <QMainWindow>

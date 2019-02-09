@@ -11,9 +11,9 @@ HEADERS += \
     inventorytablemodel.h \
     settingsdialog.h \
     sqldatabase.h \
-    categories.h \
     datamodels.h \
-    simplepopup.h
+    simplepopup.h \
+    listmodel.h
 
 SOURCES += \
     main.cpp \

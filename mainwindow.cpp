@@ -4,7 +4,7 @@
 #include "settingsdialog.h"
 #include "inventory.h"
 #include "sqldatabase.h"
-#include "categories.h"
+#include "listmodel.h"
 #include "datamodels.h"
 #include "simplepopup.h"
 

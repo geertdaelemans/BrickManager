@@ -1,4 +1,4 @@
-#include "categories.h"
+#include "listmodel.h"
 #include "ui_categories.h"
 #include "bricklink.h"
 
