@@ -80,6 +80,9 @@ public:
     void importUserInventory();
     static QJsonArray validateBricklinkResponse(QObject* obj);
 
+signals:
+    void messageSent();
+
 private:
     Q_DISABLE_COPY(BrickLink)
     void parseJsonCategories();

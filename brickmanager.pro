@@ -12,7 +12,8 @@ HEADERS += \
     settingsdialog.h \
     sqldatabase.h \
     categories.h \
-    datamodels.h
+    datamodels.h \
+    simplepopup.h
 
 SOURCES += \
     main.cpp \
@@ -25,14 +26,16 @@ SOURCES += \
     settingsdialog.cpp \
     sqldatabase.cpp \
     datamodels.cpp \
-    listmodel.cpp
+    listmodel.cpp \
+    simplepopup.cpp
 
 FORMS += \
     mainwindow.ui \
     ordersdialog.ui \
     inventory.ui \
     settingsdialog.ui \
-    categories.ui
+    categories.ui \
+    simplepopup.ui
 
 DISTFILES += \
     README.md \

@@ -6,6 +6,7 @@
 #include "sqldatabase.h"
 #include "categories.h"
 #include "datamodels.h"
+#include "simplepopup.h"
 
 #include <QMessageBox>
 
@@ -20,7 +21,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     bricklink.importColors();
     bricklink.importCategories();
-    bricklink.importUserInventory();
 
     Q_UNUSED(mydB)
 }
@@ -45,6 +45,23 @@ void MainWindow::on_actionOrders_triggered()
 
 void MainWindow::on_actionMy_Inventory_triggered()
 {
+    // Import User Inventory through the BrickLink class
+    bricklink.importUserInventory();
+
+    // Show Downloading... message
+    SimplePopup *p_popup = new SimplePopup(this);
+    p_popup->move(this->width()/2-p_popup->width()/2, this->height()/2-p_popup->height()/2);
+    p_popup->show();
+
+    // Wait for confirmation that data has been loaded in SQL database
+    QEventLoop loop;
+    connect(&bricklink, SIGNAL(messageSent()), &loop, SLOT(quit()));
+    loop.exec();
+
+    // Hide message box
+    p_popup->hide();
+
+    // Prepare list
     listModel = new ListModel(this, Tables::userinventories);
     QString header = "My Inventory";
     int numberOfTabs = ui->tabWidget->count();

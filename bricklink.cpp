@@ -148,6 +148,7 @@ void BrickLink::parseJsonUserInventory()
                 qDebug() << error.text();
         }
     }
+    emit messageSent();
 };
 
 
