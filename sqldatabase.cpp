@@ -35,28 +35,27 @@ QSqlError SqlDatabase::addCategory(int category_id, const QString &category_name
 QSqlError SqlDatabase::initiateOrderItemTable(int orderID)
 {
     QSqlQuery q;
-    QString queryString = "create table orderitem" + QString::number(orderID) + "(inventory_id integer primary key, item_no integer, item_name varchar, item_type varchar, item_category_id integer, color_id integer, color_name varchar, quantity integer, new_or_used varchar, completeness varchar, unit_price varchar, unit_price_final varchar, disp_unit_price varchar, disp_unit_price_final varchar, currency_code varchar, disp_currency_code varchar, remarks varchar, description varchar, weight varchar, batchNumber integer)";
+    QString queryString = "create table orderitem" + QString::number(orderID) + "(inventory_id integer primary key, item_no integer, item_name varchar, item_type varchar, category_id integer, color_id integer, quantity integer, new_or_used varchar, completeness varchar, unit_price varchar, unit_price_final varchar, disp_unit_price varchar, disp_unit_price_final varchar, currency_code varchar, disp_currency_code varchar, remarks varchar, description varchar, weight varchar, batchNumber integer)";
     if (!q.exec(queryString))
         return q.lastError();
     return QSqlError();
 }
 
-QSqlError SqlDatabase::addOrderItem(int orderID, int inventory_id, const QString &item_no, const QString &item_name, const QString &item_type, int item_category_id,
-                                    int color_id, const QString &color_name, int quantity, const QString &new_or_used, const QString &completeness,
+QSqlError SqlDatabase::addOrderItem(int orderID, int inventory_id, const QString &item_no, const QString &item_name, const QString &item_type, int category_id,
+                                    int color_id, int quantity, const QString &new_or_used, const QString &completeness,
                                     double unit_price, double unit_price_final, double disp_unit_price, double disp_unit_price_final, const QString &currency_code,
                                     const QString &disp_currency_code, const QString &remarks, const QString &description, double weight, int batchNumber)
 {
     QSqlQuery q;
-    QString queryString = "insert into orderitem" + QString::number(orderID) + "(inventory_id, item_no, item_name, item_type, item_category_id, color_id, color_name, quantity, new_or_used, completeness, unit_price, unit_price_final, disp_unit_price, disp_unit_price_final, currency_code, disp_currency_code, remarks, description, weight, batchNumber) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    QString queryString = "insert into orderitem" + QString::number(orderID) + "(inventory_id, item_no, item_name, item_type, category_id, color_id, quantity, new_or_used, completeness, unit_price, unit_price_final, disp_unit_price, disp_unit_price_final, currency_code, disp_currency_code, remarks, description, weight, batchNumber) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     if (!q.prepare(queryString))
         return q.lastError();
     q.addBindValue(inventory_id);
     q.addBindValue(item_no);
     q.addBindValue(item_name);
     q.addBindValue(item_type);
-    q.addBindValue(item_category_id);
+    q.addBindValue(category_id);
     q.addBindValue(color_id);
-    q.addBindValue(color_name);
     q.addBindValue(quantity);
     q.addBindValue(new_or_used);
     q.addBindValue(completeness);
@@ -74,23 +73,22 @@ QSqlError SqlDatabase::addOrderItem(int orderID, int inventory_id, const QString
     return q.lastError();
 };
 
-QSqlError SqlDatabase::addUserInventory(int inventory_id, const QString &item_no, const QString &item_name, const QString &item_type, int item_category_id,
-                              int color_id, const QString &color_name, int quantity, const QString &new_or_used, const QString &completeness,
+QSqlError SqlDatabase::addUserInventory(int inventory_id, const QString &item_no, const QString &item_name, const QString &item_type, int category_id,
+                              int color_id, int quantity, const QString &new_or_used, const QString &completeness,
                               double unit_price, int bind_id, const QString &description, const QString &remarks, int bulk, bool is_retain,
                               bool is_stock_room, QDateTime date_created, double my_cost, int sale_rate, int tier_quantity1,
                               int tier_quantity2, int tier_quantity3, double tier_price1, double tier_price2, double tier_price3,
                               double my_weight)
 {
     QSqlQuery q;
-    if (!q.prepare(QLatin1String("insert into userinventories(inventory_id, item_no, item_name, item_type, item_category_id, color_id, color_name, quantity, new_or_used, completeness, unit_price, bind_id, description, remarks, bulk, is_retain, is_stock_room, date_created, my_cost, sale_rate, tier_quantity1, tier_quantity2, tier_quantity3, tier_price1, tier_price2, tier_price3, my_weight) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")))
+    if (!q.prepare(QLatin1String("insert into userinventories(inventory_id, item_no, item_name, item_type, category_id, color_id, quantity, new_or_used, completeness, unit_price, bind_id, description, remarks, bulk, is_retain, is_stock_room, date_created, my_cost, sale_rate, tier_quantity1, tier_quantity2, tier_quantity3, tier_price1, tier_price2, tier_price3, my_weight) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")))
         return q.lastError();
     q.addBindValue(inventory_id);
     q.addBindValue(item_no);
     q.addBindValue(item_name);
     q.addBindValue(item_type);
-    q.addBindValue(item_category_id);
+    q.addBindValue(category_id);
     q.addBindValue(color_id);
-    q.addBindValue(color_name);
     q.addBindValue(quantity);
     q.addBindValue(new_or_used);
     q.addBindValue(completeness);
@@ -125,6 +123,44 @@ QString SqlDatabase::getColorById(int color_id)
     QString output;
     QSqlQuery q;
     if (!q.prepare("SELECT color_name FROM colors WHERE color_id=" + QString::number(color_id)))
+        return "Color not found";
+    q.exec();
+    while (q.next()) {
+        output = q.value(0).toString();;
+    }
+    return output;
+}
+
+
+/**
+ * Returns color code by id
+ * @param id of color to retrieve
+ * @return color code corresponding to id or empty string if no category
+ */
+QString SqlDatabase::getColorCodeById(int color_id)
+{
+    QString output;
+    QSqlQuery q;
+    if (!q.prepare("SELECT color_code FROM colors WHERE color_id=" + QString::number(color_id)))
+        return "Color not found";
+    q.exec();
+    while (q.next()) {
+        output = q.value(0).toString();;
+    }
+    return output;
+}
+
+
+/**
+ * Returns color code by name
+ * @param name of color to retrieve
+ * @return color code corresponding to id or empty string if no category
+ */
+QString SqlDatabase::getColorCodeByName(const QString &color_name)
+{
+    QString output;
+    QSqlQuery q;
+    if (!q.prepare("SELECT color_code FROM colors WHERE color_name='" + color_name + "'"))
         return "Color not found";
     q.exec();
     while (q.next()) {
@@ -178,7 +214,7 @@ QSqlError SqlDatabase::initDb()
         if (!q.exec(QLatin1String("create table categories(category_id integer primary key, category_name varchar, parent_id integer)")))
             return q.lastError();
     if (!tables.contains("userinventories", Qt::CaseInsensitive))
-        if (!q.exec(QLatin1String("create table userinventories(inventory_id integer primary key, item_no varchar, item_name varchar, item_type varchar, item_category_id integer, color_id integer, color_name varchar, quantity integer, new_or_used varchar, completeness varchar, unit_price varchar, bind_id integer, description varchar, remarks varchar, bulk integer, is_retain varchar, is_stock_room varchar, date_created varchar, my_cost varchar, sale_rate integer, tier_quantity1 integer, tier_quantity2 integer, tier_quantity3 integer, tier_price1 varchar, tier_price2 varchar, tier_price3 varchar, my_weight varchar)")))
+        if (!q.exec(QLatin1String("create table userinventories(inventory_id integer primary key, item_no varchar, item_name varchar, item_type varchar, category_id integer, color_id integer, quantity integer, new_or_used varchar, completeness varchar, unit_price varchar, bind_id integer, description varchar, remarks varchar, bulk integer, is_retain varchar, is_stock_room varchar, date_created varchar, my_cost varchar, sale_rate integer, tier_quantity1 integer, tier_quantity2 integer, tier_quantity3 integer, tier_price1 varchar, tier_price2 varchar, tier_price3 varchar, my_weight varchar)")))
             return q.lastError();
 
     return QSqlError();

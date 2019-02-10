@@ -11,7 +11,8 @@ HEADERS += \
     sqldatabase.h \
     datamodels.h \
     simplepopup.h \
-    listmodel.h
+    listmodel.h \
+    colordelegate.h
 
 SOURCES += \
     main.cpp \
@@ -23,7 +24,8 @@ SOURCES += \
     sqldatabase.cpp \
     datamodels.cpp \
     listmodel.cpp \
-    simplepopup.cpp
+    simplepopup.cpp \
+    colordelegate.cpp
 
 FORMS += \
     mainwindow.ui \

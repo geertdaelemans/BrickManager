@@ -2,7 +2,6 @@
 #include "ui_mainwindow.h"
 #include "ordersdialog.h"
 #include "settingsdialog.h"
-#include "inventory.h"
 #include "sqldatabase.h"
 #include "listmodel.h"
 #include "datamodels.h"

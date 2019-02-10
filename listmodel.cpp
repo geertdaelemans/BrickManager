@@ -1,6 +1,7 @@
 #include "listmodel.h"
 #include "ui_categories.h"
 #include "bricklink.h"
+#include "colordelegate.h"
 
 #include <QtWidgets>
 
@@ -24,6 +25,18 @@ ListModel::ListModel(QWidget *parent, Tables table, int orderID) :
         model->setHeaderData(i, Qt::Horizontal, p_tableModel->getColumnHeader(i));
     }
 
+    int colorIdx = model->fieldIndex("color_id");
+    model->setRelation(colorIdx, QSqlRelation("colors", "color_id", "color_name"));
+
+    int categoryIdx = model->fieldIndex("category_id");
+    model->setRelation(categoryIdx, QSqlRelation("categories", "category_id", "category_name"));
+
+    for(int i = 0; i < 5; i++){
+        QTableWidgetItem *colorItem = new QTableWidgetItem;
+        colorItem->setData(Qt::DisplayRole, QColor("aliceblue"));
+    }
+
+
     // Set proxy model to enable sorting columns:
     proxyModel = new QSortFilterProxyModel(this);
     proxyModel->setSourceModel(model);
@@ -37,6 +50,9 @@ ListModel::ListModel(QWidget *parent, Tables table, int orderID) :
         ui->tableView->setColumnHidden(i, !p_tableModel->isColumnVisible(i));
         ui->tableView->setColumnWidth(i, p_tableModel->getColumnWidth(i));
     }
+    QItemDelegate *test = new ColorDelegate(this);
+//    ui->tableView->setItemDelegate(test);
+    ui->tableView->setItemDelegateForColumn(colorIdx, test);
 
     // Connect SLOT to context menu
     connect(ui->tableView->horizontalHeader(), SIGNAL(customContextMenuRequested(QPoint)), SLOT(slotCustomMenuRequested(QPoint)));

@@ -128,9 +128,8 @@ void BrickLink::parseJsonOrderItem(int orderID)
             QString item_no = object.value("item").toObject().value("no").toString();
             QString item_name = object.value("item").toObject().value("name").toString();
             QString item_type = object.value("item").toObject().value("type").toString();
-            int item_category_id = object.value("item").toObject().value("category_id").toInt();
+            int category_id = object.value("item").toObject().value("category_id").toInt();
             int color_id = object.value("color_id").toInt();
-            QString color_name = object.value("color_name").toString();
             int quantity = object.value("quantity").toInt();
             QString new_or_used = object.value("new_or_used").toString();
             QString completeness = object.value("completeness").toString();
@@ -143,7 +142,7 @@ void BrickLink::parseJsonOrderItem(int orderID)
             QString remarks = object.value("remarks").toString();
             QString description = object.value("description").toString();
             double weight = object.value("weight").toVariant().toDouble();
-            SqlDatabase::addOrderItem(orderID, inventory_id, item_no, item_name, item_type, item_category_id, color_id, color_name,
+            SqlDatabase::addOrderItem(orderID, inventory_id, item_no, item_name, item_type, category_id, color_id,
                                       quantity, new_or_used, completeness, unit_price, unit_price_final, disp_unit_price,
                                       disp_unit_price_final, currency_code, disp_currency_code, remarks, description, weight,
                                       batchNumber);
@@ -163,9 +162,8 @@ void BrickLink::parseJsonUserInventory()
             QString item_no = object.value("item").toObject().value("no").toString();
             QString item_name = object.value("item").toObject().value("name").toString();
             QString item_type = object.value("item").toObject().value("type").toString();
-            int item_category_id = object.value("item").toObject().value("category_id").toInt();
+            int category_id = object.value("item").toObject().value("category_id").toInt();
             int color_id = object.value("color_id").toInt();
-            QString color_name = object.value("color_name").toString();
             int quantity = object.value("quantity").toInt();
             QString new_or_used = object.value("new_or_used").toString();
             QString completeness = object.value("completeness").toString();
@@ -186,8 +184,8 @@ void BrickLink::parseJsonUserInventory()
             double tier_price2 = object.value("tier_price2").toVariant().toDouble();
             double tier_price3 = object.value("tier_price3").toVariant().toDouble();
             double my_weight = object.value("my_weight").toVariant().toDouble();
-            QSqlError error = SqlDatabase::addUserInventory(inventory_id, item_no, item_name, item_type, item_category_id,
-                                          color_id, color_name, quantity, new_or_used, completeness,
+            QSqlError error = SqlDatabase::addUserInventory(inventory_id, item_no, item_name, item_type, category_id,
+                                          color_id, quantity, new_or_used, completeness,
                                           unit_price, bind_id, description, remarks, bulk, is_retain,
                                           is_stock_room, date_created, my_cost, sale_rate, tier_quantity1,
                                           tier_quantity2, tier_quantity3, tier_price1, tier_price2, tier_price3,

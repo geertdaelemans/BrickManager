@@ -15,7 +15,6 @@ public:
         CategoryID,
         CategoryName,
         ColorId,
-        ColorName,
         Quantity,
         NewOrUsed,
         Completeness,
@@ -48,7 +47,6 @@ private:
         map.insert(Field::CategoryID, false);
         map.insert(Field::CategoryName, true);
         map.insert(Field::ColorId, false);
-        map.insert(Field::ColorName, true);
         map.insert(Field::Quantity, true);
         map.insert(Field::NewOrUsed, true);
         map.insert(Field::Completeness, false);

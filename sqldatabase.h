@@ -15,9 +15,8 @@ public:
             const QString &item_no,
             const QString &item_name,
             const QString &item_type,
-            int item_category_id,
+            int category_id,
             int color_id,
-            const QString &color_name,
             int quantity,
             const QString &new_or_used,
             const QString &completeness,
@@ -36,9 +35,8 @@ public:
             const QString &item_no,
             const QString &item_name,
             const QString &item_type,
-            int item_category_id,
+            int category_id,
             int color_id,
-            const QString &color_name,
             int quantity,
             const QString &new_or_used,
             const QString &completeness,
@@ -60,6 +58,8 @@ public:
             double tier_price3,
             double my_weight);
     static QString getColorById(int color_id);
+    static QString getColorCodeById(int color_id);
+    static QString getColorCodeByName(const QString &color_name);
     static QString getCategoryById(int category_id);
     static QSqlError initiateOrderItemTable(int orderID);
 
