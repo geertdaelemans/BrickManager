@@ -15,7 +15,7 @@ class ListModel : public QDialog
     Q_OBJECT
 
 public:
-    explicit ListModel(QWidget *parent = nullptr, Tables table = Tables::userinventories);
+    explicit ListModel(QWidget *parent = nullptr, Tables table = Tables::userinventories, int orderID = 0);
     ~ListModel();
     enum Category {
 

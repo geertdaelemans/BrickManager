@@ -30,6 +30,7 @@ public:
 enum Tables {
     categories,
     colors,
+    orderitem,
     userinventories
 };
 
@@ -57,6 +58,31 @@ public:
             columns[2] = Column("color_code", tr("Code"), "varchar", false, 80);
             columns[3] = Column("color_type", tr("Type"), "varchar", true, 100);
             sortColumn = 1;
+            sortOrder = Qt::AscendingOrder;
+            break;
+        case Tables::orderitem:
+            sqlTable = "orderitem";
+            columns[0] = Column("inventory_id", tr("ID"), "integer", false, 80);                        // The ID of the inventory that includes the item
+            columns[1] = Column("item_no", tr("Part #"), "varchar", true, 100);                         // Item's identification number in BL catalog
+            columns[2] = Column("item_name", tr("Name"), "varchar", true, 300);                         // The name of the item
+            columns[3] = Column("item_type", tr("Type"), "varchar", false, 80);                         // The type of the item	MINIFIG, PART, SET, BOOK, GEAR, CATALOG, INSTRUCTION, UNSORTED_LOT, ORIGINAL_BOX
+            columns[4] = Column("item_category_id", tr("Category ID"), "integer", false, 50);           // The main category of the item
+            columns[5] = Column("color_id", tr("Color ID"), "integer", false, 50);                      // The ID of the color of the item
+            columns[6] = Column("color_name", tr("Color"), "varchar", true, 150);                       // Color name of the item	Upcoming feature
+            columns[7] = Column("quantity", tr("Qty."), "integer", true, 50);                           // The number of items purchased in this order
+            columns[8] = Column("new_or_used", tr("Cond."), "varchar", true, 50);                       // Indicates whether the item is new or used	N: New, U: Used
+            columns[9] = Column("completeness", tr("Comp."), "varchar", false, 50);                     // Indicates whether the set is complete or incomplete (This value is valid only for SET type)	C: Complete, B: Incomplete, S: Sealed
+            columns[10] = Column("unit_price", tr("Unit Price"), "double", true, 60);                   // The original price of this item per sale unit
+            columns[11] = Column("unit_price_final", tr("Unit Price Final"), "double", true, 60);       // The unit price of this item after applying tiered pricing policy
+            columns[12] = Column("disp_unit_price", tr("User Price"), "double", true, 60);              // The original price of this item per sale unit in display currency of the user
+            columns[13] = Column("disp_unit_price_final", tr("User Price Final"), "double", true, 60);  // The unit price of this item after applying tiered pricing policy in display currency of the user
+            columns[14] = Column("currency_code", tr("Currency"), "varchar", false, 80);                // The currency code of the price	ISO 4217
+            columns[15] = Column("disp_currency_code", tr("User Currency"), "varchar", false, 80);      // The display currency code of the user	ISO 4217
+            columns[16] = Column("remarks", tr("My Remarks"), "varchar", true, 200);                    // User remarks of the order item
+            columns[17] = Column("description", tr("Description"), "varchar", true, 200);               // User description of the order item
+            columns[18] = Column("weight", tr("Weight"), "double",	true, 100);                         // The weight of the item that overrides the catalog weight	Upcoming feature
+            columns[19] = Column("batchnumber", tr("Batch"), "integer", false, 50);                     // The number of batch containing the items
+            sortColumn = 2;
             sortOrder = Qt::AscendingOrder;
             break;
         case Tables::userinventories:
@@ -95,6 +121,9 @@ public:
     }
     QString getSqlTableName() {
         return sqlTable;
+    }
+    void setSqlTableName(QString table) {
+        sqlTable = table;
     }
     int getNumberOfColumns() {
         return columns.size();

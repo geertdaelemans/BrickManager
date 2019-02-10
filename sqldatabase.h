@@ -9,6 +9,28 @@ public:
     SqlDatabase();
     static QSqlError addColor(int color_id, const QString &color_name, const QString &color_code, const QString &color_type);
     static QSqlError addCategory(int category_id, const QString &name, int parent_id);
+    static QSqlError addOrderItem(
+            int orderId,
+            int index,
+            const QString &item_no,
+            const QString &item_name,
+            const QString &item_type,
+            int item_category_id,
+            int color_id,
+            const QString &color_name,
+            int quantity,
+            const QString &new_or_used,
+            const QString &completeness,
+            double unit_price,
+            double unit_price_final,
+            double disp_unit_price,
+            double disp_unit_price_final,
+            const QString &currency_code,
+            const QString &disp_currency_code,
+            const QString &remarks,
+            const QString &description,
+            double weight,
+            int batchNumber);
     static QSqlError addUserInventory(
             int inventory_id,
             const QString &item_no,
@@ -39,9 +61,10 @@ public:
             double my_weight);
     static QString getColorById(int color_id);
     static QString getCategoryById(int category_id);
-
+    static QSqlError initiateOrderItemTable(int orderID);
 
 private:
+    QSqlDatabase db;
     QSqlError initDb();
 };
 

@@ -63,6 +63,17 @@ void BrickLink::importColors()
     connect(reply, &QNetworkReply::finished, this, &BrickLink::parseJsonColors);
 }
 
+void BrickLink::importOrderItem(int orderID)
+{
+    QUrl url;
+    url = "https://api.bricklink.com/api/store/v1/orders/" + QString::number(orderID) + "/items";
+    QVariantMap parameters;
+    QNetworkReply *reply = this->get(url, parameters);
+
+    connect(reply, &QNetworkReply::finished, this, [orderID, this](){this->parseJsonOrderItem(orderID);});
+
+}
+
 void BrickLink::importUserInventory()
 {
     QUrl url("https://api.bricklink.com/api/store/v1/inventories");
@@ -71,7 +82,6 @@ void BrickLink::importUserInventory()
 
     connect(reply, &QNetworkReply::finished, this, &BrickLink::parseJsonUserInventory);
 }
-
 
 void BrickLink::parseJsonCategories()
 {
@@ -102,6 +112,44 @@ void BrickLink::parseJsonColors()
             SqlDatabase::addColor(index, name, code, type);
         }
     }
+}
+
+void BrickLink::parseJsonOrderItem(int orderID)
+{
+    SqlDatabase::initiateOrderItemTable(orderID);
+    QJsonArray batchArray = BrickLink::validateBricklinkResponse(sender());
+    int batchNumber = 0;
+    foreach(const QJsonValue &batch, batchArray) {
+        batchNumber++;
+        QJsonArray itemArray = batch.toArray();
+        foreach(const QJsonValue &item, itemArray) {
+            QJsonObject object = item.toObject();
+            int inventory_id = object.value("inventory_id").toInt();
+            QString item_no = object.value("item").toObject().value("no").toString();
+            QString item_name = object.value("item").toObject().value("name").toString();
+            QString item_type = object.value("item").toObject().value("type").toString();
+            int item_category_id = object.value("item").toObject().value("category_id").toInt();
+            int color_id = object.value("color_id").toInt();
+            QString color_name = object.value("color_name").toString();
+            int quantity = object.value("quantity").toInt();
+            QString new_or_used = object.value("new_or_used").toString();
+            QString completeness = object.value("completeness").toString();
+            double unit_price = object.value("unit_price").toVariant().toDouble();
+            double unit_price_final = object.value("unit_price_final").toVariant().toDouble();
+            double disp_unit_price = object.value("disp_unit_price").toVariant().toDouble();
+            double disp_unit_price_final = object.value("disp_unit_price_final").toVariant().toDouble();
+            QString currency_code = object.value("currency_code").toString();
+            QString disp_currency_code = object.value("disp_currency_code").toString();
+            QString remarks = object.value("remarks").toString();
+            QString description = object.value("description").toString();
+            double weight = object.value("weight").toVariant().toDouble();
+            SqlDatabase::addOrderItem(orderID, inventory_id, item_no, item_name, item_type, item_category_id, color_id, color_name,
+                                      quantity, new_or_used, completeness, unit_price, unit_price_final, disp_unit_price,
+                                      disp_unit_price_final, currency_code, disp_currency_code, remarks, description, weight,
+                                      batchNumber);
+        }
+    }
+    emit messageSent();
 }
 
 void BrickLink::parseJsonUserInventory()

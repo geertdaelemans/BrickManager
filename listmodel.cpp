@@ -4,13 +4,16 @@
 
 #include <QtWidgets>
 
-ListModel::ListModel(QWidget *parent, Tables table) :
+ListModel::ListModel(QWidget *parent, Tables table, int orderID) :
     QDialog(parent),
     ui(new Ui::Categories)
 {
     ui->setupUi(this);
-
     p_tableModel = new TableModel(table);
+    if(table == Tables::orderitem) {
+        QString tableName = "orderitem" + QString::number(orderID);
+        p_tableModel->setSqlTableName(tableName);
+    }
     int numberOfColumns = p_tableModel->getNumberOfColumns();
 
     // Create the data model:

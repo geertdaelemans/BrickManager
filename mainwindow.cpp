@@ -128,7 +128,24 @@ void MainWindow::openInventoryTab(QList<QString> orderIDs)
         int numberOfTabs = ui->tabWidget->count();
         if(tabs.indexOf("Order#" + orderID) == -1)
         {
-            Inventory *inv = new Inventory(this, orderID.toInt());
+            // Import User Inventory through the BrickLink class
+            bricklink.importOrderItem(orderID.toInt());
+
+            // Show Downloading... message
+            SimplePopup *p_popup = new SimplePopup(this);
+            p_popup->move(this->width()/2-p_popup->width()/2, this->height()/2-p_popup->height()/2);
+            p_popup->show();
+
+            // Wait for confirmation that data has been loaded in SQL database
+            QEventLoop loop;
+            connect(&bricklink, SIGNAL(messageSent()), &loop, SLOT(quit()));
+            loop.exec();
+
+            // Hide message box
+            p_popup->hide();
+
+            // Prepare list
+            ListModel *inv = new ListModel(this, Tables::orderitem, orderID.toInt());
             ui->tabWidget->addTab(inv, "Order#" + orderID);
             ui->tabWidget->setCurrentIndex(numberOfTabs);
         }

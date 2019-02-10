@@ -32,6 +32,48 @@ QSqlError SqlDatabase::addCategory(int category_id, const QString &category_name
     return q.lastError();
 }
 
+QSqlError SqlDatabase::initiateOrderItemTable(int orderID)
+{
+    QSqlQuery q;
+    QString queryString = "create table orderitem" + QString::number(orderID) + "(inventory_id integer primary key, item_no integer, item_name varchar, item_type varchar, item_category_id integer, color_id integer, color_name varchar, quantity integer, new_or_used varchar, completeness varchar, unit_price varchar, unit_price_final varchar, disp_unit_price varchar, disp_unit_price_final varchar, currency_code varchar, disp_currency_code varchar, remarks varchar, description varchar, weight varchar, batchNumber integer)";
+    if (!q.exec(queryString))
+        return q.lastError();
+    return QSqlError();
+}
+
+QSqlError SqlDatabase::addOrderItem(int orderID, int inventory_id, const QString &item_no, const QString &item_name, const QString &item_type, int item_category_id,
+                                    int color_id, const QString &color_name, int quantity, const QString &new_or_used, const QString &completeness,
+                                    double unit_price, double unit_price_final, double disp_unit_price, double disp_unit_price_final, const QString &currency_code,
+                                    const QString &disp_currency_code, const QString &remarks, const QString &description, double weight, int batchNumber)
+{
+    QSqlQuery q;
+    QString queryString = "insert into orderitem" + QString::number(orderID) + "(inventory_id, item_no, item_name, item_type, item_category_id, color_id, color_name, quantity, new_or_used, completeness, unit_price, unit_price_final, disp_unit_price, disp_unit_price_final, currency_code, disp_currency_code, remarks, description, weight, batchNumber) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    if (!q.prepare(queryString))
+        return q.lastError();
+    q.addBindValue(inventory_id);
+    q.addBindValue(item_no);
+    q.addBindValue(item_name);
+    q.addBindValue(item_type);
+    q.addBindValue(item_category_id);
+    q.addBindValue(color_id);
+    q.addBindValue(color_name);
+    q.addBindValue(quantity);
+    q.addBindValue(new_or_used);
+    q.addBindValue(completeness);
+    q.addBindValue(unit_price);
+    q.addBindValue(unit_price_final);
+    q.addBindValue(disp_unit_price);
+    q.addBindValue(disp_unit_price_final);
+    q.addBindValue(currency_code);
+    q.addBindValue(disp_currency_code);
+    q.addBindValue(remarks);
+    q.addBindValue(description);
+    q.addBindValue(weight);
+    q.addBindValue(batchNumber);
+    q.exec();
+    return q.lastError();
+};
+
 QSqlError SqlDatabase::addUserInventory(int inventory_id, const QString &item_no, const QString &item_name, const QString &item_type, int item_category_id,
                               int color_id, const QString &color_name, int quantity, const QString &new_or_used, const QString &completeness,
                               double unit_price, int bind_id, const QString &description, const QString &remarks, int bulk, bool is_retain,
@@ -118,7 +160,7 @@ QString SqlDatabase::getCategoryById(int category_id)
  */
 QSqlError SqlDatabase::initDb()
 {
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    db = QSqlDatabase::addDatabase("QSQLITE");
 //    db.setDatabaseName("./database.db");
     db.setDatabaseName(":memory:");
 
@@ -138,9 +180,6 @@ QSqlError SqlDatabase::initDb()
     if (!tables.contains("userinventories", Qt::CaseInsensitive))
         if (!q.exec(QLatin1String("create table userinventories(inventory_id integer primary key, item_no varchar, item_name varchar, item_type varchar, item_category_id integer, color_id integer, color_name varchar, quantity integer, new_or_used varchar, completeness varchar, unit_price varchar, bind_id integer, description varchar, remarks varchar, bulk integer, is_retain varchar, is_stock_room varchar, date_created varchar, my_cost varchar, sale_rate integer, tier_quantity1 integer, tier_quantity2 integer, tier_quantity3 integer, tier_price1 varchar, tier_price2 varchar, tier_price3 varchar, my_weight varchar)")))
             return q.lastError();
-
-
-    qDebug() << "Database initialized...";
 
     return QSqlError();
 }

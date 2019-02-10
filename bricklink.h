@@ -77,16 +77,21 @@ public:
     bool checkConnection(QObject *parent = nullptr);
     void importCategories();
     void importColors();
+    void importOrderItem(int orderID);
     void importUserInventory();
     static QJsonArray validateBricklinkResponse(QObject* obj);
 
 signals:
     void messageSent();
 
+private slots:
+    void parseJsonOrderItem(int orderID);
+
 private:
     Q_DISABLE_COPY(BrickLink)
     void parseJsonCategories();
     void parseJsonColors();
+//    void parseJsonOrderItem();
     void parseJsonUserInventory();
 };
 
