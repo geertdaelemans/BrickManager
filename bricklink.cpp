@@ -90,10 +90,11 @@ void BrickLink::parseJsonCategories()
         for (auto value : array) {
             Q_ASSERT(value.isObject());
             const auto object = value.toObject();
-            int index = object.value("category_id").toInt();
-            QString name = object.value("category_name").toString();
-            int parent_id = object.value("parent_id").toInt();
-            SqlDatabase::addCategory(index, name, parent_id);
+            QList<QVariant> fields;
+            fields.append(object.value("category_id").toInt());
+            fields.append(object.value("category_name").toString());
+            fields.append(object.value("parent_id").toInt());
+            SqlDatabase::addCategory(fields);
         }
     }
 }
@@ -105,11 +106,12 @@ void BrickLink::parseJsonColors()
         for (auto value : array) {
             Q_ASSERT(value.isObject());
             const auto object = value.toObject();
-            int index = object.value("color_id").toInt();
-            QString name = object.value("color_name").toString();
-            QString code = object.value("color_code").toString();
-            QString type = object.value("color_type").toString();
-            SqlDatabase::addColor(index, name, code, type);
+            QList<QVariant> fields;
+            fields.append(object.value("color_id").toInt());
+            fields.append(object.value("color_name").toString());
+            fields.append(object.value("color_code").toString());
+            fields.append(object.value("color_type").toString());
+            SqlDatabase::addColor(fields);
         }
     }
 }
@@ -124,28 +126,27 @@ void BrickLink::parseJsonOrderItem(int orderID)
         QJsonArray itemArray = batch.toArray();
         foreach(const QJsonValue &item, itemArray) {
             QJsonObject object = item.toObject();
-            int inventory_id = object.value("inventory_id").toInt();
-            QString item_no = object.value("item").toObject().value("no").toString();
-            QString item_name = object.value("item").toObject().value("name").toString();
-            QString item_type = object.value("item").toObject().value("type").toString();
-            int category_id = object.value("item").toObject().value("category_id").toInt();
-            int color_id = object.value("color_id").toInt();
-            int quantity = object.value("quantity").toInt();
-            QString new_or_used = object.value("new_or_used").toString();
-            QString completeness = object.value("completeness").toString();
-            double unit_price = object.value("unit_price").toVariant().toDouble();
-            double unit_price_final = object.value("unit_price_final").toVariant().toDouble();
-            double disp_unit_price = object.value("disp_unit_price").toVariant().toDouble();
-            double disp_unit_price_final = object.value("disp_unit_price_final").toVariant().toDouble();
-            QString currency_code = object.value("currency_code").toString();
-            QString disp_currency_code = object.value("disp_currency_code").toString();
-            QString remarks = object.value("remarks").toString();
-            QString description = object.value("description").toString();
-            double weight = object.value("weight").toVariant().toDouble();
-            SqlDatabase::addOrderItem(orderID, inventory_id, item_no, item_name, item_type, category_id, color_id,
-                                      quantity, new_or_used, completeness, unit_price, unit_price_final, disp_unit_price,
-                                      disp_unit_price_final, currency_code, disp_currency_code, remarks, description, weight,
-                                      batchNumber);
+            QList<QVariant> fields;
+            fields.append(object.value("inventory_id").toInt());
+            fields.append(object.value("item").toObject().value("no").toString());
+            fields.append(object.value("item").toObject().value("name").toString());
+            fields.append(object.value("item").toObject().value("type").toString());
+            fields.append(object.value("item").toObject().value("category_id").toInt());
+            fields.append(object.value("color_id").toInt());
+            fields.append(object.value("quantity").toInt());
+            fields.append(object.value("new_or_used").toString());
+            fields.append(object.value("completeness").toString());
+            fields.append(object.value("unit_price").toVariant().toDouble());
+            fields.append(object.value("unit_price_final").toVariant().toDouble());
+            fields.append(object.value("disp_unit_price").toVariant().toDouble());
+            fields.append(object.value("disp_unit_price_final").toVariant().toDouble());
+            fields.append(object.value("currency_code").toString());
+            fields.append(object.value("disp_currency_code").toString());
+            fields.append(object.value("remarks").toString());
+            fields.append(object.value("description").toString());
+            fields.append(object.value("weight").toVariant().toDouble());
+            fields.append(batchNumber);
+            SqlDatabase::addOrderItem(fields, orderID);
         }
     }
     emit messageSent();
@@ -158,38 +159,34 @@ void BrickLink::parseJsonUserInventory()
         for (auto value : array) {
             Q_ASSERT(value.isObject());
             const auto object = value.toObject();
-            int inventory_id = object.value("inventory_id").toInt();
-            QString item_no = object.value("item").toObject().value("no").toString();
-            QString item_name = object.value("item").toObject().value("name").toString();
-            QString item_type = object.value("item").toObject().value("type").toString();
-            int category_id = object.value("item").toObject().value("category_id").toInt();
-            int color_id = object.value("color_id").toInt();
-            int quantity = object.value("quantity").toInt();
-            QString new_or_used = object.value("new_or_used").toString();
-            QString completeness = object.value("completeness").toString();
-            double unit_price = object.value("unit_price").toVariant().toDouble();
-            int bind_id = object.value("bind_id").toInt();
-            QString description = object.value("description").toString();
-            QString remarks = object.value("remarks").toString();
-            int bulk = object.value("bulk").toInt();
-            bool is_retain = object.value("is_retain").toBool();
-            bool is_stock_room = object.value("is_stock_room").toBool();
-            QDateTime date_created = QDateTime::fromString(object.value("date_created").toString(), "yyyy-MM-dd'T'HH:mm:ss.zzz'Z'");
-            double my_cost = object.value("my_cost").toVariant().toDouble();
-            int sale_rate = object.value("sale_rate").toInt();
-            int tier_quantity1 = object.value("tier_quantity1").toInt();
-            int tier_quantity2 = object.value("tier_quantity2").toInt();
-            int tier_quantity3 = object.value("tier_quantity3").toInt();
-            double tier_price1 = object.value("tier_price1").toVariant().toDouble();
-            double tier_price2 = object.value("tier_price2").toVariant().toDouble();
-            double tier_price3 = object.value("tier_price3").toVariant().toDouble();
-            double my_weight = object.value("my_weight").toVariant().toDouble();
-            QSqlError error = SqlDatabase::addUserInventory(inventory_id, item_no, item_name, item_type, category_id,
-                                          color_id, quantity, new_or_used, completeness,
-                                          unit_price, bind_id, description, remarks, bulk, is_retain,
-                                          is_stock_room, date_created, my_cost, sale_rate, tier_quantity1,
-                                          tier_quantity2, tier_quantity3, tier_price1, tier_price2, tier_price3,
-                                          my_weight);
+            QList<QVariant> fields;
+            fields.append(object.value("inventory_id").toInt());
+            fields.append(object.value("item").toObject().value("no").toString());
+            fields.append(object.value("item").toObject().value("name").toString());
+            fields.append(object.value("item").toObject().value("type").toString());
+            fields.append(object.value("item").toObject().value("category_id").toInt());
+            fields.append(object.value("color_id").toInt());
+            fields.append(object.value("quantity").toInt());
+            fields.append(object.value("new_or_used").toString());
+            fields.append(object.value("completeness").toString());
+            fields.append(object.value("unit_price").toVariant().toDouble());
+            fields.append(object.value("bind_id").toInt());
+            fields.append(object.value("description").toString());
+            fields.append(object.value("remarks").toString());
+            fields.append(object.value("bulk").toInt());
+            fields.append(object.value("is_retain").toBool());
+            fields.append(object.value("is_stock_room").toBool());
+            fields.append(QDateTime::fromString(object.value("date_created").toString(), "yyyy-MM-dd'T'HH:mm:ss.zzz'Z'"));
+            fields.append(object.value("my_cost").toVariant().toDouble());
+            fields.append(object.value("sale_rate").toInt());
+            fields.append(object.value("tier_quantity1").toInt());
+            fields.append(object.value("tier_quantity2").toInt());
+            fields.append(object.value("tier_quantity3").toInt());
+            fields.append(object.value("tier_price1").toVariant().toDouble());
+            fields.append(object.value("tier_price2").toVariant().toDouble());
+            fields.append(object.value("tier_price3").toVariant().toDouble());
+            fields.append(object.value("my_weight").toVariant().toDouble());
+            QSqlError error = SqlDatabase::addUserInventory(fields);
             if(error.type() != QSqlError::NoError)
                 qDebug() << error.text();
         }

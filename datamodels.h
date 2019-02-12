@@ -31,6 +31,7 @@ enum Tables {
     categories,
     colors,
     orderitem,
+    orders,
     userinventories
 };
 
@@ -84,6 +85,26 @@ public:
             sortColumn = 2;
             sortOrder = Qt::AscendingOrder;
             break;
+        case Tables::orders:
+            sqlTable = "orders";
+            columns[0] = Column("order_id", tr("ID"), "integer", true, 80);
+            columns[1] = Column("date_ordered", tr("Date"), "varchar", true, 200);
+            columns[2] = Column("seller_name", tr("Seller"), "varchar", false, 200);
+            columns[3] = Column("store_name", tr("Store"), "varchar", false, 200);
+            columns[4] = Column("buyer_name", tr("Buyer"), "varchar", true, 200);
+            columns[5] = Column("total_count", tr("Qty."), "integer", true, 50);
+            columns[6] = Column("unique_count", tr("Unique"), "integer", true, 50);
+            columns[7] = Column("status", tr("Status"), "varchar", true, 100);
+            columns[8] = Column("payment_method", tr("Pay Method"), "varchar", true, 150);
+            columns[9] = Column("payment_status", tr("Pay Status"), "varchar", false, 150);
+            columns[10] = Column("payment_date_paid", tr("Pay Date"), "varchar", false, 300);
+            columns[11] = Column("payment_currency_code", tr("Pay Currency"), "varchar", false, 100);
+            columns[12] = Column("cost_subtotal", tr("Subtotal"), "double", false, 100);
+            columns[13] = Column("cost_grand_total", tr("Total"), "double", false, 100);
+            columns[14] = Column("cost_currency_code", tr("Cost Currency"), "varchar", false, 150);
+            sortColumn = 1;
+            sortOrder = Qt::DescendingOrder;
+            break;
         case Tables::userinventories:
             sqlTable = "userinventories";
             columns[0] = Column("inventory_id", tr("ID"), "integer", false, 80);
@@ -102,7 +123,7 @@ public:
             columns[13] = Column("bulk", tr("Bulk"), "integer", false, 50);
             columns[14] = Column("is_retain", tr("Retain"), "bool", false, 50);
             columns[15] = Column("is_stock_room", tr("Stockroom"), "bool", false, 50);
-            columns[16] = Column("date_created", tr("Date Created"), "date", false, 200);
+            columns[16] = Column("date_created", tr("Date Created"), "datetime", false, 200);
             columns[17] = Column("my_cost", tr("My Cost"), "double", false, 50);
             columns[18] = Column("sale_rate", tr("Sale"), "integer", true, 50);
             columns[19] = Column("tier_quantity1", tr("Tier Q1"), "integer", false, 50);
@@ -146,6 +167,15 @@ public:
     }
     Qt::SortOrder getSortOrder() {
         return sortOrder;
+    }
+    QString getInitiateSqlDatabaseQry() {
+        QString output;
+        output = "create table " + getSqlTableName() + "(" + columns[0].property.sqlName + " " + columns[0].property.sqlType + " primary key" ;
+        for(int i = 1; i < getNumberOfColumns(); i++) {
+            output = output + ", " + columns[i].property.sqlName + " " + columns[i].property.sqlType;
+        }
+        output = output + ")";
+        return output;
     }
 
 private:
