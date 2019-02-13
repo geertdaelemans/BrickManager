@@ -76,11 +76,12 @@ public:
     void importCategories();
     void importColors();
     void importOrderItem(int orderID);
+    void importOrders(bool filed);
     void importUserInventory();
     static QJsonArray validateBricklinkResponse(QObject* obj);
 
 signals:
-    void messageSent();
+    void dataBaseUpdated();
 
 private slots:
     void parseJsonOrderItem(int orderID);
@@ -89,6 +90,7 @@ private:
     Q_DISABLE_COPY(BrickLink)
     void parseJsonCategories();
     void parseJsonColors();
+    void parseJsonOrders();
 //    void parseJsonOrderItem();
     void parseJsonUserInventory();
 };

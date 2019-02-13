@@ -2,7 +2,8 @@
 #define ORDERSDIALOG_H
 
 #include <QDialog>
-#include "orderstablemodel.h"
+#include "datamodels.h"
+#include "bricklink.h"
 
 namespace Ui {
 class OrdersDialog;
@@ -15,30 +16,6 @@ class OrdersDialog : public QDialog
 public:
     explicit OrdersDialog(QWidget *parent = nullptr);
     ~OrdersDialog();
-
-    enum Field {
-        OrderID = 0,
-        DateOrdered,
-        SellerName,
-        StoreName,
-        BuyerName,
-        TotalCount,
-        UniqueCount,
-        Status,
-        PaymentMethod,
-        PaymentStatus,
-        PaymentDatePaid,
-        PaymentCurrencyCode,
-        CostSubtotal,
-        CostGrandTotal,
-        CostCurrencyCode
-    };
-    Q_ENUM(Field)
-
-    static QString getHeader(Field);
-    bool getVisibilityColumn(Field);
-    void setVisibility(Field);
-    void setVisibility(Field, bool);
     QWidget *parent;
     void openTab();
 
@@ -47,35 +24,18 @@ signals:
 
 private slots:
     void slotCustomMenuRequested(QPoint);
-    void setVisibilityFromCheckBox();
     void on_checkBoxFiled_stateChanged(int arg1);
     void on_pushButton_clicked();
     void on_view_doubleClicked(const QModelIndex &index);
 
 private:
-    QMap<Field, bool> initColumnNames() {
-        QMap<Field, bool> map;
-        map.insert(Field::OrderID, true);
-        map.insert(Field::DateOrdered, true);
-        map.insert(Field::SellerName, false);
-        map.insert(Field::StoreName, false);
-        map.insert(Field::BuyerName, true);
-        map.insert(Field::TotalCount, true);
-        map.insert(Field::UniqueCount, true);
-        map.insert(Field::Status, true);
-        map.insert(Field::PaymentMethod, false);
-        map.insert(Field::PaymentStatus, false);
-        map.insert(Field::PaymentDatePaid, false);
-        map.insert(Field::PaymentCurrencyCode, true);
-        map.insert(Field::CostSubtotal, true);
-        map.insert(Field::CostGrandTotal, true);
-        map.insert(Field::CostCurrencyCode, false);
-        return map;
-    }
-    QMap<Field, bool> columnVisibility = initColumnNames();
-    OrdersTableModel *model;
+    void setVisibilityFromCheckBox();
+    void showError(const QSqlError &err);
+    TableModel *p_tableModel;
+    QSqlRelationalTableModel *model;
     QSortFilterProxyModel *proxyModel;
     Ui::OrdersDialog *ui;
+    BrickLink bricklink;
 };
 
 #endif // ORDERSDIALOG_H

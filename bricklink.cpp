@@ -1,5 +1,6 @@
 #include "bricklink.h"
 #include "sqldatabase.h"
+#include "datamodels.h"
 
 #include <QtCore>
 #include <QtNetwork>
@@ -44,7 +45,6 @@ bool BrickLink::checkConnection(QObject *parent)
 }
 
 
-
 void BrickLink::importCategories()
 {
     QUrl url("https://api.bricklink.com/api/store/v1/categories");
@@ -74,6 +74,17 @@ void BrickLink::importOrderItem(int orderID)
 
 }
 
+void BrickLink::importOrders(bool filed)
+{
+    QUrl url("https://api.bricklink.com/api/store/v1/orders");
+    QVariantMap parameters;
+    parameters.insert("direction", "in");
+    parameters.insert("filed", (filed ? "true" : "false"));
+    QNetworkReply *reply = this->get(url, parameters);
+
+    connect(reply, &QNetworkReply::finished, this, &BrickLink::parseJsonOrders);
+}
+
 void BrickLink::importUserInventory()
 {
     QUrl url("https://api.bricklink.com/api/store/v1/inventories");
@@ -94,7 +105,8 @@ void BrickLink::parseJsonCategories()
             fields.append(object.value("category_id").toInt());
             fields.append(object.value("category_name").toString());
             fields.append(object.value("parent_id").toInt());
-            SqlDatabase::addCategory(fields);
+            TableModel *model = new TableModel(Tables::categories);
+            model->addItemToTable(fields);
         }
     }
 }
@@ -111,14 +123,17 @@ void BrickLink::parseJsonColors()
             fields.append(object.value("color_name").toString());
             fields.append(object.value("color_code").toString());
             fields.append(object.value("color_type").toString());
-            SqlDatabase::addColor(fields);
+            TableModel *model = new TableModel(Tables::colors);
+            model->addItemToTable(fields);
         }
     }
 }
 
 void BrickLink::parseJsonOrderItem(int orderID)
 {
-    SqlDatabase::initiateOrderItemTable(orderID);
+    TableModel *model = new TableModel(Tables::orderitem, orderID);
+    model->initiateSqlTable();
+    //SqlDatabase::initiateOrderItemTable(orderID);
     QJsonArray batchArray = BrickLink::validateBricklinkResponse(sender());
     int batchNumber = 0;
     foreach(const QJsonValue &batch, batchArray) {
@@ -146,10 +161,42 @@ void BrickLink::parseJsonOrderItem(int orderID)
             fields.append(object.value("description").toString());
             fields.append(object.value("weight").toVariant().toDouble());
             fields.append(batchNumber);
-            SqlDatabase::addOrderItem(fields, orderID);
+            QSqlError error = model->addItemToTable(fields);
         }
     }
-    emit messageSent();
+    emit dataBaseUpdated();
+}
+
+void BrickLink::parseJsonOrders()
+{
+    QJsonArray array = BrickLink::validateBricklinkResponse(sender());
+    TableModel *model = new TableModel(Tables::orders);
+    if (array.size()) {
+        for (auto value : array) {
+            Q_ASSERT(value.isObject());
+            const auto object = value.toObject();
+            QList<QVariant> fields;
+            fields.append(object.value("order_id").toInt());
+            fields.append(QDateTime::fromString(object.value("date_ordered").toString(), "yyyy-MM-dd'T'HH:mm:ss.zzz'Z'"));
+            fields.append(object.value("seller_name").toString());
+            fields.append(object.value("store_name").toString());
+            fields.append(object.value("buyer_name").toString());
+            fields.append(object.value("total_count").toInt());
+            fields.append(object.value("unique_count").toInt());
+            fields.append(object.value("status").toString());
+            fields.append(object.value("payment").toObject().value("method").toString());
+            fields.append(object.value("payment").toObject().value("status").toString());
+            fields.append(QDateTime::fromString(object.value("payment").toObject().value("date_paid").toString(), "yyyy-MM-dd'T'HH:mm:ss.zzz'Z'"));
+            fields.append(object.value("payment").toObject().value("currency_code").toString());
+            fields.append(object.value("cost").toObject().value("subtotal").toVariant().toDouble());
+            fields.append(object.value("cost").toObject().value("grand_total").toVariant().toDouble());
+            fields.append(object.value("cost").toObject().value("currency_code").toString());
+            QSqlError error = model->addItemToTable(fields);
+            if(error.type() != QSqlError::NoError)
+                qDebug() << error.text();
+        }
+    }
+    emit dataBaseUpdated();
 }
 
 void BrickLink::parseJsonUserInventory()
@@ -186,16 +233,17 @@ void BrickLink::parseJsonUserInventory()
             fields.append(object.value("tier_price2").toVariant().toDouble());
             fields.append(object.value("tier_price3").toVariant().toDouble());
             fields.append(object.value("my_weight").toVariant().toDouble());
-            QSqlError error = SqlDatabase::addUserInventory(fields);
+            TableModel *model = new TableModel(Tables::userinventories);
+            QSqlError error = model->addItemToTable(fields);
             if(error.type() != QSqlError::NoError)
                 qDebug() << error.text();
         }
     }
-    emit messageSent();
-};
+    emit dataBaseUpdated();
+}
 
 
-/*
+/**
  * Checks the reply comming from the HTTP GET request and returns the data.
  * @param incomming reply following the HTTP GET request.
  * @return JSON array containing the requested data.

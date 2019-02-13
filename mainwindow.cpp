@@ -54,7 +54,7 @@ void MainWindow::on_actionMy_Inventory_triggered()
 
     // Wait for confirmation that data has been loaded in SQL database
     QEventLoop loop;
-    connect(&bricklink, SIGNAL(messageSent()), &loop, SLOT(quit()));
+    connect(&bricklink, SIGNAL(dataBaseUpdated()), &loop, SLOT(quit()));
     loop.exec();
 
     // Hide message box
@@ -137,7 +137,7 @@ void MainWindow::openInventoryTab(QList<QString> orderIDs)
 
             // Wait for confirmation that data has been loaded in SQL database
             QEventLoop loop;
-            connect(&bricklink, SIGNAL(messageSent()), &loop, SLOT(quit()));
+            connect(&bricklink, SIGNAL(dataBaseUpdated()), &loop, SLOT(quit()));
             loop.exec();
 
             // Hide message box

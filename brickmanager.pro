@@ -6,7 +6,6 @@ HEADERS += \
     bricklink.h \
     mainwindow.h \
     ordersdialog.h \
-    orderstablemodel.h \
     settingsdialog.h \
     sqldatabase.h \
     datamodels.h \
@@ -19,7 +18,6 @@ SOURCES += \
     bricklink.cpp \
     mainwindow.cpp \
     ordersdialog.cpp \
-    orderstablemodel.cpp \
     settingsdialog.cpp \
     sqldatabase.cpp \
     datamodels.cpp \

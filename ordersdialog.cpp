@@ -1,51 +1,96 @@
 #include "ordersdialog.h"
-#include "orderstablemodel.h"
 #include "ui_ordersdialog.h"
+#include "bricklink.h"
+#include "simplepopup.h"
+#include "datamodels.h"
 
 #include <QMenu>
 #include <QWidgetAction>
+#include <QMessageBox>
 
 OrdersDialog::OrdersDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::OrdersDialog)
 {
-    model = new OrdersTableModel(this);
+    // Set-up or reset Orders SQL table
+    p_tableModel = new TableModel(Tables::orders);
+    p_tableModel->dropSqlTable();
+    p_tableModel->initiateSqlTable();
 
+    // Import Order Inventory with unfiled order by default
+    bricklink.importOrders(false);
+
+    // Show Downloading... message
+    SimplePopup *p_popup = new SimplePopup(this);
+    p_popup->move(this->width()/2-p_popup->width()/2, this->height()/2-p_popup->height()/2);
+    p_popup->show();
+
+    // Wait for confirmation that data has been loaded in SQL database
+    QEventLoop loop;
+    connect(&bricklink, SIGNAL(dataBaseUpdated()), &loop, SLOT(quit()));
+    loop.exec();
+
+    // Hide message box
+    p_popup->hide();
+
+    // Prepare List
+    ui->setupUi(this);
+
+    int numberOfColumns = p_tableModel->getNumberOfColumns();
+
+    // Create the data model:
+    model = new QSqlRelationalTableModel(ui->view);
+    model->setEditStrategy(QSqlTableModel::OnManualSubmit);
+    model->setTable(p_tableModel->getSqlTableName());
+    for(int i = 0; i < numberOfColumns; i++) {
+        model->setHeaderData(i, Qt::Horizontal, p_tableModel->getColumnHeader(i));
+    }
+
+    // Set proxy model to enable sorting columns:
     proxyModel = new QSortFilterProxyModel(this);
     proxyModel->setSourceModel(model);
-    proxyModel->sort(1, Qt::DescendingOrder);
+    proxyModel->sort(p_tableModel->getSortColumn(), p_tableModel->getSortOrder());
 
-    ui->setupUi(this);
+    // Design the model and hide columns not needed:
     ui->view->setModel(proxyModel);
     ui->view->horizontalHeader()->setSectionsMovable(true);
     ui->view->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
+    for(int i = 0; i < numberOfColumns; i++) {
+        ui->view->setColumnHidden(i, !p_tableModel->isColumnVisible(i));
+        ui->view->setColumnWidth(i, p_tableModel->getColumnWidth(i));
+    }
 
     // Connect SLOT to context menu
     connect(ui->view->horizontalHeader(), SIGNAL(customContextMenuRequested(QPoint)), SLOT(slotCustomMenuRequested(QPoint)));
 
-    model->updateOrders();
+    // Populate the model:
+    if (!model->select()) {
+        showError(model->lastError());
+        return;
+    }
 }
+
 
 OrdersDialog::~OrdersDialog()
 {
+    p_tableModel->dropSqlTable();
     delete ui;
 }
+
 
 void OrdersDialog::slotCustomMenuRequested(const QPoint pos) {
     QMenu *p_popUpMenu = new QMenu(this);
 
-    // TODO: Configuration tab including order and visibility
-    // TODO: p_popUpMenu->addAction(new QAction("Configure", this));
-    // TODO: p_popUpMenu->addSeparator();
+     // Configuration tab including order and visibility
+     p_popUpMenu->addAction(new QAction("Configure", this));
+     p_popUpMenu->addSeparator();
 
     // List all possible fields and select visibility
-    auto metaEnum = QMetaEnum::fromType<OrdersDialog::Field>();
-    for (int i = 0; i < metaEnum.keyCount(); i++) {
-        auto val = static_cast<Field>(metaEnum.value(i));
+    for (int i = 0; i < p_tableModel->getNumberOfColumns(); i++) {
         QCheckBox *p_checkBox = new QCheckBox(p_popUpMenu);
-        p_checkBox->setText(OrdersDialog::getHeader(val));
+        p_checkBox->setText(p_tableModel->getColumnHeader(i));
         p_checkBox->setObjectName(QString::number(i));
-        p_checkBox->setChecked(OrdersDialog::getVisibilityColumn(val));
+        p_checkBox->setChecked(p_tableModel->isColumnVisible(i));
         QWidgetAction *p_checkableAction = new QWidgetAction(p_popUpMenu);
         p_checkableAction->setDefaultWidget(p_checkBox);
         p_popUpMenu->addAction(p_checkableAction);
@@ -56,35 +101,42 @@ void OrdersDialog::slotCustomMenuRequested(const QPoint pos) {
     p_popUpMenu->popup(ui->view->viewport()->mapToGlobal(*p_position));
 };
 
+
 void OrdersDialog::setVisibilityFromCheckBox() {
     auto *p_checkBox = qobject_cast<QCheckBox *>(sender());
-    Field index = static_cast<OrdersDialog::Field>(p_checkBox->objectName().toInt());
-    setVisibility(index, p_checkBox->isChecked());
+    int index = p_checkBox->objectName().toInt();
+    p_tableModel->setColumnVisible(index, p_checkBox->isChecked());
+    ui->view->setColumnHidden(index, !p_tableModel->isColumnVisible(index));
 }
 
-bool OrdersDialog::getVisibilityColumn(Field field) {
-    return columnVisibility.value(field);
-}
 
-void OrdersDialog::setVisibility(Field field) {
-    bool visible = getVisibilityColumn(field);
-    setVisibility(field, visible);
-}
-
-void OrdersDialog::setVisibility(Field field, bool visible) {
-    if(visible) {
-        ui->view->showColumn(field);
-        columnVisibility[field] = true;
-    } else {
-        ui->view->hideColumn(field);
-        columnVisibility[field] = false;
-    }
-}
-
-void OrdersDialog::on_checkBoxFiled_stateChanged(int arg1)
+void OrdersDialog::on_checkBoxFiled_stateChanged(int filed)
 {
-    model->switchFiled(arg1);
-    model->updateOrders();
+    // Reset SQL table
+    p_tableModel->dropSqlTable();
+    p_tableModel->initiateSqlTable();
+
+    // Import Order Inventory with (un)filed parameter
+    bricklink.importOrders(filed);
+
+    // Show Downloading... message
+    SimplePopup *p_popup = new SimplePopup(this);
+    p_popup->move(this->width()/2-p_popup->width()/2, this->height()/2-p_popup->height()/2);
+    p_popup->show();
+
+    // Wait for confirmation that data has been loaded in SQL database
+    QEventLoop loop;
+    connect(&bricklink, SIGNAL(dataBaseUpdated()), &loop, SLOT(quit()));
+    loop.exec();
+
+    // Hide message box
+    p_popup->hide();
+
+    // Prepare List
+    if (!model->select()) {
+        showError(model->lastError());
+        return;
+    }
 }
 
 void OrdersDialog::on_pushButton_clicked()
@@ -98,6 +150,7 @@ void OrdersDialog::on_pushButton_clicked()
     emit ordersSelected(list);
 }
 
+
 void OrdersDialog::on_view_doubleClicked(const QModelIndex &index)
 {
     Q_UNUSED(index);
@@ -105,38 +158,9 @@ void OrdersDialog::on_view_doubleClicked(const QModelIndex &index)
     OrdersDialog::on_pushButton_clicked();
 }
 
-QString OrdersDialog::getHeader(Field field) {
-    switch (field) {
-    case Field::OrderID:
-        return QStringLiteral("Order Id");
-    case Field::DateOrdered:
-        return QStringLiteral("Date Ordered");
-    case Field::SellerName:
-        return QStringLiteral("Seller Name");
-    case Field::StoreName:
-        return QStringLiteral("Store Name");
-    case Field::BuyerName:
-        return QStringLiteral("Buyer Name");
-    case Field::TotalCount:
-        return QStringLiteral("Total Count");
-    case Field::UniqueCount:
-        return QStringLiteral("Unique Count");
-    case Field::Status:
-        return QStringLiteral("Status");
-    case Field::PaymentMethod:
-        return QStringLiteral("Payment Method");
-    case Field::PaymentStatus:
-        return QStringLiteral("Payment Status");
-    case Field::PaymentDatePaid:
-        return QStringLiteral("Date Paid");
-    case Field::PaymentCurrencyCode:
-        return QStringLiteral("Currency");
-    case Field::CostSubtotal:
-        return QStringLiteral("Subtotal");
-    case Field::CostGrandTotal:
-        return QStringLiteral("Grand Total");
-    case Field::CostCurrencyCode:
-        return QStringLiteral("Currency");
-    }
-    return "Error!";
+
+void OrdersDialog::showError(const QSqlError &err)
+{
+    QMessageBox::critical(this, "Unable to initialize Database",
+                "Error initializing database: " + err.text());
 }
