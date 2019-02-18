@@ -43,9 +43,9 @@ ListModel::ListModel(QWidget *parent, Tables table, int orderID) :
 
     // Apply delegates
     QItemDelegate *delegate = new ListModelDelegate(this);
-    ui->tableView->setItemDelegateForColumn(colorIdx, delegate);
-    int dateIdx = model->fieldIndex("date_created");
-    ui->tableView->setItemDelegateForColumn(dateIdx, delegate);
+    ui->tableView->setItemDelegate(delegate);
+//    int dateIdx = model->fieldIndex("date_created");
+//    ui->tableView->setItemDelegateForColumn(dateIdx, delegate);
 
     // Connect SLOT to context menu
     connect(ui->tableView->horizontalHeader(), SIGNAL(customContextMenuRequested(QPoint)), SLOT(slotCustomMenuRequested(QPoint)));

@@ -50,10 +50,9 @@ OrdersDialog::OrdersDialog(QWidget *parent) :
     proxyModel->setSourceModel(model);
     proxyModel->sort(p_tableModel->getSortColumn(), p_tableModel->getSortOrder());
 
-    // Apply delegate on date column
-    int dateIdx = model->fieldIndex("date_ordered");
+    // Set delegates
     QItemDelegate *delegate = new ListModelDelegate(this);
-    ui->view->setItemDelegateForColumn(dateIdx, delegate);
+    ui->view->setItemDelegate(delegate);
 
     // Design the model and hide columns not needed:
     ui->view->setModel(proxyModel);

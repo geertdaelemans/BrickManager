@@ -23,7 +23,7 @@ void ListModelDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
         painter->fillRect(option.rect, option.palette.color(cg, QPalette::Highlight));
 
     QString columnName = model->headerData(index.column(), Qt::Horizontal, Qt::DisplayRole).toString();
-    if(columnName == "Color") {
+    if(columnName == tr("Color")) {
         QColor color;
         QRect colorBox = option.rect;
         colorBox.setWidth(colorBox.height());
@@ -35,10 +35,13 @@ void ListModelDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
         color.setNamedColor(colorCode);
         painter->fillRect(colorBox, color);
         painter->drawText(textBox, Qt::TextSingleLine, colorName);
-    } else if (index.data().canConvert<QDateTime>()) {
+    } else if (columnName.mid(0, 4) == tr("Date")) {
         QDateTime dateTime = qvariant_cast<QDateTime>(index.data());
         QRect textBox = option.rect;
+        textBox.translate(4, 8);
+        textBox.setWidth(textBox.width() - 4);
         painter->drawText(textBox, Qt::TextSingleLine, dateTime.toString(Qt::SystemLocaleShortDate));
-    }
+    } else
+        QSqlRelationalDelegate::paint(painter, option, index);
 }
 
