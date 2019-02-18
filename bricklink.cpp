@@ -97,6 +97,7 @@ void BrickLink::importUserInventory()
 void BrickLink::parseJsonCategories()
 {
     QJsonArray array = BrickLink::validateBricklinkResponse(sender());
+    TableModel *model = new TableModel(Tables::categories);
     if (array.size()) {
         for (auto value : array) {
             Q_ASSERT(value.isObject());
@@ -105,7 +106,6 @@ void BrickLink::parseJsonCategories()
             fields.append(object.value("category_id").toInt());
             fields.append(object.value("category_name").toString());
             fields.append(object.value("parent_id").toInt());
-            TableModel *model = new TableModel(Tables::categories);
             model->addItemToTable(fields);
         }
     }
@@ -114,7 +114,16 @@ void BrickLink::parseJsonCategories()
 void BrickLink::parseJsonColors()
 {
     QJsonArray array = BrickLink::validateBricklinkResponse(sender());
+    TableModel *model = new TableModel(Tables::colors);
     if (array.size()) {
+        // Add the Not Applicable color
+        QList<QVariant> fields;
+        fields.append(0);
+        fields.append("(Not Applicable)");
+        fields.append("FFFFFF");
+        fields.append("(Not Applicable)");
+        model->addItemToTable(fields);
+        // Add all other colors
         for (auto value : array) {
             Q_ASSERT(value.isObject());
             const auto object = value.toObject();
@@ -123,7 +132,6 @@ void BrickLink::parseJsonColors()
             fields.append(object.value("color_name").toString());
             fields.append(object.value("color_code").toString());
             fields.append(object.value("color_type").toString());
-            TableModel *model = new TableModel(Tables::colors);
             model->addItemToTable(fields);
         }
     }
@@ -133,7 +141,6 @@ void BrickLink::parseJsonOrderItem(int orderID)
 {
     TableModel *model = new TableModel(Tables::orderitem, orderID);
     model->initiateSqlTable();
-    //SqlDatabase::initiateOrderItemTable(orderID);
     QJsonArray batchArray = BrickLink::validateBricklinkResponse(sender());
     int batchNumber = 0;
     foreach(const QJsonValue &batch, batchArray) {
@@ -202,6 +209,7 @@ void BrickLink::parseJsonOrders()
 void BrickLink::parseJsonUserInventory()
 {
     QJsonArray array = BrickLink::validateBricklinkResponse(sender());
+    TableModel *model = new TableModel(Tables::userinventories);
     if (array.size()) {
         for (auto value : array) {
             Q_ASSERT(value.isObject());
@@ -233,7 +241,6 @@ void BrickLink::parseJsonUserInventory()
             fields.append(object.value("tier_price2").toVariant().toDouble());
             fields.append(object.value("tier_price3").toVariant().toDouble());
             fields.append(object.value("my_weight").toVariant().toDouble());
-            TableModel *model = new TableModel(Tables::userinventories);
             QSqlError error = model->addItemToTable(fields);
             if(error.type() != QSqlError::NoError)
                 qDebug() << error.text();

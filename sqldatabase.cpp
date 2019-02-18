@@ -106,7 +106,7 @@ QSqlError SqlDatabase::initDb()
 
     // Delete previous Order Item tables
     foreach (QString table, tables) {
-        if (table.mid(0, 9) == "orderitem") {
+        if ((table.mid(0, 9) == "orderitem") || table == "userinventories") {
             QSqlQuery q;
             q.exec("DROP TABLE IF EXISTS " + table);
         }

@@ -55,8 +55,8 @@ ListModel::ListModel(QWidget *parent, Tables table, int orderID) :
         showError(model->lastError());
         return;
     }
-
-    qDebug() << "Rows retrieved:" << model->rowCount();
+    while(model->canFetchMore())
+        model->fetchMore();
 }
 
 
