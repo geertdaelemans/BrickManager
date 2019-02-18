@@ -16,10 +16,7 @@ class ListModel : public QDialog
 
 public:
     explicit ListModel(QWidget *parent = nullptr, Tables table = Tables::userinventories, int orderID = 0);
-    ~ListModel();
-    enum Category {
-
-    };
+    ~ListModel() override;
 
 private slots:
     void slotCustomMenuRequested(QPoint);

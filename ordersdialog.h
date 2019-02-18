@@ -15,8 +15,7 @@ class OrdersDialog : public QDialog
 
 public:
     explicit OrdersDialog(QWidget *parent = nullptr);
-    ~OrdersDialog();
-    QWidget *parent;
+    ~OrdersDialog() override;
     void openTab();
 
 signals:
@@ -29,6 +28,7 @@ private slots:
     void on_view_doubleClicked(const QModelIndex &index);
 
 private:
+    void reject() override;
     void setVisibilityFromCheckBox();
     void showError(const QSqlError &err);
     TableModel *p_tableModel;

@@ -11,7 +11,7 @@ HEADERS += \
     datamodels.h \
     simplepopup.h \
     listmodel.h \
-    colordelegate.h
+    listmodeldelegate.h
 
 SOURCES += \
     main.cpp \
@@ -23,7 +23,7 @@ SOURCES += \
     datamodels.cpp \
     listmodel.cpp \
     simplepopup.cpp \
-    colordelegate.cpp
+    listmodeldelegate.cpp
 
 FORMS += \
     mainwindow.ui \

@@ -1,7 +1,7 @@
 #include "listmodel.h"
 #include "ui_categories.h"
 #include "bricklink.h"
-#include "colordelegate.h"
+#include "listmodeldelegate.h"
 
 #include <QtWidgets>
 
@@ -41,9 +41,11 @@ ListModel::ListModel(QWidget *parent, Tables table, int orderID) :
         ui->tableView->setColumnWidth(i, p_tableModel->getColumnWidth(i));
     }
 
-    // Apply delegate
-    QItemDelegate *delegate = new ColorDelegate(this);
+    // Apply delegates
+    QItemDelegate *delegate = new ListModelDelegate(this);
     ui->tableView->setItemDelegateForColumn(colorIdx, delegate);
+    int dateIdx = model->fieldIndex("date_created");
+    ui->tableView->setItemDelegateForColumn(dateIdx, delegate);
 
     // Connect SLOT to context menu
     connect(ui->tableView->horizontalHeader(), SIGNAL(customContextMenuRequested(QPoint)), SLOT(slotCustomMenuRequested(QPoint)));
@@ -53,13 +55,14 @@ ListModel::ListModel(QWidget *parent, Tables table, int orderID) :
         showError(model->lastError());
         return;
     }
+
+    qDebug() << "Rows retrieved:" << model->rowCount();
 }
 
 
 ListModel::~ListModel()
 {
-    p_tableModel->dropSqlTable();
-    delete ui;
+     delete ui;
 }
 
 

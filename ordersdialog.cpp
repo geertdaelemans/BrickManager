@@ -3,6 +3,7 @@
 #include "bricklink.h"
 #include "simplepopup.h"
 #include "datamodels.h"
+#include "listmodeldelegate.h"
 
 #include <QMenu>
 #include <QWidgetAction>
@@ -14,7 +15,6 @@ OrdersDialog::OrdersDialog(QWidget *parent) :
 {
     // Set-up or reset Orders SQL table
     p_tableModel = new TableModel(Tables::orders);
-    p_tableModel->dropSqlTable();
     p_tableModel->initiateSqlTable();
 
     // Import Order Inventory with unfiled order by default
@@ -27,7 +27,7 @@ OrdersDialog::OrdersDialog(QWidget *parent) :
 
     // Wait for confirmation that data has been loaded in SQL database
     QEventLoop loop;
-    connect(&bricklink, SIGNAL(dataBaseUpdated()), &loop, SLOT(quit()));
+    connect(&bricklink, SIGNAL(dataBaseUpdatedWithOrders()), &loop, SLOT(quit()));
     loop.exec();
 
     // Hide message box
@@ -36,12 +36,11 @@ OrdersDialog::OrdersDialog(QWidget *parent) :
     // Prepare List
     ui->setupUi(this);
 
-    int numberOfColumns = p_tableModel->getNumberOfColumns();
-
     // Create the data model:
     model = new QSqlRelationalTableModel(ui->view);
     model->setEditStrategy(QSqlTableModel::OnManualSubmit);
     model->setTable(p_tableModel->getSqlTableName());
+    int numberOfColumns = p_tableModel->getNumberOfColumns();
     for(int i = 0; i < numberOfColumns; i++) {
         model->setHeaderData(i, Qt::Horizontal, p_tableModel->getColumnHeader(i));
     }
@@ -50,6 +49,11 @@ OrdersDialog::OrdersDialog(QWidget *parent) :
     proxyModel = new QSortFilterProxyModel(this);
     proxyModel->setSourceModel(model);
     proxyModel->sort(p_tableModel->getSortColumn(), p_tableModel->getSortOrder());
+
+    // Apply delegate on date column
+    int dateIdx = model->fieldIndex("date_ordered");
+    QItemDelegate *delegate = new ListModelDelegate(this);
+    ui->view->setItemDelegateForColumn(dateIdx, delegate);
 
     // Design the model and hide columns not needed:
     ui->view->setModel(proxyModel);
@@ -73,10 +77,15 @@ OrdersDialog::OrdersDialog(QWidget *parent) :
 
 OrdersDialog::~OrdersDialog()
 {
-    p_tableModel->dropSqlTable();
+    p_tableModel->truncateSqlTable();
     delete ui;
 }
 
+void OrdersDialog::reject()
+{
+    p_tableModel->truncateSqlTable();
+    QDialog::reject();
+}
 
 void OrdersDialog::slotCustomMenuRequested(const QPoint pos) {
     QMenu *p_popUpMenu = new QMenu(this);
@@ -113,7 +122,7 @@ void OrdersDialog::setVisibilityFromCheckBox() {
 void OrdersDialog::on_checkBoxFiled_stateChanged(int filed)
 {
     // Reset SQL table
-    p_tableModel->dropSqlTable();
+    p_tableModel->truncateSqlTable();
     p_tableModel->initiateSqlTable();
 
     // Import Order Inventory with (un)filed parameter
@@ -126,7 +135,7 @@ void OrdersDialog::on_checkBoxFiled_stateChanged(int filed)
 
     // Wait for confirmation that data has been loaded in SQL database
     QEventLoop loop;
-    connect(&bricklink, SIGNAL(dataBaseUpdated()), &loop, SLOT(quit()));
+    connect(&bricklink, SIGNAL(dataBaseUpdatedWithOrders()), &loop, SLOT(quit()));
     loop.exec();
 
     // Hide message box

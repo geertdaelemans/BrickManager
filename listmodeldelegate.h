@@ -6,10 +6,10 @@
 #include <QSize>
 #include <QSqlRelationalDelegate>
 
-class ColorDelegate : public QSqlRelationalDelegate
+class ListModelDelegate : public QSqlRelationalDelegate
 {
 public:
-    ColorDelegate(QObject *parent);
+    ListModelDelegate(QObject *parent);
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
                const QModelIndex &index) const override;

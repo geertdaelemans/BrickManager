@@ -53,7 +53,7 @@ public:
     int getSortColumn();
     Qt::SortOrder getSortOrder();
     QSqlError initiateSqlTable();
-    QSqlError dropSqlTable();
+    QSqlError truncateSqlTable();
     QSqlError addItemToTable(QList<QVariant> fields);
 
 private:

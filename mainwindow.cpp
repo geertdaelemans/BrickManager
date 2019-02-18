@@ -138,10 +138,12 @@ void MainWindow::openInventoryTab(QList<QString> orderIDs)
             // Wait for confirmation that data has been loaded in SQL database
             QEventLoop loop;
             connect(&bricklink, SIGNAL(dataBaseUpdated()), &loop, SLOT(quit()));
+            //connect(&bricklink, &BrickLink::dataBaseUpdated, &loop, &QEventLoop::quit);
             loop.exec();
 
             // Hide message box
             p_popup->hide();
+
 
             // Prepare list
             ListModel *inv = new ListModel(this, Tables::orderitem, orderID.toInt());

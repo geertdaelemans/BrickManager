@@ -196,7 +196,7 @@ void BrickLink::parseJsonOrders()
                 qDebug() << error.text();
         }
     }
-    emit dataBaseUpdated();
+    emit dataBaseUpdatedWithOrders();
 }
 
 void BrickLink::parseJsonUserInventory()

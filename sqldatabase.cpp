@@ -23,6 +23,7 @@ QString SqlDatabase::getColorById(int color_id)
     while (q.next()) {
         output = q.value(0).toString();;
     }
+    q.finish();
     return output;
 }
 
@@ -42,6 +43,7 @@ QString SqlDatabase::getColorCodeById(int color_id)
     while (q.next()) {
         output = q.value(0).toString();;
     }
+    q.finish();
     return output;
 }
 
@@ -61,6 +63,7 @@ QString SqlDatabase::getColorCodeByName(const QString &color_name)
     while (q.next()) {
         output = q.value(0).toString();;
     }
+    q.finish();
     return output;
 }
 
@@ -80,6 +83,7 @@ QString SqlDatabase::getCategoryById(int category_id)
     while (q.next()) {
         output = q.value(0).toString();;
     }
+    q.finish();
     return output;
 }
 
@@ -99,6 +103,14 @@ QSqlError SqlDatabase::initDb()
         return db.lastError();
 
     QStringList tables = db.tables();
+
+    // Delete previous Order Item tables
+    foreach (QString table, tables) {
+        if (table.mid(0, 9) == "orderitem") {
+            QSqlQuery q;
+            q.exec("DROP TABLE IF EXISTS " + table);
+        }
+    }
 
     TableModel *catModel = new TableModel(Tables::categories);
     catModel->initiateSqlTable();

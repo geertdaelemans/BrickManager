@@ -141,12 +141,11 @@ QSqlError TableModel::initiateSqlTable() {
     return QSqlError();
 }
 
-QSqlError TableModel::dropSqlTable() {
-    QString queryString = "DROP TABLE IF EXISTS " + getSqlTableName();
+QSqlError TableModel::truncateSqlTable() {
+    QString queryString = "DELETE FROM " + getSqlTableName();
     QSqlQuery q;
-    q.clear();
     if (!q.exec(queryString)) {
-        qDebug() << "Failed to purge" << getSqlTableName() << q.lastError();
+        qDebug() << "Failed to truncate" << getSqlTableName() << q.lastError();
         return q.lastError();
     }
     return QSqlError();
@@ -172,5 +171,5 @@ QSqlError TableModel::addItemToTable(QList<QVariant> fields)
         q.addBindValue(fields[i]);
     }
     q.exec();
-    return q.lastError();
+    return QSqlError();
 }
