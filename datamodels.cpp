@@ -151,7 +151,7 @@ QSqlError TableModel::truncateSqlTable() {
     return QSqlError();
 }
 
-QSqlError TableModel::addItemToTable(QList<QVariant> fields)
+QSqlError TableModel::addItemToTable(QMap<QString, QVariant> fields)
 {
     QString qryString = "INSERT INTO ";
     qryString += this->getSqlTableName() + "(" + this->columns[0].property.sqlName;
@@ -168,7 +168,7 @@ QSqlError TableModel::addItemToTable(QList<QVariant> fields)
         return q.lastError();
     for(int i = 0; i < fields.count(); ++i)
     {
-        q.addBindValue(fields[i]);
+        q.addBindValue(fields[columns[i].property.sqlName]);
     }
     q.exec();
     return QSqlError();
