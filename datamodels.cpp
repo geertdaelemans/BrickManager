@@ -1,6 +1,7 @@
 #include "datamodels.h"
 
-TableModel::TableModel(Tables table, int orderId)
+
+TableModel::TableModel(Tables table, QString tableName)
 {
     switch (table)
     {
@@ -22,7 +23,11 @@ TableModel::TableModel(Tables table, int orderId)
         sortOrder = Qt::AscendingOrder;
         break;
     case Tables::orderitem:
-        sqlTable = "orderitem" + QString::number(orderId);
+    case Tables::brickstock:
+        if (table == Tables::orderitem)
+            sqlTable = "orderitem" + tableName;
+        else
+            sqlTable = tableName;
         columns[0] = Column("inventory_id", tr("ID"), "integer", false, 80);                        // The ID of the inventory that includes the item
         columns[1] = Column("item_no", tr("Part #"), "varchar", true, 100);                         // Item's identification number in BL catalog
         columns[2] = Column("item_name", tr("Name"), "varchar", true, 300);                         // The name of the item
@@ -99,6 +104,9 @@ TableModel::TableModel(Tables table, int orderId)
     }
 }
 
+
+
+
 QString TableModel::getSqlTableName() {
     return sqlTable;
 }
@@ -155,20 +163,29 @@ QSqlError TableModel::addItemToTable(QMap<QString, QVariant> fields)
 {
     QString qryString = "INSERT INTO ";
     qryString += this->getSqlTableName() + "(" + this->columns[0].property.sqlName;
+    QString qryStringEnd = "";
     for (int i = 1; i < this->getNumberOfColumns(); i++) {
-        qryString += ", " + this->columns[i].property.sqlName;
+        if(fields[columns[i].property.sqlName].isValid()) {
+            qryString += ", " + this->columns[i].property.sqlName;
+            qryStringEnd += ", ?";
+        }
     }
-    qryString += ") VALUES(?";
-    for (int i = 1; i < this->getNumberOfColumns(); i++) {
-        qryString += ", ?";
-    }
-    qryString += ")";
+    qryString += ") VALUES(?" + qryStringEnd + ")";
     QSqlQuery q;
-    if (!q.prepare(qryString))
+    if (!q.prepare(qryString)) {
+        qDebug() << "Failed to add item to database" << getSqlTableName() << q.lastError();
         return q.lastError();
-    for(int i = 0; i < fields.count(); ++i)
+    }
+    if (fields[columns[0].property.sqlName].isValid()) {
+        q.addBindValue(fields[columns[0].property.sqlName]);
+    } else {
+        itemCounter++;
+        q.addBindValue(itemCounter);
+    }
+    for(int i = 1; i < fields.count(); ++i)
     {
-        q.addBindValue(fields[columns[i].property.sqlName]);
+        if(fields[columns[i].property.sqlName].isValid())
+            q.addBindValue(fields[columns[i].property.sqlName]);
     }
     q.exec();
     return QSqlError();

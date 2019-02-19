@@ -11,7 +11,6 @@ public:
     static QString getColorCodeById(int color_id);
     static QString getColorCodeByName(const QString &color_name);
     static QString getCategoryById(int category_id);
-//    static QSqlError initiateOrderItemTable(int orderID);
 
 private:
     QSqlDatabase db;

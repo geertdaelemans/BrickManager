@@ -5,12 +5,13 @@
 
 #include <QtWidgets>
 
-ListModel::ListModel(QWidget *parent, Tables table, int orderID) :
+
+ListModel::ListModel(QWidget *parent, TableModel *tableModel) :
     QDialog(parent),
     ui(new Ui::Categories)
 {
     ui->setupUi(this);
-    p_tableModel = new TableModel(table, orderID);
+    p_tableModel = tableModel;
     int numberOfColumns = p_tableModel->getNumberOfColumns();
 
     // Create the data model:
@@ -44,8 +45,6 @@ ListModel::ListModel(QWidget *parent, Tables table, int orderID) :
     // Apply delegates
     QItemDelegate *delegate = new ListModelDelegate(this);
     ui->tableView->setItemDelegate(delegate);
-//    int dateIdx = model->fieldIndex("date_created");
-//    ui->tableView->setItemDelegateForColumn(dateIdx, delegate);
 
     // Connect SLOT to context menu
     connect(ui->tableView->horizontalHeader(), SIGNAL(customContextMenuRequested(QPoint)), SLOT(slotCustomMenuRequested(QPoint)));

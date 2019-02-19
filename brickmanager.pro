@@ -1,4 +1,4 @@
-QT = core widgets network networkauth sql
+QT = core widgets network networkauth sql xml
 requires(qtConfig(tableview))
 CONFIG -= app_bundle
 

@@ -55,13 +55,15 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionOpen"/>
+    <addaction name="separator"/>
     <addaction name="actionOrders"/>
     <addaction name="separator"/>
     <addaction name="actionMy_Inventory"/>
@@ -130,6 +132,11 @@
   <action name="actionMy_Inventory">
    <property name="text">
     <string>My Inventory</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open...</string>
    </property>
   </action>
  </widget>

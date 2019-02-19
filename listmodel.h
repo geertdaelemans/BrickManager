@@ -15,7 +15,7 @@ class ListModel : public QDialog
     Q_OBJECT
 
 public:
-    explicit ListModel(QWidget *parent = nullptr, Tables table = Tables::userinventories, int orderID = 0);
+    explicit ListModel(QWidget *parent = nullptr, TableModel *tableModel = nullptr);
     ~ListModel() override;
 
 private slots:

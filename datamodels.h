@@ -32,6 +32,7 @@ public:
 enum Tables {
     categories,
     colors,
+    brickstock,
     orderitem,
     orders,
     userinventories
@@ -42,7 +43,7 @@ class TableModel : public QObject
         Q_OBJECT
 
 public:
-    TableModel(Tables table, int orderId = 0);
+    TableModel(Tables table, QString tableName = "");
     QString getSqlTableName();
     int getNumberOfColumns();
     QString getSqlColumnName(int column);
@@ -62,6 +63,7 @@ private:
     int sortColumn = 0;
     Qt::SortOrder sortOrder = Qt::AscendingOrder;
     QMap<int, Column> columns;
+    int itemCounter = 0;
 };
 
 #endif // DATAMODELS_H

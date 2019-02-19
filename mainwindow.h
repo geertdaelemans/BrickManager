@@ -25,6 +25,7 @@ public slots:
     void openInventoryTab(QList<QString>);
 
 private slots:
+    void on_actionOpen_triggered();
     void on_actionOrders_triggered();
     void on_actionExit_triggered();
     void on_actionAbout_triggered();

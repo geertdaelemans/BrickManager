@@ -139,7 +139,7 @@ void BrickLink::parseJsonColors()
 
 void BrickLink::parseJsonOrderItem(int orderID)
 {
-    TableModel *model = new TableModel(Tables::orderitem, orderID);
+    TableModel *model = new TableModel(Tables::orderitem, QString::number(orderID));
     model->initiateSqlTable();
     QJsonArray batchArray = BrickLink::validateBricklinkResponse(sender());
     int batchNumber = 0;
