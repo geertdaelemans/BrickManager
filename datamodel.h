@@ -38,12 +38,12 @@ enum Tables {
     userinventories
 };
 
-class TableModel : public QObject
+class DataModel : public QObject
 {
         Q_OBJECT
 
 public:
-    TableModel(Tables table, QString tableName = "");
+    DataModel(Tables table, QString tableName = "");
     QString getSqlTableName();
     int getNumberOfColumns();
     QString getSqlColumnName(int column);

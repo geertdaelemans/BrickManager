@@ -1,4 +1,4 @@
-#include "datamodels.h"
+#include "datamodel.h"
 
 SqlDatabase::SqlDatabase()
 {
@@ -112,11 +112,11 @@ QSqlError SqlDatabase::initDb()
         }
     }
 
-    TableModel *catModel = new TableModel(Tables::categories);
+    DataModel *catModel = new DataModel(Tables::categories);
     catModel->initiateSqlTable();
-    TableModel *colModel = new TableModel(Tables::colors);
+    DataModel *colModel = new DataModel(Tables::colors);
     colModel->initiateSqlTable();
-    TableModel *userInvModel = new TableModel(Tables::userinventories);
+    DataModel *userInvModel = new DataModel(Tables::userinventories);
     userInvModel->initiateSqlTable();
 
     return QSqlError();

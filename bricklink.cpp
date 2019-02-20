@@ -1,6 +1,6 @@
 #include "bricklink.h"
 #include "sqldatabase.h"
-#include "datamodels.h"
+#include "datamodel.h"
 
 #include <QtCore>
 #include <QtNetwork>
@@ -97,7 +97,7 @@ void BrickLink::importUserInventory()
 void BrickLink::parseJsonCategories()
 {
     QJsonArray array = BrickLink::validateBricklinkResponse(sender());
-    TableModel *model = new TableModel(Tables::categories);
+    DataModel *model = new DataModel(Tables::categories);
     if (array.size()) {
         for (auto value : array) {
             Q_ASSERT(value.isObject());
@@ -114,7 +114,7 @@ void BrickLink::parseJsonCategories()
 void BrickLink::parseJsonColors()
 {
     QJsonArray array = BrickLink::validateBricklinkResponse(sender());
-    TableModel *model = new TableModel(Tables::colors);
+    DataModel *model = new DataModel(Tables::colors);
     if (array.size()) {
         // Add the Not Applicable color
         QMap<QString, QVariant> fields;
@@ -139,7 +139,7 @@ void BrickLink::parseJsonColors()
 
 void BrickLink::parseJsonOrderItem(int orderID)
 {
-    TableModel *model = new TableModel(Tables::orderitem, QString::number(orderID));
+    DataModel *model = new DataModel(Tables::orderitem, QString::number(orderID));
     model->initiateSqlTable();
     QJsonArray batchArray = BrickLink::validateBricklinkResponse(sender());
     int batchNumber = 0;
@@ -177,7 +177,7 @@ void BrickLink::parseJsonOrderItem(int orderID)
 void BrickLink::parseJsonOrders()
 {
     QJsonArray array = BrickLink::validateBricklinkResponse(sender());
-    TableModel *model = new TableModel(Tables::orders);
+    DataModel *model = new DataModel(Tables::orders);
     if (array.size()) {
         for (auto value : array) {
             Q_ASSERT(value.isObject());
@@ -209,7 +209,7 @@ void BrickLink::parseJsonOrders()
 void BrickLink::parseJsonUserInventory()
 {
     QJsonArray array = BrickLink::validateBricklinkResponse(sender());
-    TableModel *model = new TableModel(Tables::userinventories);
+    DataModel *model = new DataModel(Tables::userinventories);
     if (array.size()) {
         for (auto value : array) {
             Q_ASSERT(value.isObject());

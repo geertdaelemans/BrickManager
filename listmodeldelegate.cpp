@@ -35,12 +35,6 @@ void ListModelDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
         color.setNamedColor(colorCode);
         painter->fillRect(colorBox, color);
         painter->drawText(textBox, Qt::TextSingleLine, colorName);
-    } else if (columnName.mid(0, 4) == tr("Date")) {
-        QDateTime dateTime = qvariant_cast<QDateTime>(index.data());
-        QRect textBox = option.rect;
-        textBox.translate(4, 8);
-        textBox.setWidth(textBox.width() - 4);
-        painter->drawText(textBox, Qt::TextSingleLine, dateTime.toString(Qt::SystemLocaleShortDate));
     } else
         QSqlRelationalDelegate::paint(painter, option, index);
 }

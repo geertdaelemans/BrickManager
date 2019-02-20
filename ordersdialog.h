@@ -2,8 +2,9 @@
 #define ORDERSDIALOG_H
 
 #include <QDialog>
-#include "datamodels.h"
+#include "datamodel.h"
 #include "bricklink.h"
+#include "generictablemodel.h"
 
 namespace Ui {
 class OrdersDialog;
@@ -31,8 +32,8 @@ private:
     void reject() override;
     void setVisibilityFromCheckBox();
     void showError(const QSqlError &err);
-    TableModel *p_tableModel;
-    QSqlRelationalTableModel *model;
+    DataModel *p_dataModel;
+    GenericTableModel *model;
     QSortFilterProxyModel *proxyModel;
     Ui::OrdersDialog *ui;
     BrickLink bricklink;

@@ -6,20 +6,20 @@
 #include <QtWidgets>
 
 
-ListModel::ListModel(QWidget *parent, TableModel *tableModel) :
+ListModel::ListModel(QWidget *parent, DataModel *tableModel) :
     QDialog(parent),
     ui(new Ui::Categories)
 {
     ui->setupUi(this);
-    p_tableModel = tableModel;
-    int numberOfColumns = p_tableModel->getNumberOfColumns();
+    p_dataModel = tableModel;
+    int numberOfColumns = p_dataModel->getNumberOfColumns();
 
     // Create the data model:
-    model = new QSqlRelationalTableModel(ui->tableView);
+    model = new GenericTableModel(ui->tableView);
     model->setEditStrategy(QSqlTableModel::OnManualSubmit);
-    model->setTable(p_tableModel->getSqlTableName());
+    model->setTable(p_dataModel->getSqlTableName());
     for(int i = 0; i < numberOfColumns; i++) {
-        model->setHeaderData(i, Qt::Horizontal, p_tableModel->getColumnHeader(i));
+        model->setHeaderData(i, Qt::Horizontal, p_dataModel->getColumnHeader(i));
     }
 
     // Set database relations
@@ -35,15 +35,15 @@ ListModel::ListModel(QWidget *parent, TableModel *tableModel) :
     // Set proxy model to enable sorting columns:
     proxyModel = new QSortFilterProxyModel(this);
     proxyModel->setSourceModel(model);
-    proxyModel->sort(p_tableModel->getSortColumn(), p_tableModel->getSortOrder());
+    proxyModel->sort(p_dataModel->getSortColumn(), p_dataModel->getSortOrder());
 
     // Design the model and hide columns not needed:
     ui->tableView->setModel(proxyModel);
     ui->tableView->horizontalHeader()->setSectionsMovable(true);
     ui->tableView->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
     for(int i = 0; i < numberOfColumns; i++) {
-        ui->tableView->setColumnHidden(i, !p_tableModel->isColumnVisible(i));
-        ui->tableView->setColumnWidth(i, p_tableModel->getColumnWidth(i));
+        ui->tableView->setColumnHidden(i, !p_dataModel->isColumnVisible(i));
+        ui->tableView->setColumnWidth(i, p_dataModel->getColumnWidth(i));
     }
 
     // Apply delegates
@@ -77,11 +77,11 @@ void ListModel::slotCustomMenuRequested(const QPoint pos) {
      p_popUpMenu->addSeparator();
 
     // List all possible fields and select visibility
-    for (int i = 0; i < p_tableModel->getNumberOfColumns(); i++) {
+    for (int i = 0; i < p_dataModel->getNumberOfColumns(); i++) {
         QCheckBox *p_checkBox = new QCheckBox(p_popUpMenu);
-        p_checkBox->setText(p_tableModel->getColumnHeader(i));
+        p_checkBox->setText(p_dataModel->getColumnHeader(i));
         p_checkBox->setObjectName(QString::number(i));
-        p_checkBox->setChecked(p_tableModel->isColumnVisible(i));
+        p_checkBox->setChecked(p_dataModel->isColumnVisible(i));
         QWidgetAction *p_checkableAction = new QWidgetAction(p_popUpMenu);
         p_checkableAction->setDefaultWidget(p_checkBox);
         p_popUpMenu->addAction(p_checkableAction);
@@ -96,8 +96,8 @@ void ListModel::slotCustomMenuRequested(const QPoint pos) {
 void ListModel::setVisibilityFromCheckBox() {
     auto *p_checkBox = qobject_cast<QCheckBox *>(sender());
     int index = p_checkBox->objectName().toInt();
-    p_tableModel->setColumnVisible(index, p_checkBox->isChecked());
-    ui->tableView->setColumnHidden(index, !p_tableModel->isColumnVisible(index));
+    p_dataModel->setColumnVisible(index, p_checkBox->isChecked());
+    ui->tableView->setColumnHidden(index, !p_dataModel->isColumnVisible(index));
 }
 
 void ListModel::showError(const QSqlError &err)

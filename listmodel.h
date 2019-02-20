@@ -1,7 +1,8 @@
 #ifndef CATEGORIES_H
 #define CATEGORIES_H
 
-#include "datamodels.h"
+#include "datamodel.h"
+#include "generictablemodel.h"
 
 #include <QDialog>
 #include <QtSql>
@@ -15,7 +16,7 @@ class ListModel : public QDialog
     Q_OBJECT
 
 public:
-    explicit ListModel(QWidget *parent = nullptr, TableModel *tableModel = nullptr);
+    explicit ListModel(QWidget *parent = nullptr, DataModel *tableModel = nullptr);
     ~ListModel() override;
 
 private slots:
@@ -24,9 +25,9 @@ private slots:
 private:
     void showError(const QSqlError &err);
     Ui::Categories *ui;
-    TableModel *p_tableModel;
+    DataModel *p_dataModel;
     void setVisibilityFromCheckBox();
-    QSqlRelationalTableModel *model;
+    GenericTableModel *model;
     QSortFilterProxyModel *proxyModel;
 };
 

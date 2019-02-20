@@ -8,10 +8,11 @@ HEADERS += \
     ordersdialog.h \
     settingsdialog.h \
     sqldatabase.h \
-    datamodels.h \
     simplepopup.h \
     listmodel.h \
-    listmodeldelegate.h
+    listmodeldelegate.h \
+    generictablemodel.h \
+    datamodel.h
 
 SOURCES += \
     main.cpp \
@@ -20,10 +21,11 @@ SOURCES += \
     ordersdialog.cpp \
     settingsdialog.cpp \
     sqldatabase.cpp \
-    datamodels.cpp \
     listmodel.cpp \
     simplepopup.cpp \
-    listmodeldelegate.cpp
+    listmodeldelegate.cpp \
+    generictablemodel.cpp \
+    datamodel.cpp
 
 FORMS += \
     mainwindow.ui \

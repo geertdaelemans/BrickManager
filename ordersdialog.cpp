@@ -2,7 +2,7 @@
 #include "ui_ordersdialog.h"
 #include "bricklink.h"
 #include "simplepopup.h"
-#include "datamodels.h"
+#include "datamodel.h"
 #include "listmodeldelegate.h"
 
 #include <QMenu>
@@ -14,8 +14,8 @@ OrdersDialog::OrdersDialog(QWidget *parent) :
     ui(new Ui::OrdersDialog)
 {
     // Set-up or reset Orders SQL table
-    p_tableModel = new TableModel(Tables::orders);
-    p_tableModel->initiateSqlTable();
+    p_dataModel = new DataModel(Tables::orders);
+    p_dataModel->initiateSqlTable();
 
     // Import Order Inventory with unfiled order by default
     bricklink.importOrders(false);
@@ -37,18 +37,18 @@ OrdersDialog::OrdersDialog(QWidget *parent) :
     ui->setupUi(this);
 
     // Create the data model:
-    model = new QSqlRelationalTableModel(ui->view);
+    model = new GenericTableModel(ui->view);
     model->setEditStrategy(QSqlTableModel::OnManualSubmit);
-    model->setTable(p_tableModel->getSqlTableName());
-    int numberOfColumns = p_tableModel->getNumberOfColumns();
+    model->setTable(p_dataModel->getSqlTableName());
+    int numberOfColumns = p_dataModel->getNumberOfColumns();
     for(int i = 0; i < numberOfColumns; i++) {
-        model->setHeaderData(i, Qt::Horizontal, p_tableModel->getColumnHeader(i));
+        model->setHeaderData(i, Qt::Horizontal, p_dataModel->getColumnHeader(i));
     }
 
     // Set proxy model to enable sorting columns:
     proxyModel = new QSortFilterProxyModel(this);
     proxyModel->setSourceModel(model);
-    proxyModel->sort(p_tableModel->getSortColumn(), p_tableModel->getSortOrder());
+    proxyModel->sort(p_dataModel->getSortColumn(), p_dataModel->getSortOrder());
 
     // Set delegates
     QItemDelegate *delegate = new ListModelDelegate(this);
@@ -59,8 +59,8 @@ OrdersDialog::OrdersDialog(QWidget *parent) :
     ui->view->horizontalHeader()->setSectionsMovable(true);
     ui->view->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
     for(int i = 0; i < numberOfColumns; i++) {
-        ui->view->setColumnHidden(i, !p_tableModel->isColumnVisible(i));
-        ui->view->setColumnWidth(i, p_tableModel->getColumnWidth(i));
+        ui->view->setColumnHidden(i, !p_dataModel->isColumnVisible(i));
+        ui->view->setColumnWidth(i, p_dataModel->getColumnWidth(i));
     }
 
     // Connect SLOT to context menu
@@ -76,13 +76,13 @@ OrdersDialog::OrdersDialog(QWidget *parent) :
 
 OrdersDialog::~OrdersDialog()
 {
-    p_tableModel->truncateSqlTable();
+    p_dataModel->truncateSqlTable();
     delete ui;
 }
 
 void OrdersDialog::reject()
 {
-    p_tableModel->truncateSqlTable();
+    p_dataModel->truncateSqlTable();
     QDialog::reject();
 }
 
@@ -94,11 +94,11 @@ void OrdersDialog::slotCustomMenuRequested(const QPoint pos) {
      p_popUpMenu->addSeparator();
 
     // List all possible fields and select visibility
-    for (int i = 0; i < p_tableModel->getNumberOfColumns(); i++) {
+    for (int i = 0; i < p_dataModel->getNumberOfColumns(); i++) {
         QCheckBox *p_checkBox = new QCheckBox(p_popUpMenu);
-        p_checkBox->setText(p_tableModel->getColumnHeader(i));
+        p_checkBox->setText(p_dataModel->getColumnHeader(i));
         p_checkBox->setObjectName(QString::number(i));
-        p_checkBox->setChecked(p_tableModel->isColumnVisible(i));
+        p_checkBox->setChecked(p_dataModel->isColumnVisible(i));
         QWidgetAction *p_checkableAction = new QWidgetAction(p_popUpMenu);
         p_checkableAction->setDefaultWidget(p_checkBox);
         p_popUpMenu->addAction(p_checkableAction);
@@ -113,16 +113,16 @@ void OrdersDialog::slotCustomMenuRequested(const QPoint pos) {
 void OrdersDialog::setVisibilityFromCheckBox() {
     auto *p_checkBox = qobject_cast<QCheckBox *>(sender());
     int index = p_checkBox->objectName().toInt();
-    p_tableModel->setColumnVisible(index, p_checkBox->isChecked());
-    ui->view->setColumnHidden(index, !p_tableModel->isColumnVisible(index));
+    p_dataModel->setColumnVisible(index, p_checkBox->isChecked());
+    ui->view->setColumnHidden(index, !p_dataModel->isColumnVisible(index));
 }
 
 
 void OrdersDialog::on_checkBoxFiled_stateChanged(int filed)
 {
     // Reset SQL table
-    p_tableModel->truncateSqlTable();
-    p_tableModel->initiateSqlTable();
+    p_dataModel->truncateSqlTable();
+    p_dataModel->initiateSqlTable();
 
     // Import Order Inventory with (un)filed parameter
     bricklink.importOrders(filed);

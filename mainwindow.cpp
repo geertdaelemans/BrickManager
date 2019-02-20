@@ -4,7 +4,7 @@
 #include "settingsdialog.h"
 #include "sqldatabase.h"
 #include "listmodel.h"
-#include "datamodels.h"
+#include "datamodel.h"
 #include "simplepopup.h"
 
 #include <QMessageBox>
@@ -63,8 +63,8 @@ void MainWindow::on_actionMy_Inventory_triggered()
     p_popup->hide();
 
     // Prepare list
-    TableModel *p_tableModel = new TableModel(Tables::userinventories);
-    listModel = new ListModel(this, p_tableModel);
+    DataModel *p_dataModel = new DataModel(Tables::userinventories);
+    listModel = new ListModel(this, p_dataModel);
     QString header = "My Inventory";
     int numberOfTabs = ui->tabWidget->count();
     if(tabs.indexOf(header) == -1)
@@ -79,15 +79,15 @@ void MainWindow::on_actionMy_Inventory_triggered()
 
 void MainWindow::on_actionColors_triggered()
 {
-    TableModel *p_tableModel = new TableModel(Tables::colors);
-    listModel = new ListModel(this, p_tableModel);
+    DataModel *p_dataModel = new DataModel(Tables::colors);
+    listModel = new ListModel(this, p_dataModel);
     listModel->exec();
 }
 
 void MainWindow::on_actionCategories_triggered()
 {
-    TableModel *p_tableModel = new TableModel(Tables::categories);
-    listModel = new ListModel(this, p_tableModel);
+    DataModel *p_dataModel = new DataModel(Tables::categories);
+    listModel = new ListModel(this, p_dataModel);
     listModel->exec();
 }
 
@@ -151,8 +151,8 @@ void MainWindow::openInventoryTab(QList<QString> orderIDs)
 
 
             // Prepare list
-            TableModel *p_tableModel = new TableModel(Tables::orderitem, orderID);
-            ListModel *inv = new ListModel(this, p_tableModel);
+            DataModel *p_dataModel = new DataModel(Tables::orderitem, orderID);
+            ListModel *inv = new ListModel(this, p_dataModel);
             ui->tabWidget->addTab(inv, "Order#" + orderID);
             ui->tabWidget->setCurrentIndex(numberOfTabs);
         }
@@ -190,8 +190,8 @@ void MainWindow::on_actionOpen_triggered()
         QDomElement item = inventory.firstChild().toElement();          // Item
 
         // Prepare data model
-        TableModel *p_tableModel = new TableModel(Tables::brickstock, sqlTableName);
-        p_tableModel->initiateSqlTableAuto();
+        DataModel *p_dataModel = new DataModel(Tables::brickstock, sqlTableName);
+        p_dataModel->initiateSqlTableAuto();
 
         // Read each child of the Inventory node
         while (!item.isNull()) {
@@ -209,12 +209,12 @@ void MainWindow::on_actionOpen_triggered()
                 }
             }
 
-            QSqlError error = p_tableModel->addItemToTable(fields);
+            QSqlError error = p_dataModel->addItemToTable(fields);
 
             // Next sibling
             item = item.nextSibling().toElement();
         }
-        listModel = new ListModel(this, p_tableModel);
+        listModel = new ListModel(this, p_dataModel);
         ui->tabWidget->addTab(listModel, tableName);
     }
 }

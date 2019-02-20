@@ -1,7 +1,7 @@
-#include "datamodels.h"
+#include "datamodel.h"
 
 
-TableModel::TableModel(Tables table, QString tableName)
+DataModel::DataModel(Tables table, QString tableName)
 {
     switch (table)
     {
@@ -140,36 +140,36 @@ TableModel::TableModel(Tables table, QString tableName)
 
 
 
-QString TableModel::getSqlTableName() {
+QString DataModel::getSqlTableName() {
     return sqlTable;
 }
 
-int TableModel::getNumberOfColumns() {
+int DataModel::getNumberOfColumns() {
     return columns.size();
 }
-QString TableModel::getSqlColumnName(int column) {
+QString DataModel::getSqlColumnName(int column) {
     return columns[column].property.sqlName;
 }
-QString TableModel::getColumnHeader(int column) {
+QString DataModel::getColumnHeader(int column) {
     return columns[column].property.name;
 }
-bool TableModel::isColumnVisible(int column) {
+bool DataModel::isColumnVisible(int column) {
     return columns[column].property.visible;
 }
-void TableModel::setColumnVisible(int column, bool visible) {
+void DataModel::setColumnVisible(int column, bool visible) {
     columns[column].property.visible = visible;
 }
-int TableModel::getColumnWidth(int column) {
+int DataModel::getColumnWidth(int column) {
     return columns[column].property.columnWidth;
 }
-int TableModel::getSortColumn() {
+int DataModel::getSortColumn() {
     return sortColumn;
 }
-Qt::SortOrder TableModel::getSortOrder() {
+Qt::SortOrder DataModel::getSortOrder() {
     return sortOrder;
 }
 
-QSqlError TableModel::initiateSqlTable() {
+QSqlError DataModel::initiateSqlTable() {
     QString queryString;
     queryString = "CREATE TABLE " + getSqlTableName() + "(" + columns[0].property.sqlName + " " + columns[0].property.sqlType + " PRIMARY KEY" ;
     for(int i = 1; i < getNumberOfColumns(); i++) {
@@ -182,7 +182,7 @@ QSqlError TableModel::initiateSqlTable() {
     return QSqlError();
 }
 
-QSqlError TableModel::initiateSqlTableAuto() {
+QSqlError DataModel::initiateSqlTableAuto() {
     QString queryString;
     queryString = "CREATE TABLE " + getSqlTableName() + "(id INTEGER PRIMARY KEY AUTOINCREMENT" ;
     for(int i = 1; i < getNumberOfColumns(); i++) {
@@ -195,7 +195,7 @@ QSqlError TableModel::initiateSqlTableAuto() {
     return QSqlError();
 }
 
-QSqlError TableModel::truncateSqlTable() {
+QSqlError DataModel::truncateSqlTable() {
     QString queryString = "DELETE FROM " + getSqlTableName();
     QSqlQuery q;
     if (!q.exec(queryString)) {
@@ -205,7 +205,7 @@ QSqlError TableModel::truncateSqlTable() {
     return QSqlError();
 }
 
-QSqlError TableModel::addItemToTable(QMap<QString, QVariant> fields)
+QSqlError DataModel::addItemToTable(QMap<QString, QVariant> fields)
 {
     QString qryString = "INSERT INTO ";
     qryString += this->getSqlTableName() + "(" + this->columns[0].property.sqlName;
