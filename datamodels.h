@@ -54,6 +54,7 @@ public:
     int getSortColumn();
     Qt::SortOrder getSortOrder();
     QSqlError initiateSqlTable();
+    QSqlError initiateSqlTableAuto();
     QSqlError truncateSqlTable();
     QSqlError addItemToTable(QMap<QString, QVariant> fields);
 

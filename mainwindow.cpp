@@ -191,7 +191,7 @@ void MainWindow::on_actionOpen_triggered()
 
         // Prepare data model
         TableModel *p_tableModel = new TableModel(Tables::brickstock, sqlTableName);
-        p_tableModel->initiateSqlTable();
+        p_tableModel->initiateSqlTableAuto();
 
         // Read each child of the Inventory node
         while (!item.isNull()) {
@@ -202,36 +202,7 @@ void MainWindow::on_actionOpen_triggered()
                 QDomElement field = item.firstChild().toElement();
                 // Read Name and value
                 while (!field.isNull()) {
-                    if (field.tagName() == "LotID")
-                        fields["inventory_id"] = field.firstChild().toText().data().toInt();
-                    if (field.tagName() == "ItemID")
-                        fields["item_no"] = field.firstChild().toText().data();
-                    if (field.tagName() == "ItemName")
-                        fields["item_name"] = field.firstChild().toText().data();
-                    if (field.tagName() == "ItemTypeID")
-                        fields["item_type_id"] = field.firstChild().toText().data();
-                    if (field.tagName() == "ColorID")
-                        fields["color_id"] = field.firstChild().toText().data().toInt();
-                    if (field.tagName() == "ItemTypeName")
-                        fields["item_type"] = field.firstChild().toText().data();
-                    if (field.tagName() == "ColorName")
-                        fields["color_name"] = field.firstChild().toText().data();
-                    if (field.tagName() == "CategoryID")
-                        fields["category_id"] = field.firstChild().toText().data().toInt();
-                    if (field.tagName() == "CategoryName")
-                        fields["category_name"] = field.firstChild().toText().data();
-                    if (field.tagName() == "Status")
-                        fields["status"] = field.firstChild().toText().data();
-                    if (field.tagName() == "Qty")
-                        fields["quantity"] = field.firstChild().toText().data().toInt();
-                    if (field.tagName() == "Price")
-                        fields["unit_price"] = field.firstChild().toText().data().toDouble();
-                    if (field.tagName() == "Condition")
-                        fields["new_or_used"] = field.firstChild().toText().data();
-                    if (field.tagName() == "OrigPrice")
-                        fields["OrigPrice"] = field.firstChild().toText().data().toDouble();
-                    if (field.tagName() == "OrigQty")
-                        fields["OrigQty"] = field.firstChild().toText().data().toInt();
+                    fields[field.tagName()] = field.firstChild().toText().data();
 
                     // Next field
                     field = field.nextSibling().toElement();

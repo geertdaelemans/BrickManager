@@ -5,6 +5,43 @@ TableModel::TableModel(Tables table, QString tableName)
 {
     switch (table)
     {
+    case Tables::brickstock:
+        sqlTable = tableName;
+        columns[0] = Column("id", tr("ID"), "integer", false, 100);
+        columns[1] = Column("Status", tr("Status"), "varchar", true, 21);
+        columns[2] = Column("Image", tr("Image"), "varchar", true, 45);
+        columns[3] = Column("ItemID", tr("Part #"), "varchar", true, 65);
+        columns[4] = Column("ItemName", tr("Description"), "varchar", true, 173);
+        columns[5] = Column("Condition", tr("Cond."), "varchar", true, 35);
+        columns[6] = Column("ColorID", tr("Color"), "integer", true, 95);
+        columns[7] = Column("Qty", tr("Qty."), "integer", true, 35);
+        columns[8] = Column("Price", tr("Price"), "double", true, 53);
+        columns[9] = Column("Total", tr("Total"), "double", true, 53);
+        columns[10] = Column("Bulk", tr("Bulk"), "integer", true, 35);
+        columns[11] = Column("Sale", tr("Sale"), "integer", true, 35);
+        columns[12] = Column("Comments", tr("Comments"), "varchar", true, 53);
+        columns[13] = Column("Remarks", tr("Remarks"), "varchar", true, 53);
+        columns[14] = Column("CategoryID", tr("Category"), "integer", true, 77);
+        columns[15] = Column("ItemTypeName", tr("Item Type"), "varchar", true, 77);
+        columns[16] = Column("TQ1", tr("Tier Q1"), "integer", true, 35);
+        columns[17] = Column("TP1", tr("Tier P1"), "double", true, 53);
+        columns[18] = Column("TQ2", tr("Tier Q2"), "integer", true, 35);
+        columns[19] = Column("TP2", tr("Tier P2"), "double", true, 53);
+        columns[20] = Column("TQ3", tr("Tier Q3"), "integer", true, 35);
+        columns[21] = Column("TP3", tr("Tier P3"), "double", true, 53);
+        columns[22] = Column("LotID", tr("Lot ID"), "integer", true, 0);
+        columns[23] = Column("Retain", tr("Retain"), "bool", true, 0);
+        columns[24] = Column("Stockroom", tr("Stockroom"), "bool", true, 0);
+        columns[25] = Column("Reserved", tr("Reserved"), "bool", true, 0);
+        columns[26] = Column("TotalWeight", tr("Weight"), "double", true, 0);
+        columns[27] = Column("Year", tr("Year"), "integer", true, 0);
+        columns[28] = Column("OrigQty", tr("Qty. Orig"), "integer", true, 35);
+        columns[29] = Column("OrigQtyDiff", tr("Qty. Diff"), "integer", true, 35);
+        columns[30] = Column("OrigPrice", tr("Pr. Orig"), "double", true, 53);
+        columns[31] = Column("OrigPriceDiff", tr("Pr. Diff"), "double", true, 53);
+        sortColumn = 2;
+        sortOrder = Qt::AscendingOrder;
+        break;
     case Tables::categories:
         sqlTable = "categories";
         columns[0] = Column("category_id", tr("ID"), "integer", false, 50);
@@ -23,11 +60,7 @@ TableModel::TableModel(Tables table, QString tableName)
         sortOrder = Qt::AscendingOrder;
         break;
     case Tables::orderitem:
-    case Tables::brickstock:
-        if (table == Tables::orderitem)
-            sqlTable = "orderitem" + tableName;
-        else
-            sqlTable = tableName;
+        sqlTable = "orderitem" + tableName;
         columns[0] = Column("inventory_id", tr("ID"), "integer", false, 80);                        // The ID of the inventory that includes the item
         columns[1] = Column("item_no", tr("Part #"), "varchar", true, 100);                         // Item's identification number in BL catalog
         columns[2] = Column("item_name", tr("Name"), "varchar", true, 300);                         // The name of the item
@@ -139,6 +172,19 @@ Qt::SortOrder TableModel::getSortOrder() {
 QSqlError TableModel::initiateSqlTable() {
     QString queryString;
     queryString = "CREATE TABLE " + getSqlTableName() + "(" + columns[0].property.sqlName + " " + columns[0].property.sqlType + " PRIMARY KEY" ;
+    for(int i = 1; i < getNumberOfColumns(); i++) {
+        queryString += ", " + columns[i].property.sqlName + " " + columns[i].property.sqlType;
+    }
+    queryString += ")";
+    QSqlQuery q;
+    if (!q.exec(queryString))
+        return q.lastError();
+    return QSqlError();
+}
+
+QSqlError TableModel::initiateSqlTableAuto() {
+    QString queryString;
+    queryString = "CREATE TABLE " + getSqlTableName() + "(id INTEGER PRIMARY KEY AUTOINCREMENT" ;
     for(int i = 1; i < getNumberOfColumns(); i++) {
         queryString += ", " + columns[i].property.sqlName + " " + columns[i].property.sqlType;
     }

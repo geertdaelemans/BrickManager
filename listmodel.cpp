@@ -24,8 +24,12 @@ ListModel::ListModel(QWidget *parent, TableModel *tableModel) :
 
     // Set database relations
     int colorIdx = model->fieldIndex("color_id");
+    if(colorIdx == -1)
+        colorIdx = model->fieldIndex("ColorID");
     model->setRelation(colorIdx, QSqlRelation("colors", "color_id", "color_name"));
     int categoryIdx = model->fieldIndex("category_id");
+    if(categoryIdx == -1)
+        categoryIdx = model->fieldIndex("CategoryID");
     model->setRelation(categoryIdx, QSqlRelation("categories", "category_id", "category_name"));
 
     // Set proxy model to enable sorting columns:
