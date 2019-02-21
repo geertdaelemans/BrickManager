@@ -203,7 +203,9 @@ void MainWindow::on_actionOpen_triggered()
                 // Read Name and value
                 while (!field.isNull()) {
                     fields[field.tagName()] = field.firstChild().toText().data();
-
+                    if (fields[field.tagName()].isNull()) {
+                        fields[field.tagName()] = QVariant(1);
+                    }
                     // Next field
                     field = field.nextSibling().toElement();
                 }
