@@ -72,9 +72,9 @@ ListModel::~ListModel()
 void ListModel::slotCustomMenuRequested(const QPoint pos) {
     QMenu *p_popUpMenu = new QMenu(this);
 
-     // Configuration tab including order and visibility
-     p_popUpMenu->addAction(new QAction("Configure", this));
-     p_popUpMenu->addSeparator();
+    // TODO: Configuration tab including order and visibility
+    //p_popUpMenu->addAction(new QAction("Configure", this));
+    //p_popUpMenu->addSeparator();
 
     // List all possible fields and select visibility
     for (int i = 0; i < p_dataModel->getNumberOfColumns(); i++) {

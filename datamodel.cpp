@@ -39,6 +39,9 @@ DataModel::DataModel(Tables table, QString tableName)
         columns[29] = Column("OrigQtyDiff", tr("Qty. Diff"), "integer", true, 35);
         columns[30] = Column("OrigPrice", tr("Pr. Orig"), "double", true, 53);
         columns[31] = Column("OrigPriceDiff", tr("Pr. Diff"), "double", true, 53);
+        columns[32] = Column("CategoryName", tr("Category Name"), "varchar", false, 77);    // Extra's should be ignored
+        columns[33] = Column("ColorName", tr("Color Name"), "varchar", false, 95);          // Extra's should be ignored
+        columns[34] = Column("ItemTypeID", tr("Item Type ID"), "varchar", false, 35);       // Extra's should be ignored
         sortColumn = 2;
         sortOrder = Qt::AscendingOrder;
         break;
