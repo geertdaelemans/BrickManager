@@ -211,6 +211,15 @@ void MainWindow::on_actionOpen_triggered()
                 }
             }
 
+            // Set original quantity to current quantity, if not already set
+            if (!fields["OrigQty"].isValid())
+                fields["OrigQty"] = fields["Qty"];
+
+            // Set original unit price to current unit price, if not already set
+            if (!fields["OrigPrice"].isValid())
+                fields["OrigPrice"] = fields["Price"];
+
+            // Add collected fields to SQL database
             QSqlError error = p_dataModel->addItemToTable(fields);
 
             // Next sibling

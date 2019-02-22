@@ -11,17 +11,19 @@ class Column
 {
 public:
     struct Properties {
-        QString sqlName;
         QString name;
+        QString importName;
+        QString displayName;
         QString sqlType;
         bool visible;
         int columnWidth;
     };
     Properties property;
     Column() {}
-    Column(QString sqlName, QString name, QString sqlType = "varchar", bool visible = false, int columnWidth = 20) {
-        property.sqlName = sqlName;
+    Column(QString name, QString sqlName, QString displayName, QString sqlType = "varchar", bool visible = false, int columnWidth = 20) {
         property.name = name;
+        property.importName = sqlName;
+        property.displayName = displayName;
         property.sqlType = sqlType;
         property.visible = visible;
         property.columnWidth = columnWidth;
