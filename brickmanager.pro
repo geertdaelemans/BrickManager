@@ -12,7 +12,8 @@ HEADERS += \
     listmodel.h \
     listmodeldelegate.h \
     generictablemodel.h \
-    datamodel.h
+    datamodel.h \
+    checkboxdelegate.h
 
 SOURCES += \
     main.cpp \
@@ -25,7 +26,8 @@ SOURCES += \
     simplepopup.cpp \
     listmodeldelegate.cpp \
     generictablemodel.cpp \
-    datamodel.cpp
+    datamodel.cpp \
+    checkboxdelegate.cpp
 
 FORMS += \
     mainwindow.ui \

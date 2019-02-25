@@ -13,7 +13,7 @@ DataModel::DataModel(Tables table, QString tableName)
         columns[3] = Column("ItemID", "ItemID", tr("Part #"), "varchar", true, 65);
         columns[4] = Column("ItemName", "ItemName", tr("Description"), "varchar", true, 173);
         columns[5] = Column("Condition", "Condition", tr("Cond."), "varchar", true, 35);
-        columns[6] = Column("ColorID", "ColorID", tr("Color"), "integer", true, 95);
+        columns[6] = Column("color_id", "ColorID", tr("Color"), "integer", true, 95);
         columns[7] = Column("quantity", "Qty", tr("Qty."), "integer", true, 35);
         columns[8] = Column("unit_price", "Price", tr("Price"), "double", true, 53);
         columns[9] = Column("total", "Total", tr("Total"), "double", true, 53);
@@ -21,7 +21,7 @@ DataModel::DataModel(Tables table, QString tableName)
         columns[11] = Column("Sale", "Sale", tr("Sale"), "integer", true, 35);
         columns[12] = Column("Comments", "Comments", tr("Comments"), "varchar", true, 53);
         columns[13] = Column("Remarks", "Remarks", tr("Remarks"), "varchar", true, 53);
-        columns[14] = Column("CategoryID", "CategoryID", tr("Category"), "integer", true, 77);
+        columns[14] = Column("category_id", "CategoryID", tr("Category"), "integer", true, 77);
         columns[15] = Column("ItemTypeName", "ItemTypeName", tr("Item Type"), "varchar", true, 77);
         columns[16] = Column("TQ1", "TQ1", tr("Tier Q1"), "integer", true, 35);
         columns[17] = Column("TP1", "TP1", tr("Tier P1"), "double", true, 53);
@@ -35,10 +35,10 @@ DataModel::DataModel(Tables table, QString tableName)
         columns[25] = Column("Reserved", "Reserved", tr("Reserved"), "varchar", true, 21);
         columns[26] = Column("TotalWeight", "TotalWeight", tr("Weight"), "double", true, 21);
         columns[27] = Column("Year", "Year", tr("Year"), "integer", true, 21);
-        columns[28] = Column("OrigQty", "OrigQty", tr("Qty. Orig"), "integer", true, 35);
-        columns[29] = Column("OrigQtyDiff", "OrigQtyDiff", tr("Qty. Diff"), "integer", true, 35);
-        columns[30] = Column("OrigPrice", "OrigPrice", tr("Pr. Orig"), "double", true, 53);
-        columns[31] = Column("OrigPriceDiff", "OrigPriceDiff", tr("Pr. Diff"), "double", true, 53);
+        columns[28] = Column("orig_qty", "OrigQty", tr("Qty. Orig"), "integer", true, 35);
+        columns[29] = Column("orig_qty_diff", "OrigQtyDiff", tr("Qty. Diff"), "integer", true, 35);
+        columns[30] = Column("orig_price", "OrigPrice", tr("Pr. Orig"), "double", true, 53);
+        columns[31] = Column("orig_price_diff", "OrigPriceDiff", tr("Pr. Diff"), "double", true, 53);
         columns[32] = Column("CategoryName", "CategoryName", tr("Category Name"), "varchar", false, 77);    // Extra's should be ignored
         columns[33] = Column("ColorName", "ColorName", tr("Color Name"), "varchar", false, 95);             // Extra's should be ignored
         columns[34] = Column("ItemTypeID", "ItemTypeID", tr("Item Type ID"), "varchar", false, 35);         // Extra's should be ignored

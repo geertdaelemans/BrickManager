@@ -2,6 +2,7 @@
 #include "ui_categories.h"
 #include "bricklink.h"
 #include "listmodeldelegate.h"
+#include "checkboxdelegate.h"
 
 #include <QtWidgets>
 
@@ -24,12 +25,8 @@ ListModel::ListModel(QWidget *parent, DataModel *tableModel) :
 
     // Set database relations
     int colorIdx = model->fieldIndex("color_id");
-    if(colorIdx == -1)
-        colorIdx = model->fieldIndex("ColorID");
     model->setRelation(colorIdx, QSqlRelation("colors", "color_id", "color_name"));
     int categoryIdx = model->fieldIndex("category_id");
-    if(categoryIdx == -1)
-        categoryIdx = model->fieldIndex("CategoryID");
     model->setRelation(categoryIdx, QSqlRelation("categories", "category_id", "category_name"));
 
     // Set proxy model to enable sorting columns:
@@ -49,6 +46,8 @@ ListModel::ListModel(QWidget *parent, DataModel *tableModel) :
     // Apply delegates
     QItemDelegate *delegate = new ListModelDelegate(this);
     ui->tableView->setItemDelegate(delegate);
+    ui->tableView->setItemDelegateForColumn( model->fieldIndex("is_retain"), new DELEGATE::CheckBoxDelegate( this ) );
+    ui->tableView->setItemDelegateForColumn( model->fieldIndex("is_stock_room"), new DELEGATE::CheckBoxDelegate( this ) );
 
     // Connect SLOT to context menu
     connect(ui->tableView->horizontalHeader(), SIGNAL(customContextMenuRequested(QPoint)), SLOT(slotCustomMenuRequested(QPoint)));

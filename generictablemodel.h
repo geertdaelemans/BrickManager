@@ -7,8 +7,9 @@
 class GenericTableModel : public QSqlRelationalTableModel
 {
 public:
-    GenericTableModel(QObject *parent = nullptr, QSqlDatabase db = QSqlDatabase());
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    GenericTableModel(QObject * = nullptr, QSqlDatabase = QSqlDatabase());
+    QVariant data(const QModelIndex &, int = Qt::DisplayRole) const override;
+    Qt::ItemFlags flags(const QModelIndex &) const override;
 };
 
 #endif // GENERICTABLEMODEL_H

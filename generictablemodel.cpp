@@ -6,6 +6,23 @@ GenericTableModel::GenericTableModel(QObject *parent, QSqlDatabase db)
 
 }
 
+Qt::ItemFlags GenericTableModel::flags(const QModelIndex &index) const
+{
+    // Prohibit certain columns to be edited
+    auto flags = QSqlTableModel::flags(index);
+    if(index.column() == fieldIndex("id") ||
+       index.column() == fieldIndex("total") ||
+       index.column() == fieldIndex("orig_qty") ||
+       index.column() == fieldIndex("orig_qty_diff") ||
+       index.column() == fieldIndex("orig_price") ||
+       index.column() == fieldIndex("orig_price_diff") ||
+       index.column() == fieldIndex("is_retain") ||
+       index.column() == fieldIndex("is_stock_room")) {
+       flags &= Qt::ItemIsEditable;
+    }
+    return flags;
+}
+
 QVariant GenericTableModel::data(const QModelIndex &index, int role) const
 {
     if (role == Qt::DisplayRole){
@@ -23,30 +40,25 @@ QVariant GenericTableModel::data(const QModelIndex &index, int role) const
         }
 
         // Calculate quantity difference
-        if(index.column() == fieldIndex("OrigQtyDiff")) {
+        if(index.column() == fieldIndex("orig_qty_diff")) {
             int quantity = data(this->index(index.row(),fieldIndex("quantity"))).toInt();
-            int originalQuantity = data(this->index(index.row(),fieldIndex("OrigQty"))).toInt();
+            int originalQuantity = data(this->index(index.row(),fieldIndex("orig_qty"))).toInt();
             return QVariant(quantity - originalQuantity);
         }
 
         // Calculate price difference
-        if(index.column() == fieldIndex("OrigPriceDiff")) {
+        if(index.column() == fieldIndex("orig_price_diff")) {
             double price = data(this->index(index.row(),fieldIndex("unit_price"))).toDouble();
-            double originalPrice = data(this->index(index.row(),fieldIndex("OrigPrice"))).toDouble();
+            double originalPrice = data(this->index(index.row(),fieldIndex("orig_price"))).toDouble();
             return QVariant(price - originalPrice);
         }
-
-//        // Insert checkboxes for boolean values
-//        if((index.column() == fieldIndex("is_retain")) || (index.column() == fieldIndex("is_stock_room"))) {
-//            return QVariant("");
-//        }
 
     }
 
     if (role == Qt::BackgroundRole) {
 
         // Calculate quantity difference
-        if(index.column() == fieldIndex("OrigQtyDiff")) {
+        if(index.column() == fieldIndex("orig_qty_diff")) {
             int difference = data(index, Qt::DisplayRole).toInt();
             if(difference > 0)
                 return QColor(171, 248, 171);
@@ -55,26 +67,13 @@ QVariant GenericTableModel::data(const QModelIndex &index, int role) const
         }
 
         // Calculate price difference
-        if(index.column() == fieldIndex("OrigPriceDiff")) {
+        if(index.column() == fieldIndex("orig_price_diff")) {
             double difference = data(index, Qt::DisplayRole).toDouble();
             if(difference > 0.0)
                 return QColor(171, 248, 171);
             else if(difference < 0)
                 return QColor(255, 178, 178);
         }
-    }
-
-    if (role == Qt::CheckStateRole) {
-
-        // Insert checkboxes for boolean values
-        if((index.column() == fieldIndex("is_retain")) || (index.column() == fieldIndex("is_stock_room"))) {
-            bool aBool = data(index, Qt::DisplayRole).toBool();
-            if (aBool)
-                    return Qt::Checked;
-            else
-                    return Qt::Unchecked;
-        }
-
     }
 
     return QSqlTableModel::data(index, role);
