@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>images/22x22/file_new.png</file>
+        <file>images/22x22/file_exit.png</file>
+        <file>images/22x22/file_open.png</file>
+        <file>images/22x22/file_import.png</file>
+    </qresource>
+</RCC>

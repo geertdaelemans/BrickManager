@@ -62,11 +62,22 @@
     <property name="title">
      <string>File</string>
     </property>
+    <widget class="QMenu" name="menuImport">
+     <property name="title">
+      <string>Import</string>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normalon>:/icons/images/22x22/file_import.png</normalon>
+      </iconset>
+     </property>
+     <addaction name="actionOrders"/>
+     <addaction name="actionMy_Inventory"/>
+    </widget>
+    <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
     <addaction name="separator"/>
-    <addaction name="actionOrders"/>
-    <addaction name="separator"/>
-    <addaction name="actionMy_Inventory"/>
+    <addaction name="menuImport"/>
     <addaction name="separator"/>
     <addaction name="actionColors"/>
     <addaction name="actionCategories"/>
@@ -91,12 +102,32 @@
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionNew"/>
+   <addaction name="actionOpen"/>
+  </widget>
   <action name="actionOrders">
    <property name="text">
-    <string>Orders</string>
+    <string>BrickLink Order...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I, Ctrl+O</string>
    </property>
   </action>
   <action name="actionExit">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/icons/images/22x22/file_exit.png</normaloff>:/icons/images/22x22/file_exit.png</iconset>
+   </property>
    <property name="text">
     <string>Exit</string>
    </property>
@@ -131,15 +162,39 @@
   </action>
   <action name="actionMy_Inventory">
    <property name="text">
-    <string>My Inventory</string>
+    <string>BrickLink Store Inventory...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I, Ctrl+S</string>
    </property>
   </action>
   <action name="actionOpen">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/icons/images/22x22/file_open.png</normaloff>:/icons/images/22x22/file_open.png</iconset>
+   </property>
    <property name="text">
     <string>Open...</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionNew">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/icons/images/22x22/file_new.png</normaloff>:/icons/images/22x22/file_new.png</iconset>
+   </property>
+   <property name="text">
+    <string>New</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="images.qrc"/>
+ </resources>
  <connections/>
 </ui>

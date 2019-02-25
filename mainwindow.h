@@ -38,6 +38,8 @@ private slots:
     void on_actionMy_Inventory_triggered();
     void on_actionColors_triggered();
 
+    void on_actionNew_triggered();
+
 private:
     Ui::MainWindow *ui;
     QList<QString> tabs;

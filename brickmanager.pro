@@ -41,3 +41,6 @@ DISTFILES += \
     README.md \
     LICENSE
 
+RESOURCES += \
+    images.qrc
+

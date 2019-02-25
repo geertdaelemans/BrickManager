@@ -68,10 +68,25 @@ int MainWindow::addTab(QWidget *page, const QString &label)
  */
 void MainWindow::removeTab(int index)
 {
-    qDebug() << "Remove tab" << index << ui->tabWidget->tabText(index);
     tabs.removeAll(ui->tabWidget->tabText(index));
     ui->tabWidget->removeTab(index);
 }
+
+
+void MainWindow::on_actionNew_triggered()
+{
+    // Prepare data model
+    QString sqlTableName = "Untitled";
+    DataModel *p_dataModel = new DataModel(Tables::brickstock, sqlTableName);
+    p_dataModel->initiateSqlTableAuto();
+
+    // Prepare list view
+    listModel = new ListModel(this, p_dataModel);
+
+    // Add tab
+    addTab(listModel, sqlTableName);
+}
+
 
 void MainWindow::on_actionOrders_triggered()
 {
@@ -255,3 +270,4 @@ void MainWindow::on_actionOpen_triggered()
         addTab(listModel, tableName);
     }
 }
+
