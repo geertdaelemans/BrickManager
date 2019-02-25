@@ -20,6 +20,8 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    int addTab(QWidget *page, const QString &label);
+    void removeTab(int index);
 
 public slots:
     void openInventoryTab(QList<QString>);

@@ -31,6 +31,47 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+/**
+ * Adds tab to the tabWidget, left most position. If tab already
+ * exists, activate that tab.
+ *
+ * @param page Pointer to widget to be displayed.
+ * @param label Pointer to label string of tab.
+ * @return tab id of the added tab.
+ */
+int MainWindow::addTab(QWidget *page, const QString &label)
+{
+    int numberOfTabs = ui->tabWidget->count();
+    int tabNumber = -1;     // -1 means nothing found
+    // Search for tab with same name
+    for(int i = 0; i < numberOfTabs; i++) {
+        if (ui->tabWidget->tabText(i) == label) {
+            tabNumber = i;
+            break;
+        }
+    }
+    // If no tab found, add new tab in leftmost position.
+    if(tabNumber == -1) {
+        tabNumber = ui->tabWidget->insertTab(0, page, label);
+        tabs.append(label);
+    }
+    // Activate current tab
+    ui->tabWidget->setCurrentIndex(tabNumber);
+    return tabNumber;
+}
+
+/**
+ * Removes tab from tabWidget.
+ *
+ * @param index Index of tab to be removed.
+ * @return nothing.
+ */
+void MainWindow::removeTab(int index)
+{
+    qDebug() << "Remove tab" << index << ui->tabWidget->tabText(index);
+    tabs.removeAll(ui->tabWidget->tabText(index));
+    ui->tabWidget->removeTab(index);
+}
 
 void MainWindow::on_actionOrders_triggered()
 {
@@ -66,15 +107,7 @@ void MainWindow::on_actionMy_Inventory_triggered()
     DataModel *p_dataModel = new DataModel(Tables::userinventories);
     listModel = new ListModel(this, p_dataModel);
     QString header = "My Inventory";
-    int numberOfTabs = ui->tabWidget->count();
-    if(tabs.indexOf(header) == -1)
-    {
-        ui->tabWidget->addTab(listModel, header);
-        ui->tabWidget->setCurrentIndex(numberOfTabs);
-        tabs.append(header);
-    } else {
-        ui->tabWidget->setCurrentIndex(tabs.indexOf(header));
-    }
+    addTab(listModel, header);
 }
 
 void MainWindow::on_actionColors_triggered()
@@ -116,8 +149,7 @@ void MainWindow::on_actionAboutQt_triggered()
 
 void MainWindow::on_tabWidget_tabCloseRequested(int index)
 {
-    ui->tabWidget->removeTab(index);
-    tabs.removeAt(index);
+    removeTab(index);
 }
 
 void MainWindow::openInventoryTab(QList<QString> orderIDs)
@@ -129,33 +161,27 @@ void MainWindow::openInventoryTab(QList<QString> orderIDs)
     }
     foreach(QString orderID, orderIDs)
     {
-        int numberOfTabs = ui->tabWidget->count();
-        if(tabs.indexOf("Order#" + orderID) == -1)
-        {
-            // Import User Inventory through the BrickLink class
-            bricklink.importOrderItem(orderID.toInt());
+        // Import User Inventory through the BrickLink class
+        bricklink.importOrderItem(orderID.toInt());
 
-            // Show Downloading... message
-            SimplePopup *p_popup = new SimplePopup(this);
-            p_popup->move(this->width()/2-p_popup->width()/2, this->height()/2-p_popup->height()/2);
-            p_popup->show();
+        // Show Downloading... message
+        SimplePopup *p_popup = new SimplePopup(this);
+        p_popup->move(this->width()/2-p_popup->width()/2, this->height()/2-p_popup->height()/2);
+        p_popup->show();
 
-            // Wait for confirmation that data has been loaded in SQL database
-            QEventLoop loop;
-            connect(&bricklink, SIGNAL(dataBaseUpdated()), &loop, SLOT(quit()));
-            //connect(&bricklink, &BrickLink::dataBaseUpdated, &loop, &QEventLoop::quit);
-            loop.exec();
+        // Wait for confirmation that data has been loaded in SQL database
+        QEventLoop loop;
+        connect(&bricklink, SIGNAL(dataBaseUpdated()), &loop, SLOT(quit()));
+        //connect(&bricklink, &BrickLink::dataBaseUpdated, &loop, &QEventLoop::quit);
+        loop.exec();
 
-            // Hide message box
-            p_popup->hide();
+        // Hide message box
+        p_popup->hide();
 
-
-            // Prepare list
-            DataModel *p_dataModel = new DataModel(Tables::orderitem, orderID);
-            ListModel *inv = new ListModel(this, p_dataModel);
-            ui->tabWidget->addTab(inv, "Order#" + orderID);
-            ui->tabWidget->setCurrentIndex(numberOfTabs);
-        }
+        // Prepare list
+        DataModel *p_dataModel = new DataModel(Tables::orderitem, orderID);
+        ListModel *inv = new ListModel(this, p_dataModel);
+        addTab(inv, "Order#" + orderID);
     }
     ordersDialog->close();
 }
@@ -226,6 +252,6 @@ void MainWindow::on_actionOpen_triggered()
             item = item.nextSibling().toElement();
         }
         listModel = new ListModel(this, p_dataModel);
-        ui->tabWidget->addTab(listModel, tableName);
+        addTab(listModel, tableName);
     }
 }
