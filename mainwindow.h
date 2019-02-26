@@ -27,20 +27,17 @@ public slots:
     void openInventoryTab(QList<QString>);
 
 private slots:
+    void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionOrders_triggered();
+    void on_actionMy_Inventory_triggered();
     void on_actionExit_triggered();
+    void on_actionAdd_Items_triggered();
+    void on_actionSettings_triggered();
     void on_actionAbout_triggered();
     void on_actionAboutQt_triggered();
+
     void on_tabWidget_tabCloseRequested(int index);
-    void on_actionSettings_triggered();
-    void on_actionCategories_triggered();
-    void on_actionMy_Inventory_triggered();
-    void on_actionColors_triggered();
-
-    void on_actionNew_triggered();
-
-    void on_actionAdd_Items_triggered();
 
 private:
     Ui::MainWindow *ui;

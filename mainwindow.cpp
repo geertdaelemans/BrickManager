@@ -238,29 +238,6 @@ void MainWindow::on_actionOpen_triggered()
 }
 
 
-void MainWindow::on_actionColors_triggered()
-{
-    DataModel *p_dataModel = new DataModel(Tables::colors);
-    listModel = new ListModel(this, p_dataModel);
-    listModel->exec();
-}
-
-
-void MainWindow::on_actionCategories_triggered()
-{
-    DataModel *p_dataModel = new DataModel(Tables::categories);
-    listModel = new ListModel(this, p_dataModel);
-    listModel->exec();
-}
-
-
-void MainWindow::on_actionSettings_triggered()
-{
-    settingsDialog = new SettingsDialog(this);
-    settingsDialog->exec();
-}
-
-
 void MainWindow::on_actionExit_triggered()
 {
     QCoreApplication::quit();
@@ -275,6 +252,17 @@ void MainWindow::on_actionAdd_Items_triggered()
 {
     AddItemDialog *addItemDialog = new AddItemDialog();
     addItemDialog->exec();
+}
+
+
+/**
+ * @brief MainWindow Extra's Menu
+ */
+
+void MainWindow::on_actionSettings_triggered()
+{
+    settingsDialog = new SettingsDialog(this);
+    settingsDialog->exec();
 }
 
 

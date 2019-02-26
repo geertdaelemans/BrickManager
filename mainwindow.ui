@@ -79,8 +79,6 @@
     <addaction name="separator"/>
     <addaction name="menuImport"/>
     <addaction name="separator"/>
-    <addaction name="actionColors"/>
-    <addaction name="actionCategories"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -157,16 +155,6 @@
   <action name="actionSettings">
    <property name="text">
     <string>Settings...</string>
-   </property>
-  </action>
-  <action name="actionCategories">
-   <property name="text">
-    <string>Categories</string>
-   </property>
-  </action>
-  <action name="actionColors">
-   <property name="text">
-    <string>Colors</string>
    </property>
   </action>
   <action name="actionMy_Inventory">
