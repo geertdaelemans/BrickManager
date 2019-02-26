@@ -13,7 +13,8 @@ HEADERS += \
     listmodeldelegate.h \
     generictablemodel.h \
     datamodel.h \
-    checkboxdelegate.h
+    checkboxdelegate.h \
+    additemdialog.h
 
 SOURCES += \
     main.cpp \
@@ -27,7 +28,8 @@ SOURCES += \
     listmodeldelegate.cpp \
     generictablemodel.cpp \
     datamodel.cpp \
-    checkboxdelegate.cpp
+    checkboxdelegate.cpp \
+    additemdialog.cpp
 
 FORMS += \
     mainwindow.ui \
@@ -35,7 +37,8 @@ FORMS += \
     inventory.ui \
     settingsdialog.ui \
     simplepopup.ui \
-    listmodel.ui
+    listmodel.ui \
+    additemdialog.ui
 
 DISTFILES += \
     README.md \

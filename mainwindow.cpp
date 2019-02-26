@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "ordersdialog.h"
 #include "settingsdialog.h"
+#include "additemdialog.h"
 #include "sqldatabase.h"
 #include "listmodel.h"
 #include "datamodel.h"
@@ -73,6 +74,11 @@ void MainWindow::removeTab(int index)
 }
 
 
+/**
+ * @brief MainWindow File Menu
+ */
+
+
 void MainWindow::on_actionNew_triggered()
 {
     // Prepare data model
@@ -125,47 +131,6 @@ void MainWindow::on_actionMy_Inventory_triggered()
     addTab(listModel, header);
 }
 
-void MainWindow::on_actionColors_triggered()
-{
-    DataModel *p_dataModel = new DataModel(Tables::colors);
-    listModel = new ListModel(this, p_dataModel);
-    listModel->exec();
-}
-
-void MainWindow::on_actionCategories_triggered()
-{
-    DataModel *p_dataModel = new DataModel(Tables::categories);
-    listModel = new ListModel(this, p_dataModel);
-    listModel->exec();
-}
-
-void MainWindow::on_actionSettings_triggered()
-{
-    settingsDialog = new SettingsDialog(this);
-
-    settingsDialog->exec();
-}
-
-void MainWindow::on_actionExit_triggered()
-{
-    QCoreApplication::quit();
-}
-
-void MainWindow::on_actionAbout_triggered()
-{
-    QMessageBox::about(this, tr("About Brick Manager"),
-            tr("<p>The <b>Brick Manager</b> application is being developed by Geert Daelemans.</p>"));
-}
-
-void MainWindow::on_actionAboutQt_triggered()
-{
-    QApplication::aboutQt();
-}
-
-void MainWindow::on_tabWidget_tabCloseRequested(int index)
-{
-    removeTab(index);
-}
 
 void MainWindow::openInventoryTab(QList<QString> orderIDs)
 {
@@ -200,6 +165,7 @@ void MainWindow::openInventoryTab(QList<QString> orderIDs)
     }
     ordersDialog->close();
 }
+
 
 void MainWindow::on_actionOpen_triggered()
 {
@@ -271,3 +237,63 @@ void MainWindow::on_actionOpen_triggered()
     }
 }
 
+
+void MainWindow::on_actionColors_triggered()
+{
+    DataModel *p_dataModel = new DataModel(Tables::colors);
+    listModel = new ListModel(this, p_dataModel);
+    listModel->exec();
+}
+
+
+void MainWindow::on_actionCategories_triggered()
+{
+    DataModel *p_dataModel = new DataModel(Tables::categories);
+    listModel = new ListModel(this, p_dataModel);
+    listModel->exec();
+}
+
+
+void MainWindow::on_actionSettings_triggered()
+{
+    settingsDialog = new SettingsDialog(this);
+    settingsDialog->exec();
+}
+
+
+void MainWindow::on_actionExit_triggered()
+{
+    QCoreApplication::quit();
+}
+
+
+/**
+ * @brief MainWindow Edit Menu
+ */
+
+void MainWindow::on_actionAdd_Items_triggered()
+{
+    AddItemDialog *addItemDialog = new AddItemDialog();
+    addItemDialog->exec();
+}
+
+
+/**
+ * @brief MainWindow Help Menu
+ */
+
+void MainWindow::on_actionAbout_triggered()
+{
+    QMessageBox::about(this, tr("About Brick Manager"),
+            tr("<p>The <b>Brick Manager</b> application is being developed by Geert Daelemans.</p>"));
+}
+
+void MainWindow::on_actionAboutQt_triggered()
+{
+    QApplication::aboutQt();
+}
+
+void MainWindow::on_tabWidget_tabCloseRequested(int index)
+{
+    removeTab(index);
+}

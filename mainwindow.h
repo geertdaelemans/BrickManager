@@ -40,6 +40,8 @@ private slots:
 
     void on_actionNew_triggered();
 
+    void on_actionAdd_Items_triggered();
+
 private:
     Ui::MainWindow *ui;
     QList<QString> tabs;

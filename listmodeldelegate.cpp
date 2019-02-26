@@ -28,13 +28,13 @@ void ListModelDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
         QRect colorBox = option.rect;
         colorBox.setWidth(colorBox.height());
         QRect textBox = option.rect;
-        textBox.translate(option.rect.height() + 8, 8);
-        textBox.setWidth(textBox.width() - option.rect.height() - 8);
+        textBox.translate(option.rect.height() + option.rect.height()/5, 0);
+        textBox.setWidth(textBox.width() - option.rect.height() - option.rect.height()/5);
         QString colorName = model->data(index, Qt::DisplayRole).toString();
         QString colorCode = "#" + SqlDatabase::getColorCodeByName(colorName);
         color.setNamedColor(colorCode);
         painter->fillRect(colorBox, color);
-        painter->drawText(textBox, Qt::TextSingleLine, colorName);
+        painter->drawText(textBox, Qt::TextSingleLine | Qt::AlignVCenter, colorName);
     } else
         QSqlRelationalDelegate::paint(painter, option, index);
 }
