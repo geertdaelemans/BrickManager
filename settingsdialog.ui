@@ -19,7 +19,7 @@
      <item>
       <widget class="QTabWidget" name="tabWidget">
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="General">
         <attribute name="title">
@@ -70,44 +70,62 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
-          <widget class="QLabel" name="lblConsumerKey">
-           <property name="text">
-            <string>Consumer Key</string>
+          <widget class="QGroupBox" name="ConsumerBox">
+           <property name="title">
+            <string>Consumer</string>
            </property>
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <item>
+             <widget class="QLabel" name="lblConsumerKey">
+              <property name="text">
+               <string>Key</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="consumerKey"/>
+            </item>
+            <item>
+             <widget class="QLabel" name="lblConsumerSecret">
+              <property name="text">
+               <string>Secret</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="consumerSecret"/>
+            </item>
+           </layout>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="consumerKey"/>
-         </item>
-         <item>
-          <widget class="QLabel" name="lblConsumerSecret">
-           <property name="text">
-            <string>Consumer Secret</string>
+          <widget class="QGroupBox" name="groupBox_3">
+           <property name="title">
+            <string>Token</string>
            </property>
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item>
+             <widget class="QLabel" name="lblTokenValue">
+              <property name="text">
+               <string>Value</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="tokenValue"/>
+            </item>
+            <item>
+             <widget class="QLabel" name="lblTokenSecret">
+              <property name="text">
+               <string>Secret</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="tokenSecret"/>
+            </item>
+           </layout>
           </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="consumerSecret"/>
-         </item>
-         <item>
-          <widget class="QLabel" name="lblTokenValue">
-           <property name="text">
-            <string>Token Value</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="tokenValue"/>
-         </item>
-         <item>
-          <widget class="QLabel" name="lblTokenSecret">
-           <property name="text">
-            <string>Token Secret</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="tokenSecret"/>
          </item>
          <item>
           <widget class="QPushButton" name="btnCheckConnection">

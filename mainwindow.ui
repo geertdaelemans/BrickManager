@@ -55,7 +55,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -93,6 +93,8 @@
     <property name="title">
      <string>Extras</string>
     </property>
+    <addaction name="actionUpdate_Database"/>
+    <addaction name="separator"/>
     <addaction name="actionSettings"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
@@ -153,8 +155,12 @@
    </property>
   </action>
   <action name="actionSettings">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/icons/images/22x22/extras_configure.png</normaloff>:/icons/images/22x22/extras_configure.png</iconset>
+   </property>
    <property name="text">
-    <string>Settings...</string>
+    <string>Configure...</string>
    </property>
   </action>
   <action name="actionMy_Inventory">
@@ -199,6 +205,15 @@
    </property>
    <property name="shortcut">
     <string>Ins</string>
+   </property>
+  </action>
+  <action name="actionUpdate_Database">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/icons/images/22x22/extras_update_database.png</normaloff>:/icons/images/22x22/extras_update_database.png</iconset>
+   </property>
+   <property name="text">
+    <string>Update Database</string>
    </property>
   </action>
  </widget>
