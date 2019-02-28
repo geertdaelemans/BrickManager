@@ -15,17 +15,27 @@ AddItemDialog::AddItemDialog(QWidget *parent) :
     DataModel *colorsDataModel = new DataModel(Tables::colors);
     DataModel *categoriesDataModel = new DataModel(Tables::categories);
 
-    QSqlRelationalTableModel *colorsModel = new QSqlRelationalTableModel(ui->colorsListView);
+    QSqlTableModel *colorsModel = new QSqlTableModel(ui->colorsListView);
     colorsModel->setTable(colorsDataModel->getSqlTableName());
-    QSqlRelationalTableModel *categoriesModel = new QSqlRelationalTableModel(ui->categoriesListView);
+
+    // Set filter to include BrickArm and/or Modulex colors
+    QSettings settings;
+    if(!settings.value("filter/includeBrickArmsColors").toBool() && !settings.value("filter/includeModulexColors").toBool()) {
+        colorsModel->setFilter(QString("color_type NOT LIKE '%%1%' AND color_type NOT LIKE '%%2%'").arg("BrickArms").arg("Modulex"));
+    } else if(!settings.value("filter/includeBrickArmsColors").toBool()) {
+        colorsModel->setFilter(QString("color_type NOT LIKE '%%1%'").arg("BrickArms"));
+    } else if(!settings.value("filter/includeModulexColors").toBool()) {
+        colorsModel->setFilter(QString("color_type NOT LIKE '%%1%'").arg("Modulex"));
+    }
+
+    // Set table source
+    QSqlTableModel *categoriesModel = new QSqlTableModel(ui->categoriesListView);
     categoriesModel->setTable(categoriesDataModel->getSqlTableName());
 
     // Set database relations
-    int colorIdx = colorsModel->fieldIndex("color_id");
-    colorsModel->setRelation(colorIdx, QSqlRelation("colors", "color_id", "color_name"));
+    int colorIdx = colorsModel->fieldIndex("color_name");
     colorsModel->setHeaderData(colorIdx, Qt::Horizontal, "Color");
-    int categoryIdx = categoriesModel->fieldIndex("category_id");
-    categoriesModel->setRelation(categoryIdx, QSqlRelation("categories", "category_id", "category_name"));
+    int categoryIdx = categoriesModel->fieldIndex("category_name");
 
     // Set proxy model to enable sorting columns
     QSortFilterProxyModel *colorsProxyModel = new QSortFilterProxyModel(this);

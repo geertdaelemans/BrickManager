@@ -14,12 +14,14 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 
     ui->setupUi(this);
 
+    QSettings settings;
+
     // GENERAL panel
-    ui->lblGeneral->setText("No General Settings yet...");
+    ui->checkBoxBrickArms->setChecked(settings.value("filter/includeBrickArmsColors").toBool());
+    ui->checkBoxModulex->setChecked(settings.value("filter/includeModulexColors").toBool());
 
     // CONNECTION panel
     // Retrieve OAuth1 credentials
-    QSettings settings;
     ui->consumerKey->setText(settings.value("credentials/consumerKey").toString());
     ui->consumerSecret->setText(settings.value("credentials/consumerSecret").toString());
     ui->tokenValue->setText(settings.value("credentials/tokenValue").toString());
@@ -36,6 +38,8 @@ SettingsDialog::~SettingsDialog()
 void SettingsDialog::on_buttonBox_accepted()
 {
     QSettings settings;
+    settings.setValue("filter/includeBrickArmsColors", ui->checkBoxBrickArms->checkState());
+    settings.setValue("filter/includeModulexColors", ui->checkBoxModulex->checkState());
     settings.setValue("credentials/consumerKey", ui->consumerKey->text());
     settings.setValue("credentials/consumerSecret", ui->consumerSecret->text());
     settings.setValue("credentials/tokenValue", ui->tokenValue->text());
