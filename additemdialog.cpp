@@ -54,3 +54,15 @@ AddItemDialog::~AddItemDialog()
 {
     delete ui;
 }
+
+void AddItemDialog::on_pushButton_clicked()
+{
+    QList<QString> fields;
+    QModelIndex categoryIndex = ui->categoriesListView->currentIndex();
+    QString categoryText = categoryIndex.data(Qt::DisplayRole).toString();
+    QModelIndex colorIndex = ui->colorsListView->currentIndex();
+    QString colorText = colorIndex.data(Qt::DisplayRole).toString();
+    fields.append(categoryText);
+    fields.append(colorText);
+    emit insertItem(fields);
+}

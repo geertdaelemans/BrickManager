@@ -4,7 +4,7 @@
 #include <QtSql>
 
 
-class GenericTableModel : public QSqlRelationalTableModel
+class GenericTableModel : public QSqlTableModel
 {
 public:
     GenericTableModel(QObject * = nullptr, QSqlDatabase = QSqlDatabase());

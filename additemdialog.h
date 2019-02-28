@@ -15,6 +15,12 @@ public:
     explicit AddItemDialog(QWidget *parent = nullptr);
     ~AddItemDialog();
 
+private slots:
+    void on_pushButton_clicked();
+
+signals:
+    void insertItem(QList<QString> fields);
+
 private:
     Ui::AddItemDialog *ui;
 };

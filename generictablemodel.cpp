@@ -1,7 +1,7 @@
 #include "generictablemodel.h"
 
 GenericTableModel::GenericTableModel(QObject *parent, QSqlDatabase db)
-    : QSqlRelationalTableModel(parent, db)
+    : QSqlTableModel(parent, db)
 {
 
 }

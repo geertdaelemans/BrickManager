@@ -13,7 +13,7 @@ DataModel::DataModel(Tables table, QString tableName)
         columns[3] = Column("ItemID", "ItemID", tr("Part #"), "varchar", true, 65);
         columns[4] = Column("ItemName", "ItemName", tr("Description"), "varchar", true, 173);
         columns[5] = Column("Condition", "Condition", tr("Cond."), "varchar", true, 35);
-        columns[6] = Column("color_id", "ColorID", tr("Color"), "integer", true, 95);
+        columns[6] = Column("color_name", "ColorName", tr("Color"), "integer", true, 95);
         columns[7] = Column("quantity", "Qty", tr("Qty."), "integer", true, 35);
         columns[8] = Column("unit_price", "Price", tr("Price"), "double", true, 53);
         columns[9] = Column("total", "Total", tr("Total"), "double", true, 53);
@@ -21,7 +21,7 @@ DataModel::DataModel(Tables table, QString tableName)
         columns[11] = Column("Sale", "Sale", tr("Sale"), "integer", true, 35);
         columns[12] = Column("Comments", "Comments", tr("Comments"), "varchar", true, 53);
         columns[13] = Column("Remarks", "Remarks", tr("Remarks"), "varchar", true, 53);
-        columns[14] = Column("category_id", "CategoryID", tr("Category"), "integer", true, 77);
+        columns[14] = Column("category_name", "CategoryName", tr("Category"), "integer", true, 77);
         columns[15] = Column("ItemTypeName", "ItemTypeName", tr("Item Type"), "varchar", true, 77);
         columns[16] = Column("TQ1", "TQ1", tr("Tier Q1"), "integer", true, 35);
         columns[17] = Column("TP1", "TP1", tr("Tier P1"), "double", true, 53);
@@ -39,8 +39,8 @@ DataModel::DataModel(Tables table, QString tableName)
         columns[29] = Column("orig_qty_diff", "OrigQtyDiff", tr("Qty. Diff"), "integer", true, 35);
         columns[30] = Column("orig_price", "OrigPrice", tr("Pr. Orig"), "double", true, 53);
         columns[31] = Column("orig_price_diff", "OrigPriceDiff", tr("Pr. Diff"), "double", true, 53);
-        columns[32] = Column("CategoryName", "CategoryName", tr("Category Name"), "varchar", false, 77);    // Extra's should be ignored
-        columns[33] = Column("ColorName", "ColorName", tr("Color Name"), "varchar", false, 95);             // Extra's should be ignored
+        columns[32] = Column("category_id", "CategoryID", tr("Category ID"), "varchar", false, 77);    // Extra's should be ignored
+        columns[33] = Column("color_id", "ColorID", tr("Color ID"), "varchar", false, 95);             // Extra's should be ignored
         columns[34] = Column("ItemTypeID", "ItemTypeID", tr("Item Type ID"), "varchar", false, 35);         // Extra's should be ignored
         sortColumn = 2;
         sortOrder = Qt::AscendingOrder;
@@ -68,8 +68,8 @@ DataModel::DataModel(Tables table, QString tableName)
         columns[1] = Column("item_no", "item_no", tr("Part #"), "varchar", true, 100);                                  // Item's identification number in BL catalog
         columns[2] = Column("item_name", "item_name", tr("Name"), "varchar", true, 300);                                // The name of the item
         columns[3] = Column("item_type", "item_type", tr("Type"), "varchar", false, 80);                                // The type of the item	MINIFIG, PART, SET, BOOK, GEAR, CATALOG, INSTRUCTION, UNSORTED_LOT, ORIGINAL_BOX
-        columns[4] = Column("category_id", "category_id", tr("Category"), "integer", true, 300);                        // The main category of the item
-        columns[5] = Column("color_id", "color_id", tr("Color"), "integer", true, 200);                                 // The ID of the color of the item
+        columns[4] = Column("category_name", "category_name", tr("Category"), "varchar", true, 300);                    // [NOT IN API] Name of the category
+        columns[5] = Column("color_name", "color_name", tr("Color"), "varchar", true, 200);                             // Color name of the item
         columns[6] = Column("quantity", "quantity", tr("Qty."), "integer", true, 50);                                   // The number of items purchased in this order
         columns[7] = Column("new_or_used", "new_or_used", tr("Cond."), "varchar", true, 50);                            // Indicates whether the item is new or used	N: New, U: Used
         columns[8] = Column("completeness", "completeness", tr("Comp."), "varchar", false, 50);                         // Indicates whether the set is complete or incomplete (This value is valid only for SET type)	C: Complete, B: Incomplete, S: Sealed
@@ -83,6 +83,8 @@ DataModel::DataModel(Tables table, QString tableName)
         columns[16] = Column("description", "description", tr("Description"), "varchar", true, 200);                    // User description of the order item
         columns[17] = Column("weight", "weight", tr("Weight"), "double",	true, 100);                                 // The weight of the item that overrides the catalog weight	Upcoming feature
         columns[18] = Column("batchnumber", "batchnumber", tr("Batch"), "integer", false, 50);                          // The number of batch containing the items
+        columns[19] = Column("color_id", "color_id", tr("Color ID"), "integer", false, 50);                             // The ID of the color of the item
+        columns[20] = Column("category_id", "category_id", tr("Category ID"), "integer", true, 50);                     // The main category of the item
         sortColumn = 2;
         sortOrder = Qt::AscendingOrder;
         break;
@@ -112,8 +114,8 @@ DataModel::DataModel(Tables table, QString tableName)
         columns[1] = Column("item_no", "item_no", tr("Part #"), "varchar", true, 100);
         columns[2] = Column("item_name", "item_name", tr("Name"), "varchar", true, 300);
         columns[3] = Column("item_type", "item_type", tr("Type"), "varchar", false, 80);
-        columns[4] = Column("category_id", "category_id", tr("Category"), "integer", true, 300);
-        columns[5] = Column("color_id", "color_id", tr("Color"), "integer", true, 200);
+        columns[4] = Column("category_name", "category_name", tr("Category"), "integer", true, 300);
+        columns[5] = Column("color_name", "color_name", tr("Color"), "varchar", true, 200);
         columns[6] = Column("quantity", "quantity", tr("Qty."), "integer", true, 50);
         columns[7] = Column("new_or_used", "new_or_used", tr("Cond."), "varchar", true, 50);
         columns[8] = Column("completeness", "completeness", tr("Comp."), "varchar", false, 50);
@@ -134,6 +136,8 @@ DataModel::DataModel(Tables table, QString tableName)
         columns[23] = Column("tier_quantity3", "tier_quantity3", tr("Tier Q3"), "integer", false, 50);
         columns[24] = Column("tier_price3", "tier_price3", tr("Tier P3"), "double", false, 50);
         columns[25] = Column("my_weight", "my_weight", tr("My Weight"), "double", false, 50);
+        columns[26] = Column("color_id", "color_id", tr("Color ID"), "integer", false, 50);
+        columns[27] = Column("category_id", "category_id", tr("Category ID"), "integer", false, 50);
         sortColumn = 2;
         sortOrder = Qt::AscendingOrder;
         break;

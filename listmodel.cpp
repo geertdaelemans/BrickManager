@@ -23,12 +23,6 @@ ListModel::ListModel(QWidget *parent, DataModel *tableModel) :
         model->setHeaderData(i, Qt::Horizontal, p_dataModel->getColumnHeader(i));
     }
 
-    // Set database relations
-    int colorIdx = model->fieldIndex("color_id");
-    model->setRelation(colorIdx, QSqlRelation("colors", "color_id", "color_name"));
-    int categoryIdx = model->fieldIndex("category_id");
-    model->setRelation(categoryIdx, QSqlRelation("categories", "category_id", "category_name"));
-
     // Set proxy model to enable sorting columns:
     proxyModel = new QSortFilterProxyModel(this);
     proxyModel->setSourceModel(model);
@@ -103,4 +97,21 @@ void ListModel::showError(const QSqlError &err)
 {
     QMessageBox::critical(this, "Unable to initialize Database",
                 "Error initializing database: " + err.text());
+}
+
+bool ListModel::insertRow(QList<QString> fields)
+{
+    int colorIdx = model->fieldIndex("color_name");
+    int categoryIdx = model->fieldIndex("category_name");
+
+    bool reply = model->insertRow(0);
+    model->setData(model->index(0, colorIdx), fields[1]);
+    model->setData(model->index(0, categoryIdx), fields[0]);
+
+    // Submits all pending changes and returns detailed error information if this fails.
+    if (!model->submitAll()) {
+        qDebug() << model->lastError();
+    }
+
+    return reply;
 }

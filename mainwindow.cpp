@@ -40,7 +40,7 @@ MainWindow::~MainWindow()
  * @param label Pointer to label string of tab.
  * @return tab id of the added tab.
  */
-int MainWindow::addTab(QWidget *page, const QString &label)
+int MainWindow::addTab(ListModel *page, const QString &label)
 {
     int numberOfTabs = ui->tabWidget->count();
     int tabNumber = -1;     // -1 means nothing found
@@ -54,7 +54,7 @@ int MainWindow::addTab(QWidget *page, const QString &label)
     // If no tab found, add new tab in leftmost position.
     if(tabNumber == -1) {
         tabNumber = ui->tabWidget->insertTab(0, page, label);
-        tabs.append(label);
+        tabList[label] = page;
     }
     // Activate current tab
     ui->tabWidget->setCurrentIndex(tabNumber);
@@ -69,7 +69,7 @@ int MainWindow::addTab(QWidget *page, const QString &label)
  */
 void MainWindow::removeTab(int index)
 {
-    tabs.removeAll(ui->tabWidget->tabText(index));
+    tabList.remove(ui->tabWidget->tabText(index));
     ui->tabWidget->removeTab(index);
 }
 
@@ -87,7 +87,7 @@ void MainWindow::on_actionNew_triggered()
     p_dataModel->initiateSqlTableAuto();
 
     // Prepare list view
-    listModel = new ListModel(this, p_dataModel);
+    ListModel *listModel = new ListModel(this, p_dataModel);
 
     // Add tab
     addTab(listModel, sqlTableName);
@@ -126,21 +126,20 @@ void MainWindow::on_actionMy_Inventory_triggered()
 
     // Prepare list
     DataModel *p_dataModel = new DataModel(Tables::userinventories);
-    listModel = new ListModel(this, p_dataModel);
+    ListModel *listModel = new ListModel(this, p_dataModel);
     QString header = "My Inventory";
     addTab(listModel, header);
 }
 
+void MainWindow::insertItemIntoSheet(QList<QString> fields)
+{
+    ListModel *model = tabList[ui->tabWidget->tabText(ui->tabWidget->currentIndex())];
+    model->insertRow(fields);
+}
 
 void MainWindow::openInventoryTab(QList<QString> orderIDs)
 {
-    int numberOfTabs = ui->tabWidget->count();
-    for(int i = 0; i < numberOfTabs; i++)
-    {
-        tabs.append(ui->tabWidget->tabText(i));
-    }
-    foreach(QString orderID, orderIDs)
-    {
+    foreach(QString orderID, orderIDs) {
         // Import User Inventory through the BrickLink class
         bricklink.importOrderItem(orderID.toInt());
 
@@ -161,7 +160,9 @@ void MainWindow::openInventoryTab(QList<QString> orderIDs)
         // Prepare list
         DataModel *p_dataModel = new DataModel(Tables::orderitem, orderID);
         ListModel *inv = new ListModel(this, p_dataModel);
-        addTab(inv, "Order#" + orderID);
+        const QString tabName = "Order#" + orderID;
+        tabList[tabName] = inv;
+        addTab(inv, tabName);
     }
     ordersDialog->close();
 }
@@ -232,7 +233,7 @@ void MainWindow::on_actionOpen_triggered()
             // Next sibling
             item = item.nextSibling().toElement();
         }
-        listModel = new ListModel(this, p_dataModel);
+        ListModel *listModel = new ListModel(this, p_dataModel);
         addTab(listModel, tableName);
     }
 }
@@ -250,7 +251,8 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionAdd_Items_triggered()
 {
-    AddItemDialog *addItemDialog = new AddItemDialog();
+    AddItemDialog *addItemDialog = new AddItemDialog(this);
+    QObject::connect(addItemDialog, SIGNAL(insertItem(QList<QString>)), this, SLOT(insertItemIntoSheet(QList<QString>)));
     addItemDialog->exec();
 }
 

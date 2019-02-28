@@ -153,7 +153,9 @@ void BrickLink::parseJsonOrderItem(int orderID)
             fields["item_name"] = object.value("item").toObject().value("name").toVariant();
             fields["item_type"] = object.value("item").toObject().value("type").toVariant();
             fields["category_id"] = object.value("item").toObject().value("category_id").toVariant();
+            fields["category_name"] = SqlDatabase::getCategoryById(fields["category_id"].toInt());
             fields["color_id"] = object.value("color_id").toVariant();
+            fields["color_name"] = object.value("color_name").toVariant();
             fields["quantity"] = object.value("quantity").toVariant();
             fields["new_or_used"] = object.value("new_or_used").toVariant();
             fields["completeness"] = object.value("completeness").toVariant();
@@ -219,7 +221,9 @@ void BrickLink::parseJsonUserInventory()
             fields["item_name"] = object.value("item").toObject().value("name").toVariant();
             fields["item_type"] = object.value("item").toObject().value("type").toVariant();
             fields["category_id"] = object.value("item").toObject().value("category_id").toVariant();
+            fields["category_name"] = SqlDatabase::getCategoryById(fields["category_id"].toInt());
             fields["color_id"] = object.value("color_id").toVariant();
+            fields["color_name"] = object.value("color_name").toVariant();
             fields["quantity"] = object.value("quantity").toVariant();
             fields["new_or_used"] = object.value("new_or_used").toVariant();
             fields["completeness"] = object.value("completeness").toVariant();

@@ -20,11 +20,12 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    int addTab(QWidget *page, const QString &label);
+    int addTab(ListModel *page, const QString &label);
     void removeTab(int index);
 
 public slots:
     void openInventoryTab(QList<QString>);
+    void insertItemIntoSheet(QList<QString>);
 
 private slots:
     void on_actionNew_triggered();
@@ -41,10 +42,9 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QList<QString> tabs;
     OrdersDialog *ordersDialog;
     SettingsDialog *settingsDialog;
-    ListModel *listModel;
+    QMap<QString, ListModel*> tabList;
     BrickLink bricklink;
 };
 
