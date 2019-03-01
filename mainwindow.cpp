@@ -267,6 +267,63 @@ void MainWindow::on_actionSettings_triggered()
     settingsDialog->exec();
 }
 
+void MainWindow::on_actionUpdate_Database_triggered()
+{
+    QFile file(":/test/testdata/Parts.xml");
+
+    if(!file.open(QIODevice::ReadOnly)) {
+        QMessageBox::information(this, "error", file.errorString());
+        return;
+    }
+
+    // Get file information
+    QFileInfo info(file);
+    QString tableName = info.baseName();
+    QString sqlTableName = tableName;
+    sqlTableName.remove(QRegExp("[^a-zA-Z\\d]"));
+
+    //The QDomDocument class represents an XML document.
+    QDomDocument xmlInventory;
+
+    // Set data into the QDomDocument before processing
+    xmlInventory.setContent(&file);
+    file.close();
+
+    // Extract the root markup
+    QDomElement catalog = xmlInventory.documentElement();
+    QDomElement item = catalog.firstChild().toElement();
+
+    // Prepare data model
+    DataModel *p_dataModel = new DataModel(Tables::parts, sqlTableName);
+    p_dataModel->initiateSqlTableAuto();
+
+    // Read each child of the Inventory node
+    int counter = 0;
+//    while (!item.isNull() && counter < 100) {
+    while (!item.isNull()) {
+
+        // Prepare fields
+        QMap<QString, QVariant> fields;
+        if (item.tagName() == "ITEM") {
+            QDomElement field = item.firstChild().toElement();
+            // Read Name and value
+            while (!field.isNull()) {
+                fields[field.tagName()] = field.firstChild().toText().data();
+                // Next field
+                field = field.nextSibling().toElement();
+            }
+        }
+
+        // Add collected fields to SQL database
+        QSqlError error = p_dataModel->addItemToTable(fields);
+
+        // Next sibling
+        counter++;
+        item = item.nextSibling().toElement();
+    }
+    QMessageBox::information(this, "Database updated", QString("Database updated with %1 parts.").arg(counter));
+}
+
 
 /**
  * @brief MainWindow Help Menu
@@ -287,3 +344,4 @@ void MainWindow::on_tabWidget_tabCloseRequested(int index)
 {
     removeTab(index);
 }
+

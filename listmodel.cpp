@@ -103,10 +103,14 @@ bool ListModel::insertRow(QList<QString> fields)
 {
     int colorIdx = model->fieldIndex("color_name");
     int categoryIdx = model->fieldIndex("category_name");
+    int nameIdx = model->fieldIndex("item_name");
+    int numberIdx = model->fieldIndex("item_no");
 
     bool reply = model->insertRow(0);
     model->setData(model->index(0, colorIdx), fields[1]);
     model->setData(model->index(0, categoryIdx), fields[0]);
+    model->setData(model->index(0, nameIdx), fields[2]);
+    model->setData(model->index(0, numberIdx), fields[3]);
 
     // Submits all pending changes and returns detailed error information if this fails.
     if (!model->submitAll()) {

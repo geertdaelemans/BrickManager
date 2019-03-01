@@ -106,16 +106,22 @@ QSqlError SqlDatabase::initDb()
 
     // Delete previous Order Item tables
     foreach (QString table, tables) {
-        if ((table != "colors") && (table != "categories")) {
+        if ((table != "colors") && (table != "categories") && (table != "parts")) {
             QSqlQuery q;
             q.exec("DROP TABLE IF EXISTS " + table);
         }
     }
 
-    DataModel *catModel = new DataModel(Tables::categories);
-    catModel->initiateSqlTable();
-    DataModel *colModel = new DataModel(Tables::colors);
-    colModel->initiateSqlTable();
+    if (!tables.contains("colors")) {
+        DataModel *catModel = new DataModel(Tables::categories);
+        catModel->initiateSqlTable();
+    }
+
+    if (!tables.contains("categories")) {
+        DataModel *colModel = new DataModel(Tables::colors);
+        colModel->initiateSqlTable();
+    }
+
     DataModel *userInvModel = new DataModel(Tables::userinventories);
     userInvModel->initiateSqlTable();
 

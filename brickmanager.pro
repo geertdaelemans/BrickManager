@@ -45,5 +45,6 @@ DISTFILES += \
     LICENSE
 
 RESOURCES += \
-    images.qrc
+    images.qrc \
+    xml.qrc
 

@@ -37,6 +37,7 @@ enum Tables {
     brickstock,
     orderitem,
     orders,
+    parts,
     userinventories
 };
 

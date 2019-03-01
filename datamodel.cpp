@@ -10,8 +10,8 @@ DataModel::DataModel(Tables table, QString tableName)
         columns[0] = Column("id", "id", tr("ID"), "integer", false, 100);
         columns[1] = Column("Status", "Status", tr("Status"), "varchar", true, 21);
         columns[2] = Column("Image", "Image", tr("Image"), "varchar", true, 45);
-        columns[3] = Column("ItemID", "ItemID", tr("Part #"), "varchar", true, 65);
-        columns[4] = Column("ItemName", "ItemName", tr("Description"), "varchar", true, 173);
+        columns[3] = Column("item_no", "ItemID", tr("Part #"), "varchar", true, 65);
+        columns[4] = Column("item_name", "ItemName", tr("Description"), "varchar", true, 173);
         columns[5] = Column("Condition", "Condition", tr("Cond."), "varchar", true, 35);
         columns[6] = Column("color_name", "ColorName", tr("Color"), "integer", true, 95);
         columns[7] = Column("quantity", "Qty", tr("Qty."), "integer", true, 35);
@@ -105,6 +105,20 @@ DataModel::DataModel(Tables table, QString tableName)
         columns[12] = Column("cost_subtotal", "cost_subtotal", tr("Subtotal"), "double", false, 100);
         columns[13] = Column("cost_grand_total", "cost_grand_total", tr("Total"), "double", false, 100);
         columns[14] = Column("cost_currency_code", "cost_currency_code", tr("Cost Currency"), "varchar", false, 150);
+        sortColumn = 1;
+        sortOrder = Qt::DescendingOrder;
+        break;
+    case Tables::parts:
+        sqlTable = "parts";
+        columns[0] = Column("id", "id", tr("ID"), "integer", false, 100);
+        columns[1] = Column("item_type", "ITEMTYPE", tr("Type"), "varchar", false, 50);
+        columns[2] = Column("item_no", "ITEMID", tr("Part #"), "varchar", true, 100);
+        columns[3] = Column("item_name", "ITEMNAME", tr("Name"), "integer", true, 500);
+        columns[4] = Column("category_id", "CATEGORY", tr("Category ID"), "integer", false, 80);
+        columns[5] = Column("weight", "ITEMWEIGHT", tr("Weight"), "double", false, 80);
+        columns[6] = Column("size_x", "ITEMDIMX", tr("Size X"), "integer", false, 50);
+        columns[7] = Column("size_y", "ITEMDIMY", tr("Size Y"), "integer", false, 50);
+        columns[8] = Column("size_z", "ITEMDIMZ", tr("Size Z"), "integer", false, 50);
         sortColumn = 1;
         sortOrder = Qt::DescendingOrder;
         break;
