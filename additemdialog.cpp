@@ -94,8 +94,3 @@ void AddItemDialog::on_pushButton_clicked()
     fields.append(partsNumber.data(Qt::DisplayRole).toString());
     emit insertItem(fields);
 }
-
-void AddItemDialog::on_buttonBox_accepted()
-{
-    qDebug() << "Check";
-}
