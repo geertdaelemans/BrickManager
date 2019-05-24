@@ -5,6 +5,7 @@
 #include "settingsdialog.h"
 #include "listmodel.h"
 #include "bricklink.h"
+#include "ctransfer.h"
 
 #include <QMainWindow>
 #include <QtSql>
@@ -41,9 +42,11 @@ private slots:
     void on_tabWidget_tabCloseRequested(int index);
 
     void on_actionUpdate_Database_triggered();
+    void updateStatusBar(QString msg, int timeout);
 
 private:
     Ui::MainWindow *ui;
+    CTransfer *m_trans;
     OrdersDialog *ordersDialog;
     SettingsDialog *settingsDialog;
     QMap<QString, ListModel*> tabList;

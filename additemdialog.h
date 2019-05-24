@@ -2,6 +2,7 @@
 #define ADDITEMDIALOG_H
 
 #include <QDialog>
+#include <QtSql>
 
 namespace Ui {
 class AddItemDialog;
@@ -16,13 +17,16 @@ public:
     ~AddItemDialog();
 
 private slots:
-    void on_pushButton_clicked();
+    void on_addPushButton_clicked();
+
+    void on_categoriesListView_clicked(const QModelIndex &index);
 
 signals:
     void insertItem(QList<QString> fields);
 
 private:
     Ui::AddItemDialog *ui;
+    QSqlTableModel *partsModel;
 };
 
 #endif // ADDITEMDIALOG_H

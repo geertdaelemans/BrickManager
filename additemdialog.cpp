@@ -3,8 +3,6 @@
 #include "listmodeldelegate.h"
 #include "ui_additemdialog.h"
 
-#include <QtSql>
-
 AddItemDialog::AddItemDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::AddItemDialog)
@@ -32,14 +30,15 @@ AddItemDialog::AddItemDialog(QWidget *parent) :
     // Set table source
     QSqlTableModel *categoriesModel = new QSqlTableModel(ui->categoriesListView);
     categoriesModel->setTable(categoriesDataModel->getSqlTableName());
-    QSqlTableModel *partsModel = new QSqlTableModel(ui->partsTableView);
+    partsModel = new QSqlTableModel(ui->partsTableView);
     partsModel->setTable(partsDataModel->getSqlTableName());
+    categoriesModel->setFilter("part == 1");
+
 
     // Set database relations
     int colorIdx = colorsModel->fieldIndex("color_name");
     colorsModel->setHeaderData(colorIdx, Qt::Horizontal, "Color");
     int categoryIdx = categoriesModel->fieldIndex("category_name");
-    int partsIdx = partsModel->fieldIndex("item_name");
 
     // Set proxy model to enable sorting columns
     QSortFilterProxyModel *colorsProxyModel = new QSortFilterProxyModel(this);
@@ -80,7 +79,7 @@ AddItemDialog::~AddItemDialog()
     delete ui;
 }
 
-void AddItemDialog::on_pushButton_clicked()
+void AddItemDialog::on_addPushButton_clicked()
 {
     QList<QString> fields;
     const QModelIndex categoryIndex = ui->categoriesListView->currentIndex();
@@ -93,4 +92,12 @@ void AddItemDialog::on_pushButton_clicked()
     fields.append(partsName.data(Qt::DisplayRole).toString());
     fields.append(partsNumber.data(Qt::DisplayRole).toString());
     emit insertItem(fields);
+}
+
+void AddItemDialog::on_categoriesListView_clicked(const QModelIndex &index)
+{
+    const QModelIndex categoryID = index.sibling(index.row(), 0);
+    int selectedCategory = categoryID.data(Qt::DisplayRole).toInt();
+    partsModel->setFilter(QString("category_id == %1").arg(selectedCategory));
+    partsModel->select();
 }

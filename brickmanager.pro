@@ -14,7 +14,11 @@ HEADERS += \
     generictablemodel.h \
     datamodel.h \
     checkboxdelegate.h \
-    additemdialog.h
+    additemdialog.h \
+    progressdialog.h \
+    curllabel.h \
+    lzmadec.h \
+    ctransfer.h
 
 SOURCES += \
     main.cpp \
@@ -29,7 +33,11 @@ SOURCES += \
     generictablemodel.cpp \
     datamodel.cpp \
     checkboxdelegate.cpp \
-    additemdialog.cpp
+    additemdialog.cpp \
+    progressdialog.cpp \
+    curllabel.cpp \
+    lzmadec.c \
+    ctransfer.cpp
 
 FORMS += \
     mainwindow.ui \
@@ -38,7 +46,8 @@ FORMS += \
     settingsdialog.ui \
     simplepopup.ui \
     listmodel.ui \
-    additemdialog.ui
+    additemdialog.ui \
+    progressdialog.ui
 
 DISTFILES += \
     README.md \
@@ -46,5 +55,9 @@ DISTFILES += \
 
 RESOURCES += \
     images.qrc \
-    xml.qrc
+    auth.qrc
 
+unix|win32: LIBS += -L$$PWD/../../libs/curl-7.64.0-win32-mingw/lib/ -llibcurl.dll
+
+INCLUDEPATH += $$PWD/../../libs/curl-7.64.0-win32-mingw/include
+DEPENDPATH += $$PWD/../../libs/curl-7.64.0-win32-mingw/include

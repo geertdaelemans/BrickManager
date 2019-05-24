@@ -21,6 +21,9 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->checkBoxModulex->setChecked(settings.value("filter/includeModulexColors").toBool());
 
     // CONNECTION panel
+    // Retrieve BrickLink Login credentials
+    ui->userName->setText(settings.value("bricklinklogin/userName").toString());
+    ui->passWord->setText(settings.value("bricklinklogin/passWord").toString());
     // Retrieve OAuth1 credentials
     ui->consumerKey->setText(settings.value("credentials/consumerKey").toString());
     ui->consumerSecret->setText(settings.value("credentials/consumerSecret").toString());
@@ -40,6 +43,8 @@ void SettingsDialog::on_buttonBox_accepted()
     QSettings settings;
     settings.setValue("filter/includeBrickArmsColors", ui->checkBoxBrickArms->checkState());
     settings.setValue("filter/includeModulexColors", ui->checkBoxModulex->checkState());
+    settings.setValue("bricklinklogin/userName", ui->userName->text());
+    settings.setValue("bricklinklogin/passWord", ui->passWord->text());
     settings.setValue("credentials/consumerKey", ui->consumerKey->text());
     settings.setValue("credentials/consumerSecret", ui->consumerSecret->text());
     settings.setValue("credentials/tokenValue", ui->tokenValue->text());

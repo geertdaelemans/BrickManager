@@ -10,6 +10,12 @@
     <height>396</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>50</width>
+    <height>0</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>Settings</string>
   </property>
@@ -70,59 +76,155 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
+          <widget class="QGroupBox" name="BrickLinkLogin">
+           <property name="title">
+            <string>BrickLink Login</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_7">
+            <item>
+             <layout class="QHBoxLayout" name="layUsername">
+              <item>
+               <widget class="QLabel" name="lblUsername">
+                <property name="minimumSize">
+                 <size>
+                  <width>50</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Username</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="userName"/>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="layPassword">
+              <item>
+               <widget class="QLabel" name="lblPassword">
+                <property name="minimumSize">
+                 <size>
+                  <width>50</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Password</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="passWord">
+                <property name="inputMethodHints">
+                 <set>Qt::ImhHiddenText|Qt::ImhNoAutoUppercase|Qt::ImhNoPredictiveText|Qt::ImhSensitiveData</set>
+                </property>
+                <property name="echoMode">
+                 <enum>QLineEdit::Password</enum>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
           <widget class="QGroupBox" name="ConsumerBox">
            <property name="title">
             <string>Consumer</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_5">
             <item>
-             <widget class="QLabel" name="lblConsumerKey">
-              <property name="text">
-               <string>Key</string>
-              </property>
-             </widget>
+             <layout class="QHBoxLayout" name="layConsumerKey">
+              <item>
+               <widget class="QLabel" name="lblConsumerKey">
+                <property name="minimumSize">
+                 <size>
+                  <width>50</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Key</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="consumerKey"/>
+              </item>
+             </layout>
             </item>
             <item>
-             <widget class="QLineEdit" name="consumerKey"/>
-            </item>
-            <item>
-             <widget class="QLabel" name="lblConsumerSecret">
-              <property name="text">
-               <string>Secret</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="consumerSecret"/>
+             <layout class="QHBoxLayout" name="layConsumerSecret">
+              <item>
+               <widget class="QLabel" name="lblConsumerSecret">
+                <property name="minimumSize">
+                 <size>
+                  <width>50</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Secret</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="consumerSecret"/>
+              </item>
+             </layout>
             </item>
            </layout>
           </widget>
          </item>
          <item>
-          <widget class="QGroupBox" name="groupBox_3">
+          <widget class="QGroupBox" name="TokenBox">
            <property name="title">
             <string>Token</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_6">
             <item>
-             <widget class="QLabel" name="lblTokenValue">
-              <property name="text">
-               <string>Value</string>
-              </property>
-             </widget>
+             <layout class="QHBoxLayout" name="layTokenValue">
+              <item>
+               <widget class="QLabel" name="lblTokenValue">
+                <property name="minimumSize">
+                 <size>
+                  <width>50</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Value</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="tokenValue"/>
+              </item>
+             </layout>
             </item>
             <item>
-             <widget class="QLineEdit" name="tokenValue"/>
-            </item>
-            <item>
-             <widget class="QLabel" name="lblTokenSecret">
-              <property name="text">
-               <string>Secret</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="tokenSecret"/>
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+               <widget class="QLabel" name="lblTokenSecret">
+                <property name="minimumSize">
+                 <size>
+                  <width>50</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Secret</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="tokenSecret"/>
+              </item>
+             </layout>
             </item>
            </layout>
           </widget>

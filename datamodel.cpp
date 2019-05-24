@@ -50,6 +50,7 @@ DataModel::DataModel(Tables table, QString tableName)
         columns[0] = Column("category_id", "category_id", tr("ID"), "integer", false, 50);
         columns[1] = Column("category_name", "category_name", tr("Name"), "varchar", true, 300);
         columns[2] = Column("parent_id", "parent_id", tr("Parent"), "integer", false, 80);
+        columns[3] = Column("part", "part", tr("Part"), "bool", false, 50);
         sortColumn = 1;
         sortOrder = Qt::AscendingOrder;
         break;
@@ -115,10 +116,11 @@ DataModel::DataModel(Tables table, QString tableName)
         columns[2] = Column("item_no", "ITEMID", tr("Part #"), "varchar", true, 100);
         columns[3] = Column("item_name", "ITEMNAME", tr("Name"), "integer", true, 500);
         columns[4] = Column("category_id", "CATEGORY", tr("Category ID"), "integer", false, 80);
-        columns[5] = Column("weight", "ITEMWEIGHT", tr("Weight"), "double", false, 80);
-        columns[6] = Column("size_x", "ITEMDIMX", tr("Size X"), "integer", false, 50);
-        columns[7] = Column("size_y", "ITEMDIMY", tr("Size Y"), "integer", false, 50);
-        columns[8] = Column("size_z", "ITEMDIMZ", tr("Size Z"), "integer", false, 50);
+        columns[5] = Column("year", "ITEMYEAR", tr("Year"), "integer", false, 80);
+        columns[6] = Column("weight", "ITEMWEIGHT", tr("Weight"), "double", false, 80);
+        columns[7] = Column("size_x", "ITEMDIMX", tr("Size X"), "integer", false, 50);
+        columns[8] = Column("size_y", "ITEMDIMY", tr("Size Y"), "integer", false, 50);
+        columns[9] = Column("size_z", "ITEMDIMZ", tr("Size Z"), "integer", false, 50);
         sortColumn = 1;
         sortOrder = Qt::DescendingOrder;
         break;

@@ -19,6 +19,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->tabWidget->clear();
 
+    m_trans = new CTransfer();
+    connect(m_trans, SIGNAL(updateStatusBar(QString, int)), this, SLOT(updateStatusBar(QString, int)));
+    m_trans->init();
+
     SqlDatabase mydB = SqlDatabase();
 
     bricklink.importColors();
@@ -33,6 +37,8 @@ MainWindow::~MainWindow()
 }
 
 /**
+ * @brief adds a tab to the main window
+ *
  * Adds tab to the tabWidget, left most position. If tab already
  * exists, activate that tab.
  *
@@ -61,8 +67,24 @@ int MainWindow::addTab(ListModel *page, const QString &label)
     return tabNumber;
 }
 
+
 /**
- * Removes tab from tabWidget.
+ * @brief Display messages in statusbar
+ *
+ * Hides the normal status indications and displays the given message for the
+ * specified number of milli-seconds (timeout). If timeout is 0 (default), the
+ * message remains displayed until the next message.
+ *
+ * @param msg - Message to be displayed
+ * @param timeout - Time in ms, 0 for continuous
+ */
+void MainWindow::updateStatusBar(QString msg, int timeout) {
+    ui->statusbar->showMessage(msg, timeout);
+}
+
+
+/**
+ * @brief Remove tab from tabWidget.
  *
  * @param index Index of tab to be removed.
  * @return nothing.
@@ -269,59 +291,11 @@ void MainWindow::on_actionSettings_triggered()
 
 void MainWindow::on_actionUpdate_Database_triggered()
 {
-    QFile file(":/test/testdata/Parts.xml");
+    m_trans->brickLinkLogin();
 
-    if(!file.open(QIODevice::ReadOnly)) {
-        QMessageBox::information(this, "error", file.errorString());
-        return;
-    }
-
-    // Get file information
-    QFileInfo info(file);
-    QString tableName = info.baseName();
-    QString sqlTableName = tableName;
-    sqlTableName.remove(QRegExp("[^a-zA-Z\\d]"));
-
-    //The QDomDocument class represents an XML document.
-    QDomDocument xmlInventory;
-
-    // Set data into the QDomDocument before processing
-    xmlInventory.setContent(&file);
-    file.close();
-
-    // Extract the root markup
-    QDomElement catalog = xmlInventory.documentElement();
-    QDomElement item = catalog.firstChild().toElement();
-
-    // Prepare data model
-    DataModel *p_dataModel = new DataModel(Tables::parts, sqlTableName);
-    p_dataModel->initiateSqlTableAuto();
-
-    // Read each child of the Inventory node
-    int counter = 0;
-//    while (!item.isNull() && counter < 100) {
-    while (!item.isNull()) {
-
-        // Prepare fields
-        QMap<QString, QVariant> fields;
-        if (item.tagName() == "ITEM") {
-            QDomElement field = item.firstChild().toElement();
-            // Read Name and value
-            while (!field.isNull()) {
-                fields[field.tagName()] = field.firstChild().toText().data();
-                // Next field
-                field = field.nextSibling().toElement();
-            }
-        }
-
-        // Add collected fields to SQL database
-        QSqlError error = p_dataModel->addItemToTable(fields);
-
-        // Next sibling
-        counter++;
-        item = item.nextSibling().toElement();
-    }
-    QMessageBox::information(this, "Database updated", QString("Database updated with %1 parts.").arg(counter));
+    ProgressDialog *pd = new ProgressDialog(this);
+    m_trans->importCatalog(pd);
+    pd->exec();
 }
 
 

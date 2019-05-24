@@ -96,8 +96,8 @@ QString SqlDatabase::getCategoryById(int category_id)
 QSqlError SqlDatabase::initDb()
 {
     db = QSqlDatabase::addDatabase("QSQLITE");
-//    db.setDatabaseName("./database.db");
-    db.setDatabaseName(":memory:");
+    db.setDatabaseName("./database.db");
+//    db.setDatabaseName(":memory:");
 
     if (!db.open())
         return db.lastError();
@@ -112,12 +112,12 @@ QSqlError SqlDatabase::initDb()
         }
     }
 
-    if (!tables.contains("colors")) {
+    if (!tables.contains("categories")) {
         DataModel *catModel = new DataModel(Tables::categories);
         catModel->initiateSqlTable();
     }
 
-    if (!tables.contains("categories")) {
+    if (!tables.contains("colors")) {
         DataModel *colModel = new DataModel(Tables::colors);
         colModel->initiateSqlTable();
     }
