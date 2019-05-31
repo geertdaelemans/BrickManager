@@ -9,10 +9,26 @@ AddItemDialog::AddItemDialog(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // Populate Item Types
+    ui->w_item_types_label->setText(tr("Item types:"));
+    ui->w_item_types->addItem("Book", 'B');
+    ui->w_item_types->addItem("Catalog", 'C');
+    ui->w_item_types->addItem("Gear", 'G');
+    ui->w_item_types->addItem("Instruction", 'I');
+    ui->w_item_types->addItem("Minifig", 'M');
+    ui->w_item_types->addItem("Original box", 'O');
+    ui->w_item_types->addItem("Parts", 'P');
+    ui->w_item_types->addItem("Set", 'S');
+    ui->w_item_types->setCurrentIndex(6);
+
+    connect(ui->w_item_types, SIGNAL(currentTextChanged(QString)), this, SLOT(updateCategories(QString)));
+
+    updateCategories();
+
     // Create the data models
     DataModel *colorsDataModel = new DataModel(Tables::colors);
-    DataModel *categoriesDataModel = new DataModel(Tables::categories);
-    DataModel *partsDataModel = new DataModel(Tables::parts);
+//    DataModel *categoriesDataModel = new DataModel(Tables::categories);
+//    DataModel *partsDataModel = new DataModel(Tables::parts, category);
 
     QSqlTableModel *colorsModel = new QSqlTableModel(ui->colorsListView);
     colorsModel->setTable(colorsDataModel->getSqlTableName());
@@ -27,23 +43,95 @@ AddItemDialog::AddItemDialog(QWidget *parent) :
         colorsModel->setFilter(QString("color_type NOT LIKE '%%1%'").arg("Modulex"));
     }
 
-    // Set table source
-    QSqlTableModel *categoriesModel = new QSqlTableModel(ui->categoriesListView);
-    categoriesModel->setTable(categoriesDataModel->getSqlTableName());
-    partsModel = new QSqlTableModel(ui->partsTableView);
-    partsModel->setTable(partsDataModel->getSqlTableName());
-    categoriesModel->setFilter("part == 1");
+//    // Set table source
+//    QSqlTableModel *categoriesModel = new QSqlTableModel(ui->categoriesListView);
+//    categoriesModel->setTable(categoriesDataModel->getSqlTableName());
+//    qDebug() << "categoriesDataModel" << categoriesDataModel->getSqlTableName();
+//    partsModel = new QSqlTableModel(ui->partsTableView);
+//    partsModel->setTable(partsDataModel->getSqlTableName());
+//    qDebug() << "partsDataModel" << partsDataModel->getSqlTableName();
+//    categoriesModel->setFilter(category + " == 1");
 
 
     // Set database relations
     int colorIdx = colorsModel->fieldIndex("color_name");
     colorsModel->setHeaderData(colorIdx, Qt::Horizontal, "Color");
-    int categoryIdx = categoriesModel->fieldIndex("category_name");
+//    int categoryIdx = categoriesModel->fieldIndex("category_name");
 
     // Set proxy model to enable sorting columns
     QSortFilterProxyModel *colorsProxyModel = new QSortFilterProxyModel(this);
     colorsProxyModel->setSourceModel(colorsModel);
     colorsProxyModel->sort(colorsDataModel->getSortColumn(), colorsDataModel->getSortOrder());
+//    QSortFilterProxyModel *categoriesProxyModel = new QSortFilterProxyModel(this);
+//    categoriesProxyModel->setSourceModel(categoriesModel);
+//    categoriesProxyModel->sort(categoriesDataModel->getSortColumn(), categoriesDataModel->getSortOrder());
+//    QSortFilterProxyModel *partsProxyModel = new QSortFilterProxyModel(this);
+//    partsProxyModel->setSourceModel(partsModel);
+//    partsProxyModel->sort(partsDataModel->getSortColumn(), partsDataModel->getSortOrder());
+
+    // Design the model
+    ui->colorsListView->setModel(colorsProxyModel);
+    ui->colorsListView->setModelColumn(colorIdx);
+//    ui->categoriesListView->setModel(categoriesProxyModel);
+//    ui->categoriesListView->setModelColumn(categoryIdx);
+//    ui->partsTableView->setModel(partsProxyModel);
+
+//    for(int i = 0; i < 9; i++) {
+//        ui->partsTableView->setColumnHidden(i, !partsDataModel->isColumnVisible(i));
+//        partsModel->setHeaderData(i, Qt::Horizontal, partsDataModel->getColumnHeader(i));
+//        ui->partsTableView->setColumnWidth(i, partsDataModel->getColumnWidth(i));
+//    }
+
+    // Apply delegates
+    QItemDelegate *delegate = new ListModelDelegate(this);
+    ui->colorsListView->setItemDelegate(delegate);
+    ui->categoriesListView->setItemDelegate(delegate);
+
+    colorsModel->select();
+//    categoriesModel->select();
+//    partsModel->select();
+}
+
+AddItemDialog::~AddItemDialog()
+{
+    delete ui;
+}
+
+void AddItemDialog::updateCategories(QString cat)
+{
+    qDebug() << "input" << cat;
+    QString category;
+    if (cat == "Book")
+        category = "books";
+    else if (cat == "Catalog")
+        category = "catalogs";
+    else if (cat == "Gear")
+        category = "gear";
+    else if (cat == "Instruction")
+        category = "instructions";
+    else if (cat == "Minifig")
+        category = "minifigs";
+    else if (cat == "Original box")
+        category = "boxes";
+    else if (cat == "Set")
+        category = "sets";
+    else
+        category = "parts";
+
+    DataModel *categoriesDataModel = new DataModel(Tables::categories);
+    DataModel *partsDataModel = new DataModel(Tables::parts, category);
+
+    // Set table source
+    QSqlTableModel *categoriesModel = new QSqlTableModel(ui->categoriesListView);
+    categoriesModel->setTable(categoriesDataModel->getSqlTableName());
+    qDebug() << "categoriesDataModel" << categoriesDataModel->getSqlTableName();
+    partsModel = new QSqlTableModel(ui->partsTableView);
+    partsModel->setTable(partsDataModel->getSqlTableName());
+    qDebug() << "partsDataModel" << partsDataModel->getSqlTableName();
+    categoriesModel->setFilter(category + " == 1");
+
+    int categoryIdx = categoriesModel->fieldIndex("category_name");
+
     QSortFilterProxyModel *categoriesProxyModel = new QSortFilterProxyModel(this);
     categoriesProxyModel->setSourceModel(categoriesModel);
     categoriesProxyModel->sort(categoriesDataModel->getSortColumn(), categoriesDataModel->getSortOrder());
@@ -51,9 +139,6 @@ AddItemDialog::AddItemDialog(QWidget *parent) :
     partsProxyModel->setSourceModel(partsModel);
     partsProxyModel->sort(partsDataModel->getSortColumn(), partsDataModel->getSortOrder());
 
-    // Design the model
-    ui->colorsListView->setModel(colorsProxyModel);
-    ui->colorsListView->setModelColumn(colorIdx);
     ui->categoriesListView->setModel(categoriesProxyModel);
     ui->categoriesListView->setModelColumn(categoryIdx);
     ui->partsTableView->setModel(partsProxyModel);
@@ -64,19 +149,8 @@ AddItemDialog::AddItemDialog(QWidget *parent) :
         ui->partsTableView->setColumnWidth(i, partsDataModel->getColumnWidth(i));
     }
 
-    // Apply delegates
-    QItemDelegate *delegate = new ListModelDelegate(this);
-    ui->colorsListView->setItemDelegate(delegate);
-    ui->categoriesListView->setItemDelegate(delegate);
-
-    colorsModel->select();
     categoriesModel->select();
     partsModel->select();
-}
-
-AddItemDialog::~AddItemDialog()
-{
-    delete ui;
 }
 
 void AddItemDialog::on_addPushButton_clicked()

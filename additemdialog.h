@@ -17,6 +17,9 @@ public:
     ~AddItemDialog();
 
 private slots:
+    void updateCategories(QString category = "parts");
+
+private slots:
     void on_addPushButton_clicked();
 
     void on_categoriesListView_clicked(const QModelIndex &index);

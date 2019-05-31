@@ -64,6 +64,11 @@ int MainWindow::addTab(ListModel *page, const QString &label)
     }
     // Activate current tab
     ui->tabWidget->setCurrentIndex(tabNumber);
+
+    // Enable the Add Items menu
+    if (!ui->actionAdd_Items->isEnabled())
+        ui->actionAdd_Items->setEnabled(true);
+
     return tabNumber;
 }
 
@@ -93,6 +98,8 @@ void MainWindow::removeTab(int index)
 {
     tabList.remove(ui->tabWidget->tabText(index));
     ui->tabWidget->removeTab(index);
+    if (ui->tabWidget->count() == 0)
+        ui->actionAdd_Items->setDisabled(true);
 }
 
 

@@ -14,6 +14,7 @@ public:
 
 private:
     QSqlDatabase db;
+    QSqlDatabase db2;
     QSqlError initDb();
 };
 

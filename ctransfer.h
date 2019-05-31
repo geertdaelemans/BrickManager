@@ -42,7 +42,7 @@ public:
         void *userObject ( ) const       { return m_userobject; }
         QDateTime lastModified ( ) const { QDateTime d; d.setTime_t ( m_filetime ); return d; }
         bool notModifiedSince ( ) const  { return m_not_modified; }
-        enum returnType {Login, File, XML, ZIP};
+        enum returnType {Login, File, XML, ZIP, Tab};
         enum httpMethod {Get, Post};
 
     private:
@@ -56,6 +56,7 @@ public:
         QByteArray   m_url;
         QByteArray   m_query;
         QByteArray   m_effective_url;
+        QString      m_name;
         QByteArray * m_data;
         QFile *      m_file;
         QString      m_error;
@@ -116,7 +117,7 @@ protected:
 
 private:
     virtual void run() override;
-    Job *retrieve(Job::httpMethod method, const QByteArray &url, const QMap<QString, QString> &query, Job::returnType returnType, bool tracking = false, time_t ifnewer = 0, QFile *file = nullptr, void *userobject = nullptr, bool high_priority = false);
+    Job *retrieve(Job::httpMethod method, const QByteArray &url, const QMap<QString, QString> &query, Job::returnType returnType, QString name, bool tracking = false, time_t ifnewer = 0, QFile *file = nullptr, void *userobject = nullptr, bool high_priority = false);
     void cancel(Job *j);
     void updateProgress(int delta);
 
@@ -127,6 +128,8 @@ private:
 
     static void lock_curl(CURL * /*handle*/, curl_lock_data /*data*/, curl_lock_access /*access*/, void * /*userptr*/);
     static void unlock_curl(CURL * /*handle*/, curl_lock_data /*data*/, void * /*userptr*/);
+
+    int populateDatabase(QString category, QByteArray* data = nullptr);
 
     QString decompress(const QString &src, const QString &dst);
 

@@ -4,7 +4,7 @@ SqlDatabase::SqlDatabase()
 {
     QSqlError error = initDb();
     if(error.type() != QSqlError::NoError)
-        qDebug() << error.text();
+        qDebug() << "initDb" << error.text();
 }
 
 
@@ -97,16 +97,17 @@ QSqlError SqlDatabase::initDb()
 {
     db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName("./database.db");
-//    db.setDatabaseName(":memory:");
 
     if (!db.open())
         return db.lastError();
 
     QStringList tables = db.tables();
+    qDebug() << "db" << tables;
 
     // Delete previous Order Item tables
     foreach (QString table, tables) {
-        if ((table != "colors") && (table != "categories") && (table != "parts")) {
+        if ((table != "colors") && (table != "categories") && (table != "parts") && (table != "books") && (table != "instructions")
+           && (table != "gear") && (table != "catalogs") && (table != "sets") && (table != "minifigs") && (table != "boxes")) {
             QSqlQuery q;
             q.exec("DROP TABLE IF EXISTS " + table);
         }
@@ -122,8 +123,10 @@ QSqlError SqlDatabase::initDb()
         colModel->initiateSqlTable();
     }
 
-    DataModel *userInvModel = new DataModel(Tables::userinventories);
-    userInvModel->initiateSqlTable();
+    if (!tables.contains("userinventories")) {
+        DataModel *userInvModel = new DataModel(Tables::userinventories);
+        userInvModel->initiateSqlTable();
+    }
 
     return QSqlError();
 }

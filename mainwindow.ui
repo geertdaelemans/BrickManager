@@ -196,6 +196,9 @@
    </property>
   </action>
   <action name="actionAdd_Items">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="images.qrc">
      <normaloff>:/icons/images/22x22/edit_additems.png</normaloff>:/icons/images/22x22/edit_additems.png</iconset>

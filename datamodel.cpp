@@ -50,7 +50,14 @@ DataModel::DataModel(Tables table, QString tableName)
         columns[0] = Column("category_id", "category_id", tr("ID"), "integer", false, 50);
         columns[1] = Column("category_name", "category_name", tr("Name"), "varchar", true, 300);
         columns[2] = Column("parent_id", "parent_id", tr("Parent"), "integer", false, 80);
-        columns[3] = Column("part", "part", tr("Part"), "bool", false, 50);
+        columns[3] = Column("books", "books", tr("Books"), "bool", false, 50);
+        columns[4] = Column("boxes", "boxes", tr("Original Boxes"), "bool", false, 50);
+        columns[5] = Column("catalogs", "catalogs", tr("Catalogs"), "bool", false, 50);
+        columns[6] = Column("gear", "gear", tr("Gear"), "bool", false, 50);
+        columns[7] = Column("instructions", "instructions", tr("Instructions"), "bool", false, 50);
+        columns[8] = Column("minifigs", "minifigs", tr("Minifigs"), "bool", false, 50);
+        columns[9] = Column("parts", "parts", tr("Parts"), "bool", false, 50);
+        columns[10] = Column("sets", "sets", tr("Sets"), "bool", false, 50);
         sortColumn = 1;
         sortOrder = Qt::AscendingOrder;
         break;
@@ -110,7 +117,7 @@ DataModel::DataModel(Tables table, QString tableName)
         sortOrder = Qt::DescendingOrder;
         break;
     case Tables::parts:
-        sqlTable = "parts";
+        sqlTable = tableName;
         columns[0] = Column("id", "id", tr("ID"), "integer", false, 100);
         columns[1] = Column("item_type", "ITEMTYPE", tr("Type"), "varchar", false, 50);
         columns[2] = Column("item_no", "ITEMID", tr("Part #"), "varchar", true, 100);
@@ -197,8 +204,9 @@ QSqlError DataModel::initiateSqlTable() {
         queryString += ", " + columns[i].property.name + " " + columns[i].property.sqlType;
     }
     queryString += ")";
-    QSqlQuery q;
-    if (!q.exec(queryString)) {
+    qDebug() << queryString;
+    QSqlQuery q(queryString);
+    if (!q.exec()) {
         qDebug() << q.lastError();
         return q.lastError();
     }

@@ -126,7 +126,7 @@ QByteArray CTransfer::buildQueryString( const QMap<QString, QString> &kvl)
  * @param high_priority
  * @return CTransfer::Job
  */
-CTransfer::Job *CTransfer::retrieve(Job::httpMethod method, const QByteArray &url, const QMap<QString, QString> &query, Job::returnType returnType, bool tracking, time_t ifnewer, QFile *file, void *userobject, bool high_priority)
+CTransfer::Job *CTransfer::retrieve(Job::httpMethod method, const QByteArray &url, const QMap<QString, QString> &query, Job::returnType returnType, QString name, bool tracking, time_t ifnewer, QFile *file, void *userobject, bool high_priority)
 {
     if(url.isEmpty() || (file && (!file->isOpen() || !file->isWritable())))
         return nullptr;
@@ -141,6 +141,7 @@ CTransfer::Job *CTransfer::retrieve(Job::httpMethod method, const QByteArray &ur
     job->m_query = buildQueryString(query);
     job->m_ifnewer = ifnewer;
 
+    job->m_name = name;
     job->m_data = file ? nullptr : new QByteArray ( );
     job->m_file = file;
     job->m_userobject = userobject;
@@ -497,7 +498,6 @@ size_t CTransfer::write_curl(void *ptr, size_t size, size_t nmemb, void *stream)
         int oldsize = j->m_data->size();
         int newSize = static_cast<int>(size * nmemb);
         that->m_bytesReceived += newSize;
-        qDebug() << "CTransfer::write_curl - size" << oldsize + newSize;
         j->m_data->resize(oldsize + newSize);
         ::memcpy(j->m_data->data() + oldsize, ptr, size * nmemb);
         return size * nmemb;
@@ -620,7 +620,7 @@ void CTransfer::brickLinkLogin(ProgressDialog *pd)
     query["password"] = settings.value("bricklinklogin/passWord").toString();
 
     // Submit the POST request
-    m_job = retrieve(Job::Post, url, query, Job::Login);
+    m_job = retrieve(Job::Post, url, query, Job::Login, "login");
 }
 
 
@@ -641,7 +641,7 @@ void CTransfer::importCatalog(ProgressDialog *pd)
     const char *url = "https://www.bricklink.com/catalogDownload.asp";
 
     char typeCode[] = {'S', 'P', 'M', 'B', 'G', 'C', 'I', 'O'};
-    QString typeName[] = {"Sets", "Parts", "Minifigs", "Books", "Gear", "Catalogs", "Instructions", "Boxes"};
+    QString typeName[] = {"sets", "parts", "minifigs", "books", "gear", "catalogs", "instructions", "boxes"};
 
     QMap<QString, QString> query;
     query["viewType"] = "0";            // 0: Catalog Items, 1: Item Types, 2: Categories, 3: Colors, 4: Inventory, 5: Part and Color Codes
@@ -651,21 +651,30 @@ void CTransfer::importCatalog(ProgressDialog *pd)
     query["selDim"] = "Y";              // Include Dimensions
     query["itemTypeInv"] = "S";         // S: Set, P: Part, M: Minifig, B: Book, G: Gear
     query["itemNo"] = "";               // Item number
-    query["downloadType"] = "X";        // T: Tab-Delimited File, X: XML
+//    query["downloadType"] = "X";        // T: Tab-Delimited File, X: XML
+    query["downloadType"] = "T";        // T: Tab-Delimited File, X: XML
     QDateTime dt;
 
-    if (!QDir("database/").exists())
-        QDir().mkdir("database/");
-
+    bool saveAsFile = false;
     QString extension = ".xml";
-    if (query["downloadType"] == "T")
-        extension = ".txt";
+
+    if (saveAsFile) {
+        if (!QDir("database/").exists())
+            QDir().mkdir("database/");
+
+        if (query["downloadType"] == "T")
+            extension = ".txt";
+    }
 
     for (int i = 0; i < static_cast<int>(sizeof(typeCode)/sizeof(*typeCode)) ; i++) {
         query["itemType"] = typeCode[i];
-        QFile *file = new QFile("database/" + typeName[i] + extension);
-        if(file->open(QIODevice::WriteOnly)) {
-            m_job = retrieve(Job::Post, url, query, Job::File, true, 0, file);
+        if (saveAsFile) {
+            QFile *file = new QFile("database/" + typeName[i] + extension);
+            if(file->open(QIODevice::WriteOnly)) {
+                m_job = retrieve(Job::Post, url, query, Job::File, typeName[i], true, 0, file);
+            }
+        } else {
+            m_job = retrieve(Job::Post, url, query, Job::Tab, typeName[i], true);
         }
     }
 }
@@ -701,7 +710,7 @@ void CTransfer::importStore(ProgressDialog *pd)
     query["invBrikTrak"] = "";
     query["invDesc"] = "";
 
-    m_job = retrieve(Job::Post, url, query, Job::XML);
+    m_job = retrieve(Job::Post, url, query, Job::XML, "store");
 }
 
 void CTransfer::importDatabase(ProgressDialog *pd)
@@ -731,7 +740,7 @@ void CTransfer::importDatabase(ProgressDialog *pd)
     if(file->open(QIODevice::WriteOnly)) {
         QString fileName = remotefile + ".lzma";
         time_t time = static_cast<time_t>(dt.toTime_t());
-        m_job = retrieve(Job::Get, fileName.toLatin1(), CKeyValueList(), Job::ZIP, false, dt.isValid() ? time : 0, file);
+        m_job = retrieve(Job::Get, fileName.toLatin1(), CKeyValueList(), Job::ZIP, "database", false, dt.isValid() ? time : 0, file);
     }
     else {
         m_progressDialog->setErrorText(tr("Could not write to file: %1").arg(file->fileName()));
@@ -788,6 +797,27 @@ void CTransfer::gotten(CTransfer::Job* job)
         }
     }
 
+    // TAB DELIMITED EXPERIMENT
+    else if (job->m_type == Job::Tab) {
+        qDebug() << "Parsing catalog file" << job->effectiveUrl() << "ID" << job->m_id;
+        if (job->m_data) {
+            QString category = job->m_name;
+            if (m_progressDialog) {
+                m_progressDialog->setMessageText(tr("Finished importing %1").arg(category));
+                m_progressDialog->setTextBlock(tr("Imported %1 (%2 kB)").arg(category).arg(QString::number(job->m_data->size()/1024.0, 'f', 1)));
+            }
+            QByteArray *data = job->m_data;
+            populateDatabase(category, data);
+        }
+        if (isJobCompleted(job)) {
+            m_progressDialog->setMessageText(tr("Completed downloading."));
+            m_progressDialog->setTextBlock(tr("Completed downloading %1 kB.").arg(QString::number(m_bytesReceived/1024.0, 'f', 1)));
+            m_progressDialog->setFinished(true);
+            m_progressDialog->setProgressVisible(false);
+            m_bytesReceived = 0;
+        }
+    }
+
     // CATALOG FILE SEQUENCE
     else if (job->m_type == Job::File) {
         qDebug() << "Parsing catalog file" << job->effectiveUrl() << "ID" << job->m_id;
@@ -818,79 +848,14 @@ void CTransfer::gotten(CTransfer::Job* job)
                     m_progressDialog->setTextBlock(tr("Completed downloading %1 kB.").arg(QString::number(m_bytesReceived/1024.0, 'f', 1)));
 
                     m_progressDialog->setTextBlock(tr("Populating database with parts."));
-                    QFile file("database/Minifigs.xml");
 
-                    if(!file.open(QIODevice::ReadOnly)) {
-                        QMessageBox msg;
-                        msg.setIcon(QMessageBox::Critical);
-                        msg.setText(file.errorString());
-                        msg.exec();
-                        return;
-                    }
-
-                    // Get file information
-                    QFileInfo info(file);
-                    QString tableName = info.baseName();
-                    QString sqlTableName = tableName;
-                    sqlTableName.remove(QRegExp("[^a-zA-Z\\d]"));
-
-                    //The QDomDocument class represents an XML document.
-                    QDomDocument xmlInventory;
-
-                    // Set data into the QDomDocument before processing
-                    xmlInventory.setContent(&file);
-                    file.close();
-
-                    // Extract the root markup
-                    QDomElement catalog = xmlInventory.documentElement();
-                    QDomElement item = catalog.firstChild().toElement();
-
-                    // Prepare data model
-                    DataModel *p_dataModel = new DataModel(Tables::parts, sqlTableName);
-                    p_dataModel->initiateSqlTableAuto();
-
-                    // Read each child of the Inventory node
                     int counter = 0;
-                //    while (!item.isNull() && counter < 200) {
-                    while (!item.isNull()) {
-
-                        // Prepare fields
-                        QMap<QString, QVariant> fields;
-                        if (item.tagName() == "ITEM") {
-                            QDomElement field = item.firstChild().toElement();
-                            // Read Name and value
-                            while (!field.isNull()) {
-                                fields[field.tagName()] = field.firstChild().toText().data();
-                                // Next field
-                                field = field.nextSibling().toElement();
-                            }
-                        }
-
-                        // Add collected fields to SQL database
-                        QSqlError error = p_dataModel->addItemToTable(fields);
-
-                        // Next sibling
-                        counter++;
-                        item = item.nextSibling().toElement();
-                    }
-
-
-                    QString queryString;
-                    queryString = "SELECT DISTINCT category_id FROM parts";
-                    QSqlQuery q;
-                    if (!q.prepare(queryString))
-                        qDebug() << q.lastError();
-                    q.exec();
-                    while (q.next()) {
-                        int catNo = q.value(0).toInt();
-                        QSqlQuery q;
-                        if (!q.prepare(QString("UPDATE categories SET part = 1 WHERE category_id == %1").arg(catNo)))
-                            qDebug() << q.lastError();
-                        q.exec();
-                    }
+                    QString category = "sets";
+                    counter = populateDatabase(category);
+                    m_progressDialog->setTextBlock(tr("Database updated with %1 %2.").arg(counter).arg(category));
+                    counter = 0;
 
                     m_progressDialog->setMessageText(tr("Database updated"));
-                    m_progressDialog->setTextBlock(tr("Database updated with %1 parts.").arg(counter));
                     m_progressDialog->setFinished(true);
                     m_progressDialog->setProgressVisible(false);
                     m_bytesReceived = 0;
@@ -1055,6 +1020,120 @@ void CTransfer::gotten(CTransfer::Job* job)
     }
 }
 
+int CTransfer::populateDatabase(QString category, QByteArray* data)
+{
+    int counter = 0;
+    QString sqlTableName = category;
+
+    if (data) {
+
+        // Prepare data model
+        qDebug() << "TableName" << sqlTableName;
+
+        QSqlQuery q;
+        q.exec("DROP TABLE IF EXISTS " + sqlTableName);
+
+        DataModel *p_dataModel = new DataModel(Tables::parts, sqlTableName);
+        p_dataModel->initiateSqlTableAuto();
+
+        QList<QByteArray> lines = data->split('\n');
+        int counter = 0;
+        foreach (const QByteArray &line, lines) {
+            // Prepare fields
+            QMap<QString, QVariant> fields;
+
+            QList<QByteArray> dataFields = line.split('\t');
+            if (dataFields.size() > 1) {
+                if (counter == 0)
+                    qDebug() << dataFields.size() << dataFields[0] << dataFields[1] << dataFields[2] << dataFields[3];
+                fields["CATEGORY"] = dataFields[0].toInt(); // Category ID
+//                fields[] = dataFields[1]; // Category Name
+                fields["ITEMID"] = dataFields[2]; // Number
+                fields["ITEMNAME"] = dataFields[3]; // Name
+//                if (counter > 50) {
+//                    break;
+//                }
+                if (counter != 0)
+                    QSqlError error = p_dataModel->addItemToTable(fields);
+                counter++;
+            }
+        }
+    } else {
+        int counter = 0;
+
+        QFile file("database/" + category + ".xml");
+
+        if(!file.open(QIODevice::ReadOnly)) {
+            QMessageBox msg;
+            msg.setIcon(QMessageBox::Critical);
+            msg.setText(file.errorString());
+            msg.exec();
+            return 0;
+        }
+
+        // Get file information
+        QFileInfo info(file);
+        QString tableName = info.baseName();
+        QString sqlTableName = tableName;
+        sqlTableName.remove(QRegExp("[^a-zA-Z\\d]"));
+
+        //The QDomDocument class represents an XML document.
+        QDomDocument xmlInventory;
+
+        // Set data into the QDomDocument before processing
+        xmlInventory.setContent(&file);
+        file.close();
+
+        // Extract the root markup
+        QDomElement catalog = xmlInventory.documentElement();
+        QDomElement item = catalog.firstChild().toElement();
+
+        // Prepare data model
+        qDebug() << "TableName" << sqlTableName;
+        DataModel *p_dataModel = new DataModel(Tables::parts, sqlTableName);
+        p_dataModel->initiateSqlTableAuto();
+
+        // Read each child of the Inventory node
+    //    while (!item.isNull() && counter < 50) {
+        while (!item.isNull()) {
+
+            // Prepare fields
+            QMap<QString, QVariant> fields;
+            if (item.tagName() == "ITEM") {
+                QDomElement field = item.firstChild().toElement();
+                // Read Name and value
+                while (!field.isNull()) {
+                    fields[field.tagName()] = field.firstChild().toText().data();
+                    // Next field
+                    field = field.nextSibling().toElement();
+                }
+            }
+
+            // Add collected fields to SQL database
+            QSqlError error = p_dataModel->addItemToTable(fields);
+
+            // Next sibling
+            counter++;
+            item = item.nextSibling().toElement();
+        }
+    }
+
+
+    QString queryString;
+    queryString = "SELECT DISTINCT category_id FROM " + sqlTableName;
+    QSqlQuery q;
+    if (!q.prepare(queryString))
+        qDebug() << q.lastError();
+    q.exec();
+    while (q.next()) {
+        int catNo = q.value(0).toInt();
+        QSqlQuery q;
+        if (!q.prepare(QString("UPDATE categories SET %1 = 1 WHERE category_id == %2").arg(sqlTableName).arg(catNo)))
+            qDebug() << q.lastError();
+        q.exec();
+    }
+    return counter;
+}
 
 QString CTransfer::decompress(const QString &src, const QString &dst)
 {
