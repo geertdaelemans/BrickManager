@@ -197,7 +197,7 @@ Qt::SortOrder DataModel::getSortOrder() {
     return sortOrder;
 }
 
-QSqlError DataModel::initiateSqlTable() {
+QSqlError DataModel::initiateSqlTable(QString database) {
     QString queryString;
     queryString = "CREATE TABLE " + getSqlTableName() + "(" + columns[0].property.name + " " + columns[0].property.sqlType + " PRIMARY KEY" ;
     for(int i = 1; i < getNumberOfColumns(); i++) {
@@ -205,7 +205,7 @@ QSqlError DataModel::initiateSqlTable() {
     }
     queryString += ")";
     qDebug() << queryString;
-    QSqlQuery q(queryString);
+    QSqlQuery q(queryString, QSqlDatabase::database(database));
     if (!q.exec()) {
         qDebug() << q.lastError();
         return q.lastError();
@@ -213,30 +213,30 @@ QSqlError DataModel::initiateSqlTable() {
     return QSqlError();
 }
 
-QSqlError DataModel::initiateSqlTableAuto() {
+QSqlError DataModel::initiateSqlTableAuto(QString database) {
     QString queryString;
     queryString = "CREATE TABLE " + getSqlTableName() + "(id INTEGER PRIMARY KEY AUTOINCREMENT" ;
     for(int i = 1; i < getNumberOfColumns(); i++) {
         queryString += ", " + columns[i].property.name + " " + columns[i].property.sqlType;
     }
     queryString += ")";
-    QSqlQuery q;
-    if (!q.exec(queryString))
+    QSqlQuery q(queryString, QSqlDatabase::database(database));
+    if (!q.exec())
         return q.lastError();
     return QSqlError();
 }
 
-QSqlError DataModel::truncateSqlTable() {
+QSqlError DataModel::truncateSqlTable(QString database) {
     QString queryString = "DELETE FROM " + getSqlTableName();
-    QSqlQuery q;
-    if (!q.exec(queryString)) {
+    QSqlQuery q(queryString, QSqlDatabase::database(database));
+    if (!q.exec()) {
         qDebug() << "Failed to truncate" << getSqlTableName() << q.lastError();
         return q.lastError();
     }
     return QSqlError();
 }
 
-QSqlError DataModel::addItemToTable(QMap<QString, QVariant> fields)
+QSqlError DataModel::addItemToTable(QMap<QString, QVariant> fields, QString database)
 {
     QString qryString = "INSERT INTO ";
     qryString += this->getSqlTableName() + "(" + this->columns[0].property.name;
@@ -248,7 +248,7 @@ QSqlError DataModel::addItemToTable(QMap<QString, QVariant> fields)
         }
     }
     qryString += ") VALUES(?" + qryStringEnd + ")";
-    QSqlQuery q;
+    QSqlQuery q(QSqlDatabase::database(database));
     if (!q.prepare(qryString)) {
         qDebug() << "Failed to add item to database" << getSqlTableName() << q.lastError();
         return q.lastError();

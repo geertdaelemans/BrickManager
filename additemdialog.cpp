@@ -30,7 +30,7 @@ AddItemDialog::AddItemDialog(QWidget *parent) :
 //    DataModel *categoriesDataModel = new DataModel(Tables::categories);
 //    DataModel *partsDataModel = new DataModel(Tables::parts, category);
 
-    QSqlTableModel *colorsModel = new QSqlTableModel(ui->colorsListView);
+    QSqlTableModel *colorsModel = new QSqlTableModel(ui->colorsListView, QSqlDatabase::database("catalogDatabase"));
     colorsModel->setTable(colorsDataModel->getSqlTableName());
 
     // Set filter to include BrickArm and/or Modulex colors
@@ -122,10 +122,10 @@ void AddItemDialog::updateCategories(QString cat)
     DataModel *partsDataModel = new DataModel(Tables::parts, category);
 
     // Set table source
-    QSqlTableModel *categoriesModel = new QSqlTableModel(ui->categoriesListView);
+    QSqlTableModel *categoriesModel = new QSqlTableModel(ui->categoriesListView, QSqlDatabase::database("catalogDatabase"));
     categoriesModel->setTable(categoriesDataModel->getSqlTableName());
     qDebug() << "categoriesDataModel" << categoriesDataModel->getSqlTableName();
-    partsModel = new QSqlTableModel(ui->partsTableView);
+    partsModel = new QSqlTableModel(ui->partsTableView, QSqlDatabase::database("catalogDatabase"));
     partsModel->setTable(partsDataModel->getSqlTableName());
     qDebug() << "partsDataModel" << partsDataModel->getSqlTableName();
     categoriesModel->setFilter(category + " == 1");

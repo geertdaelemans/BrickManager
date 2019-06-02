@@ -15,7 +15,7 @@ OrdersDialog::OrdersDialog(QWidget *parent) :
 {
     // Set-up or reset Orders SQL table
     p_dataModel = new DataModel(Tables::orders);
-    p_dataModel->initiateSqlTable();
+    p_dataModel->initiateSqlTable("tempDatabase");
 
     // Import Order Inventory with unfiled order by default
     bricklink.importOrders(false);
@@ -37,7 +37,7 @@ OrdersDialog::OrdersDialog(QWidget *parent) :
     ui->setupUi(this);
 
     // Create the data model:
-    model = new GenericTableModel(ui->view);
+    model = new GenericTableModel(ui->view, QSqlDatabase::database("tempDatabase"));
     model->setEditStrategy(QSqlTableModel::OnManualSubmit);
     model->setTable(p_dataModel->getSqlTableName());
     int numberOfColumns = p_dataModel->getNumberOfColumns();

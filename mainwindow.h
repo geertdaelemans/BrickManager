@@ -44,6 +44,8 @@ private slots:
     void on_actionUpdate_Database_triggered();
     void updateStatusBar(QString msg, int timeout);
 
+    void on_actionImport_BrickStock_Database_triggered();
+
 private:
     Ui::MainWindow *ui;
     CTransfer *m_trans;

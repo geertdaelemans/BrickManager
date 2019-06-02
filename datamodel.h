@@ -56,10 +56,10 @@ public:
     int getColumnWidth(int column);
     int getSortColumn();
     Qt::SortOrder getSortOrder();
-    QSqlError initiateSqlTable();
-    QSqlError initiateSqlTableAuto();
-    QSqlError truncateSqlTable();
-    QSqlError addItemToTable(QMap<QString, QVariant> fields);
+    QSqlError initiateSqlTable(QString database = "tempDatabase");
+    QSqlError initiateSqlTableAuto(QString database = "tempDatabase");
+    QSqlError truncateSqlTable(QString database = "tempDatabase");
+    QSqlError addItemToTable(QMap<QString, QVariant> fields, QString database = "tempDatabase");
 
 
 private:

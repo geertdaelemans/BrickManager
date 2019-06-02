@@ -1,4 +1,5 @@
 #include "datamodel.h"
+#include "sqldatabase.h"
 
 SqlDatabase::SqlDatabase()
 {
@@ -16,7 +17,7 @@ SqlDatabase::SqlDatabase()
 QString SqlDatabase::getColorById(int color_id)
 {
     QString output;
-    QSqlQuery q;
+    QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
     if (!q.prepare("SELECT color_name FROM colors WHERE color_id=" + QString::number(color_id)))
         return "Color not found";
     q.exec();
@@ -36,7 +37,7 @@ QString SqlDatabase::getColorById(int color_id)
 QString SqlDatabase::getColorCodeById(int color_id)
 {
     QString output;
-    QSqlQuery q;
+    QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
     if (!q.prepare("SELECT color_code FROM colors WHERE color_id=" + QString::number(color_id)))
         return "Color not found";
     q.exec();
@@ -56,7 +57,7 @@ QString SqlDatabase::getColorCodeById(int color_id)
 QString SqlDatabase::getColorCodeByName(const QString &color_name)
 {
     QString output;
-    QSqlQuery q;
+    QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
     if (!q.prepare("SELECT color_code FROM colors WHERE color_name='" + color_name + "'"))
         return "Color not found";
     q.exec();
@@ -76,7 +77,7 @@ QString SqlDatabase::getColorCodeByName(const QString &color_name)
 QString SqlDatabase::getCategoryById(int category_id)
 {
     QString output;
-    QSqlQuery q;
+    QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
     if (!q.prepare("SELECT category_name FROM categories WHERE category_id=" + QString::number(category_id)))
         return "";
     q.exec();
@@ -95,37 +96,69 @@ QString SqlDatabase::getCategoryById(int category_id)
  */
 QSqlError SqlDatabase::initDb()
 {
-    db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("./database.db");
 
-    if (!db.open())
-        return db.lastError();
+    QTemporaryFile tmpFile(qApp);
+    tmpFile.setFileTemplate("XXXXXX.sqlite3");
+    if (tmpFile.open()) {
+        QString tmp_filename=tmpFile.fileName();
+        qDebug() << "temporary" << tmp_filename;
 
-    QStringList tables = db.tables();
-    qDebug() << "db" << tables;
+        QFile file(":/testdata/catalog_database.db");
+        if (file.open(QIODevice::ReadOnly)) {
+            tmpFile.write(file.readAll());
+        }
+
+        tmpFile.close();
+    }
+
+
+
+    catalogDataBase = QSqlDatabase::addDatabase("QSQLITE", "catalogDatabase");
+    tempDataBase = QSqlDatabase::addDatabase("QSQLITE", "tempDatabase");
+
+    catalogDataBase.setDatabaseName(tmpFile.fileName());
+//    catalogDataBase.setDatabaseName("./database.db");
+//    tempDataBase.setDatabaseName("./temp_database.db");
+    tempDataBase.setDatabaseName(":memory:");
+
+    if (!catalogDataBase.open())
+        qDebug() << "catalogDataBase" << catalogDataBase.lastError();
+    if (!tempDataBase.open())
+        qDebug() << "tempDataBase" << tempDataBase.lastError();
+
+    QStringList tables = catalogDataBase.tables();
+    qDebug() << "catalogDataBase" << tables;
+    QStringList tempTables = tempDataBase.tables();
+    qDebug() << "tempDataBase" << tempTables;
 
     // Delete previous Order Item tables
     foreach (QString table, tables) {
         if ((table != "colors") && (table != "categories") && (table != "parts") && (table != "books") && (table != "instructions")
            && (table != "gear") && (table != "catalogs") && (table != "sets") && (table != "minifigs") && (table != "boxes")) {
-            QSqlQuery q;
+            QSqlQuery q(catalogDataBase);
             q.exec("DROP TABLE IF EXISTS " + table);
         }
     }
 
     if (!tables.contains("categories")) {
         DataModel *catModel = new DataModel(Tables::categories);
-        catModel->initiateSqlTable();
+        catModel->initiateSqlTable("catalogDatabase");
     }
 
     if (!tables.contains("colors")) {
         DataModel *colModel = new DataModel(Tables::colors);
-        colModel->initiateSqlTable();
+        colModel->initiateSqlTable("catalogDatabase");
     }
 
-    if (!tables.contains("userinventories")) {
+    // Delete previous Order Item tables
+    foreach (QString table, tempTables) {
+        QSqlQuery q("DROP TABLE IF EXISTS " + table, tempDataBase);
+        q.exec();
+    }
+
+    if (!tempTables.contains("userinventories")) {
         DataModel *userInvModel = new DataModel(Tables::userinventories);
-        userInvModel->initiateSqlTable();
+        userInvModel->initiateSqlTable("tempDatabase");
     }
 
     return QSqlError();

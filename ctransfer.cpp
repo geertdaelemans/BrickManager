@@ -1029,12 +1029,15 @@ int CTransfer::populateDatabase(QString category, QByteArray* data)
 
         // Prepare data model
         qDebug() << "TableName" << sqlTableName;
+        m_progressDialog->setMessageText(tr("Started populating database."));
+        m_progressDialog->setTextBlock(tr("Started populating database."));
 
-        QSqlQuery q;
+
+        QSqlQuery q(QSqlDatabase::database("tempDatabase"));
         q.exec("DROP TABLE IF EXISTS " + sqlTableName);
 
         DataModel *p_dataModel = new DataModel(Tables::parts, sqlTableName);
-        p_dataModel->initiateSqlTableAuto();
+        p_dataModel->initiateSqlTableAuto("tempDatabase");
 
         QList<QByteArray> lines = data->split('\n');
         int counter = 0;
@@ -1091,10 +1094,10 @@ int CTransfer::populateDatabase(QString category, QByteArray* data)
         // Prepare data model
         qDebug() << "TableName" << sqlTableName;
         DataModel *p_dataModel = new DataModel(Tables::parts, sqlTableName);
-        p_dataModel->initiateSqlTableAuto();
+        p_dataModel->initiateSqlTableAuto("tempDatabase");
 
         // Read each child of the Inventory node
-    //    while (!item.isNull() && counter < 50) {
+//        while (!item.isNull() && counter < 10) {
         while (!item.isNull()) {
 
             // Prepare fields
@@ -1118,20 +1121,64 @@ int CTransfer::populateDatabase(QString category, QByteArray* data)
         }
     }
 
+    m_progressDialog->setMessageText(tr("Finished populating database."));
+    m_progressDialog->setTextBlock(tr("Finished populating database."));
 
     QString queryString;
     queryString = "SELECT DISTINCT category_id FROM " + sqlTableName;
-    QSqlQuery q;
+    QSqlQuery q(QSqlDatabase::database("tempDatabase"));
     if (!q.prepare(queryString))
         qDebug() << q.lastError();
     q.exec();
     while (q.next()) {
         int catNo = q.value(0).toInt();
-        QSqlQuery q;
+        QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
         if (!q.prepare(QString("UPDATE categories SET %1 = 1 WHERE category_id == %2").arg(sqlTableName).arg(catNo)))
             qDebug() << q.lastError();
         q.exec();
     }
+
+    m_progressDialog->setMessageText(tr("Database indexed."));
+    m_progressDialog->setTextBlock(tr("Database indexed."));
+
+//    QSqlQuery query(QSqlDatabase::database("tempDatabase"));
+//    QStringList tables;
+//    query.prepare("SELECT * FROM sqlite_master");
+//    query.exec();
+//    while (query.next())
+//    {
+//        tables << query.value("name").toString();
+//    }
+//    qDebug() << tables;
+
+//    static const QString insert = QStringLiteral("INSERT INTO %1 (%2) VALUES (%3);");
+//    bool first = true;
+//    foreach (const QString& table, tables)
+//    {
+//        QStringList columns;
+//        QStringList values;
+//        QSqlRecord record;
+//        first = true;
+//        query.prepare(QString("SELECT * FROM [%1]").arg(table));
+//        query.exec();
+//        while (query.next())
+//        {
+//            record = query.record();
+//            for (int i = 0; i < record.count(); i++) {
+//                if (first)
+//                    columns << record.fieldName(i);
+//                values << record.value(i).toString();
+//            }
+//            first = false;
+//            QString q = insert.arg(table).arg(columns.join(", ")).arg(values.join(", "));
+//            qDebug() << q;
+//            QSqlQuery newQuery(q, QSqlDatabase::database("catalogDatabase"));
+//            newQuery.exec();
+//            qDebug() << "Error" << newQuery.lastError();
+//        }
+//    }
+//    m_progressDialog->setTextBlock(tr("Done."));
+
     return counter;
 }
 

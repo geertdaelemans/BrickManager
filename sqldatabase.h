@@ -13,9 +13,9 @@ public:
     static QString getCategoryById(int category_id);
 
 private:
-    QSqlDatabase db;
-    QSqlDatabase db2;
     QSqlError initDb();
+    QSqlDatabase catalogDataBase;
+    QSqlDatabase tempDataBase;
 };
 
 #endif // SQLDATABASE_H

@@ -16,7 +16,7 @@ class ListModel : public QDialog
     Q_OBJECT
 
 public:
-    explicit ListModel(QWidget *parent = nullptr, DataModel *tableModel = nullptr);
+    explicit ListModel(QWidget *parent = nullptr, DataModel *tableModel = nullptr, QSqlDatabase database = QSqlDatabase());
     ~ListModel() override;
     bool insertRow(QList<QString> fields);
 

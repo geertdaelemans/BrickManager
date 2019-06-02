@@ -25,8 +25,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     SqlDatabase mydB = SqlDatabase();
 
-    bricklink.importColors();
-    bricklink.importCategories();
+//    bricklink.importColors();
+//    bricklink.importCategories();
 
     Q_UNUSED(mydB)
 }
@@ -113,10 +113,10 @@ void MainWindow::on_actionNew_triggered()
     // Prepare data model
     QString sqlTableName = "Untitled";
     DataModel *p_dataModel = new DataModel(Tables::brickstock, sqlTableName);
-    p_dataModel->initiateSqlTableAuto();
+    p_dataModel->initiateSqlTableAuto("tempDatabase");
 
     // Prepare list view
-    ListModel *listModel = new ListModel(this, p_dataModel);
+    ListModel *listModel = new ListModel(this, p_dataModel, QSqlDatabase::database("tempDatabase"));
 
     // Add tab
     addTab(listModel, sqlTableName);
@@ -155,7 +155,7 @@ void MainWindow::on_actionMy_Inventory_triggered()
 
     // Prepare list
     DataModel *p_dataModel = new DataModel(Tables::userinventories);
-    ListModel *listModel = new ListModel(this, p_dataModel);
+    ListModel *listModel = new ListModel(this, p_dataModel, QSqlDatabase::database("tempDatabase"));
     QString header = "My Inventory";
     addTab(listModel, header);
 }
@@ -188,7 +188,7 @@ void MainWindow::openInventoryTab(QList<QString> orderIDs)
 
         // Prepare list
         DataModel *p_dataModel = new DataModel(Tables::orderitem, orderID);
-        ListModel *inv = new ListModel(this, p_dataModel);
+        ListModel *inv = new ListModel(this, p_dataModel, QSqlDatabase::database("tempDatabase"));
         const QString tabName = "Order#" + orderID;
         tabList[tabName] = inv;
         addTab(inv, tabName);
@@ -228,7 +228,7 @@ void MainWindow::on_actionOpen_triggered()
 
         // Prepare data model
         DataModel *p_dataModel = new DataModel(Tables::brickstock, sqlTableName);
-        p_dataModel->initiateSqlTableAuto();
+        p_dataModel->initiateSqlTableAuto("tempDatabase");
 
         // Read each child of the Inventory node
         while (!item.isNull()) {
@@ -262,7 +262,7 @@ void MainWindow::on_actionOpen_triggered()
             // Next sibling
             item = item.nextSibling().toElement();
         }
-        ListModel *listModel = new ListModel(this, p_dataModel);
+        ListModel *listModel = new ListModel(this, p_dataModel, QSqlDatabase::database("tempDatabase"));
         addTab(listModel, tableName);
     }
 }
@@ -305,7 +305,6 @@ void MainWindow::on_actionUpdate_Database_triggered()
     pd->exec();
 }
 
-
 /**
  * @brief MainWindow Help Menu
  */
@@ -325,4 +324,6 @@ void MainWindow::on_tabWidget_tabCloseRequested(int index)
 {
     removeTab(index);
 }
+
+
 

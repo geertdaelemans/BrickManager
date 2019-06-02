@@ -7,7 +7,7 @@
 #include <QtWidgets>
 
 
-ListModel::ListModel(QWidget *parent, DataModel *tableModel) :
+ListModel::ListModel(QWidget *parent, DataModel *tableModel, QSqlDatabase database) :
     QDialog(parent),
     ui(new Ui::Categories)
 {
@@ -16,7 +16,7 @@ ListModel::ListModel(QWidget *parent, DataModel *tableModel) :
     int numberOfColumns = p_dataModel->getNumberOfColumns();
 
     // Create the data model:
-    model = new GenericTableModel(ui->tableView);
+    model = new GenericTableModel(ui->tableView, database);
     model->setEditStrategy(QSqlTableModel::OnManualSubmit);
     model->setTable(p_dataModel->getSqlTableName());
     for(int i = 0; i < numberOfColumns; i++) {
