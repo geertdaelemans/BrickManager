@@ -669,27 +669,9 @@ void CTransfer::importCatalog(ProgressDialog *pd)
     query["downloadType"] = "T";        // T: Tab-Delimited File, X: XML
     QDateTime dt;
 
-    bool saveAsFile = false;
-    QString extension = ".xml";
-
-    if (saveAsFile) {
-        if (!QDir("database/").exists())
-            QDir().mkdir("database/");
-
-        if (query["downloadType"] == "T")
-            extension = ".txt";
-    }
-
     for (int i = 0; i < static_cast<int>(sizeof(typeCode)/sizeof(*typeCode)) ; i++) {
         query["itemType"] = typeCode[i];
-        if (saveAsFile) {
-            QFile *file = new QFile("database/" + typeName[i] + extension);
-            if(file->open(QIODevice::WriteOnly)) {
-                m_job = retrieve(Job::Post, url, query, Job::File, typeName[i], true, 0, file);
-            }
-        } else {
-            m_job = retrieve(Job::Post, url, query, Job::Tab, typeName[i], true);
-        }
+        m_job = retrieve(Job::Post, url, query, Job::Tab, typeName[i], true);
     }
 }
 
@@ -725,41 +707,6 @@ void CTransfer::importStore(ProgressDialog *pd)
     query["invDesc"] = "";
 
     m_job = retrieve(Job::Post, url, query, Job::XML, "store");
-}
-
-void CTransfer::importDatabase(ProgressDialog *pd)
-{
-    m_progressDialog = pd;
-    if (m_progressDialog) {
-        m_progressDialog->setAutoClose(false);
-        m_progressDialog->setProgressVisible(true);
-        m_progressDialog->setTextBlockVisible(true);
-        m_progressDialog->setWindowTitle(tr("Updating BrickStock Database"));
-        m_progressDialog->setHeaderText(tr("Updating BrickStock Database"));
-        m_progressDialog->setMessageText(tr("Download: %1/%2 KB"));
-    }
-
-//        QString remotefile = "http://" BRICKSTOCK_URL BRICKSTOCK_DB_PATH + BrickLink::inst ( )-> defaultDatabaseName ( );
-    QString remotefile = "http://brickforge.de/brickstore-data/database-v1";
-
-//        QString localfile = BrickLink::inst ( )-> dataPath ( ) + BrickLink::inst ( )-> defaultDatabaseName ( );
-    QString localfile = "database-v1";
-
-    QDateTime dt;
-//		if(QFile::exists(localfile))
-//			dt = CConfig::inst ( )-> lastDatabaseUpdate ( );
-
-    QFile *file = new QFile(localfile + ".lzma");
-
-    if(file->open(QIODevice::WriteOnly)) {
-        QString fileName = remotefile + ".lzma";
-        time_t time = static_cast<time_t>(dt.toTime_t());
-        m_job = retrieve(Job::Get, fileName.toLatin1(), CKeyValueList(), Job::ZIP, "database", false, dt.isValid() ? time : 0, file);
-    }
-    else {
-        m_progressDialog->setErrorText(tr("Could not write to file: %1").arg(file->fileName()));
-        delete file;
-    }
 }
 
 
@@ -811,7 +758,7 @@ void CTransfer::gotten(CTransfer::Job* job)
         }
     }
 
-    // TAB DELIMITED EXPERIMENT
+    // TAB DELIMITED INPUT
     else if (job->m_type == Job::Tab) {
         if (job->m_data) {
 
@@ -838,110 +785,6 @@ void CTransfer::gotten(CTransfer::Job* job)
             m_progressDialog->setFinished(true);
             m_progressDialog->setProgressVisible(false);
             m_bytesReceived = 0;
-        }
-    }
-
-    // CATALOG FILE SEQUENCE
-    else if (job->m_type == Job::File) {
-        QFile *file = job->file();
-        if(file) {
-             if (file->size()) {
-                if (file->open(QIODevice::ReadOnly)) {
-                    QTextStream in(file);
-                    QString line = in.readLine();
-                    if (line.mid(0, 15) == "<!doctype html>") {
-                        if (m_progressDialog) {
-                            m_progressDialog->setMessageText(tr("Error logging in."));
-                            m_progressDialog->setTextBlock(tr("Either your username or password are incorrect."));
-                            m_progressDialog->killAll();
-                        }
-                        cancel(job);
-                        return;
-                    }
-                }
-                m_bytesReceived += file->size();
-                if (m_progressDialog) {
-                    QString basepath = file->fileName();
-                    m_progressDialog->setMessageText(tr("Finished importing %1").arg(basepath));
-                    m_progressDialog->setTextBlock(tr("Imported %1 (%2 kB)").arg(basepath).arg(QString::number(file->size()/1024.0, 'f', 1)));
-                }
-                if (isJobCompleted(job)) {
-                    m_progressDialog->setMessageText(tr("Completed downloading."));
-                    m_progressDialog->setTextBlock(tr("Completed downloading %1 kB.").arg(QString::number(m_bytesReceived/1024.0, 'f', 1)));
-
-                    m_progressDialog->setTextBlock(tr("Populating database with parts."));
-
-                    int counter = 0;
-                    QString category = "sets";
-                    counter = populateDatabase(category);
-                    m_progressDialog->setTextBlock(tr("Database updated with %1 %2.").arg(counter).arg(category));
-                    counter = 0;
-
-                    m_progressDialog->setMessageText(tr("Database updated"));
-                    m_progressDialog->setFinished(true);
-                    m_progressDialog->setProgressVisible(false);
-                    m_bytesReceived = 0;
-                }
-                file->close();
-            }
-        } else {
-            qDebug() << "No file detected...";
-
-    //            QByteArray *data = j->data();
-
-    //            bool ok = false;
-
-    //            qDebug() << "Response" << data->mid(0, 1000);
-
-    //            QList<QByteArray> lines = data->split('\n'); //   ("\r\n");
-    //    //            foreach ( const QByteArray &line, lines)
-    //    //            {
-    //    //                qDebug() << line;
-    //    ////                QList<QByteArray> fields = line.split(' ');
-    //    ////                foreach( const QByteArray &field, fields)
-    //    ////                {
-    //    ////                qDebug() << field;
-    //    ////                }
-    //    //            }
-
-
-
-
-
-
-    //            if (data && data->size()) {
-    //                QBuffer *store_buffer = new QBuffer(data);
-
-    //                if (store_buffer->open(QIODevice::ReadOnly)) {
-    //    //				BrickLink::InvItemList *items = 0;
-    //                    qDebug() << store_buffer->data();
-    //                    QString emsg;
-    //                    int eline = 0, ecol = 0;
-    //                    QDomDocument doc;
-
-    //                    if (doc.setContent(store_buffer, &emsg, &eline, &ecol)) {
-    //                        QDomElement root = doc.documentElement();
-
-    //                        if ((root.nodeName() == "CATALOG"))
-    //    //						items = BrickLink::inst ( )-> parseItemListXML ( root, BrickLink::XMLHint_MassUpload /*, &invalid_items */);
-
-    //    //					if ( items ) {
-    //    //						m_items += *items;
-    //    //						delete items;
-    //                            ok = true;
-    //    //					}
-    //                        else
-    //                            m_progress->setErrorText(tr("Could not parse the XML data for the store catalog."));
-    //                    }
-    //                    else {
-    //                        if ((QByteArray(data->data(), 15) == "<!doctype html>") && (QByteArray(data->data(), data->size()).indexOf("Error!", 1) != -1 ))
-    //                            m_progress->setErrorText(tr("Either your username or password are incorrect."));
-    //                        else
-    //                            m_progress->setErrorText(tr("Could not parse the XML data for the store inventory:<br /><i>Line %1, column %2: %3</i>" ). arg ( eline ). arg ( ecol ). arg ( emsg ));
-    //                    }
-    //                }
-    //            }
-    //            m_progress->setFinished(ok);
         }
     }
 
@@ -999,43 +842,6 @@ void CTransfer::gotten(CTransfer::Job* job)
 //            if (m_progressDialog)
 //                m_progressDialog->setFinished(ok);
         }
-    }
-
-    // DATABASE SEQUENCE
-    else if (job->m_type == Job::ZIP) {
-        qDebug("gottenDatabase()");
-        QFile *file = job->file();
-        if (job->notModifiedSince()) {
-            file->remove();
-            m_progressDialog->setMessageText(tr("Already up-to-date."));
-            m_progressDialog->setFinished(true);
-        }
-        else if (file->size()) {
-            QString basepath = file->fileName();
-            basepath.truncate(basepath.length() - 5);   // Strip '.lzma'
-
-            qDebug() << file->size() << basepath << file->fileName();
-            file->copy("D:/geert.lzma");
-            qDebug() << "File size" << file->size() << "copied to d:-drive.";
-            file->close();
-
-            QString error = decompress (file->fileName(), basepath);
-
-            if (error.isNull()) {
-    //				if ( BrickLink::inst ( )-> readDatabase ( )) {
-    //                    CConfig::inst ( )-> setLastDatabaseUpdate ( QDateTime::currentDateTime ( ));
-                    m_progressDialog->setMessageText(tr( "Finished."));
-                    m_progressDialog->setTextBlock(tr("Finished."));
-                    m_progressDialog->setFinished(true);
-    //              }
-    //				else
-    //					m_progress-> setErrorText ( tr( "Could not load the new database." ));
-            }
-            else
-                m_progressDialog->setErrorText(error);
-        }
-        else
-            m_progressDialog->setErrorText(tr("Downloaded file is empty."));
     }
 }
 
@@ -1159,70 +965,4 @@ int CTransfer::populateDatabase(QString category, QByteArray* data)
         q.exec();
     }
     return counter;
-}
-
-QString CTransfer::decompress(const QString &src, const QString &dst)
-{
-    QFile sf ( src );
-    QFile df ( dst );
-
-    if ( !sf. open ( QIODevice::ReadOnly ))
-        return tr( "Could not read downloaded file: %1" ). arg( src );
-    if ( !df. open ( QIODevice::WriteOnly ))
-        return tr( "Could not write to database file: %1" ). arg( dst );
-
-    static const int CHUNKSIZE_IN = 4096;
-    static const int CHUNKSIZE_OUT = 512 * 1024;
-
-    char *buffer_in  = new char [CHUNKSIZE_IN];
-    char *buffer_out = new char [CHUNKSIZE_OUT];
-
-    lzmadec_stream strm;
-    strm. lzma_alloc = nullptr;
-    strm. lzma_free = nullptr;
-    strm. opaque = nullptr;
-    strm. avail_in = 0;
-    strm. next_in = nullptr;
-
-
-    if ( lzmadec_init ( &strm ) != LZMADEC_OK )
-        return tr( "Could not initialize the LZMA decompressor" );
-
-
-    QString loop_error;
-
-    m_progressDialog->setTextBlock(tr("Decompressing database"));
-    m_progressDialog->setProgress(0, 0);
-
-    while ( true ) {
-        if ( strm. avail_in == 0 ) {
-            strm. next_in  = (unsigned char *) buffer_in;
-            strm. avail_in = sf.read(buffer_in, CHUNKSIZE_IN);
-        }
-        strm. next_out  = (unsigned char *) buffer_out;
-        strm. avail_out = CHUNKSIZE_OUT;
-
-        int ret = lzmadec_decode ( &strm, strm.avail_in == 0 );
-        if ( ret != LZMADEC_OK && ret != LZMADEC_STREAM_END ) {
-            loop_error = tr( "Error while decompressing %1" ). arg( src );
-            break;
-        }
-
-        long write_size = CHUNKSIZE_OUT - strm.avail_out;
-        if ( write_size != df. write ( buffer_out, write_size )) {
-            loop_error = tr( "Error writing to file %1: %2" ). arg( dst, df. errorString ( ));
-            break;
-        }
-        if ( ret == LZMADEC_STREAM_END ) {
-            lzmadec_end ( &strm );
-            break;
-        }
-//			m_progress-> setProgress ( sf. at ( ), sf. size ( ));
-    }
-
-    delete [] buffer_in;
-    delete [] buffer_out;
-
-    return loop_error;
-//        return QString();
 }

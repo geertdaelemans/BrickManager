@@ -42,7 +42,7 @@ public:
         void *userObject ( ) const       { return m_userobject; }
         QDateTime lastModified ( ) const { QDateTime d; d.setTime_t ( m_filetime ); return d; }
         bool notModifiedSince ( ) const  { return m_not_modified; }
-        enum returnType {Login, File, XML, ZIP, Tab, NoReturn};
+        enum returnType {Login, XML, Tab, NoReturn};
         enum httpMethod {Get, Post};
 
     private:
@@ -91,7 +91,6 @@ public:
     void brickLinkLogin(ProgressDialog *pd = nullptr);
     void importCatalog(ProgressDialog *pd = nullptr);
     void importStore(ProgressDialog *pd = nullptr);
-    void importDatabase(ProgressDialog *pd = nullptr);
 
 public slots:
     void cancelAllJobs();
@@ -130,8 +129,6 @@ private:
     static void unlock_curl(CURL * /*handle*/, curl_lock_data /*data*/, void * /*userptr*/);
 
     int populateDatabase(QString category, QByteArray* data = nullptr);
-
-    QString decompress(const QString &src, const QString &dst);
 
     bool isJobCompleted(Job *j);
 
