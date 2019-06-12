@@ -174,4 +174,34 @@ void AddItemDialog::on_categoriesListView_clicked(const QModelIndex &index)
     int selectedCategory = categoryID.data(Qt::DisplayRole).toInt();
     partsModel->setFilter(QString("category_id == %1").arg(selectedCategory));
     partsModel->select();
+    m_categorySelected = true;
+    statusAddButton();
 }
+
+
+void AddItemDialog::on_partsTableView_clicked(const QModelIndex &index)
+{
+    const QModelIndex partNumber = index.sibling(index.row(), 2);
+    QString selectedPart = partNumber.data(Qt::DisplayRole).toString();
+    qDebug() << "Selected part" << selectedPart;
+
+    m_partSelected = true;
+    statusAddButton();
+}
+
+void AddItemDialog::on_colorsListView_clicked(const QModelIndex &index)
+{
+    Q_UNUSED(index);
+
+    m_colorSelected = true;
+    statusAddButton();
+}
+
+void AddItemDialog::statusAddButton() {
+    // When category, part and color is selected, enable Add button
+    if (m_categorySelected && m_partSelected && m_colorSelected)
+        ui->addPushButton->setEnabled(true);
+};
+
+
+
