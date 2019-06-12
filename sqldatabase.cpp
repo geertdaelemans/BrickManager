@@ -96,28 +96,35 @@ QString SqlDatabase::getCategoryById(int category_id)
  */
 QSqlError SqlDatabase::initDb()
 {
+//    QTemporaryFile tmpFile(qApp);
+//    tmpFile.setFileTemplate("XXXXXX.sqlite3");
+//    if (tmpFile.open()) {
+//        QString tmp_filename=tmpFile.fileName();
+//        qDebug() << "temporary" << tmp_filename;
 
-    QTemporaryFile tmpFile(qApp);
-    tmpFile.setFileTemplate("XXXXXX.sqlite3");
-    if (tmpFile.open()) {
-        QString tmp_filename=tmpFile.fileName();
-        qDebug() << "temporary" << tmp_filename;
+//        QFile file(":/testdata/catalog_database.db");
+//        if (file.open(QIODevice::ReadOnly)) {
+//            tmpFile.write(file.readAll());
+//        }
 
-        QFile file(":/testdata/catalog_database.db");
-        if (file.open(QIODevice::ReadOnly)) {
-            tmpFile.write(file.readAll());
-        }
-
-        tmpFile.close();
-    }
-
+//        tmpFile.close();
+//    }
 
 
     catalogDataBase = QSqlDatabase::addDatabase("QSQLITE", "catalogDatabase");
     tempDataBase = QSqlDatabase::addDatabase("QSQLITE", "tempDatabase");
 
-    catalogDataBase.setDatabaseName(tmpFile.fileName());
-//    catalogDataBase.setDatabaseName("./database.db");
+
+//    QSqlQuery("PRAGMA page_size = 4096", QSqlDatabase::database("catalogDatabase"));
+//    QSqlQuery("PRAGMA cache_size = 16384", QSqlDatabase::database("catalogDatabase"));
+//    QSqlQuery("PRAGMA temp_store = MEMORY", QSqlDatabase::database("catalogDatabase"));
+
+    QSqlQuery("PRAGMA journal_mode = OFF", QSqlDatabase::database("catalogDatabase"));
+//    QSqlQuery("PRAGMA locking_mode = EXCLUSIVE", QSqlDatabase::database("catalogDatabase"));
+    QSqlQuery("PRAGMA synchronous = OFF", QSqlDatabase::database("catalogDatabase"));
+
+
+    catalogDataBase.setDatabaseName("./database.db");
 //    tempDataBase.setDatabaseName("./temp_database.db");
     tempDataBase.setDatabaseName(":memory:");
 
@@ -163,3 +170,4 @@ QSqlError SqlDatabase::initDb()
 
     return QSqlError();
 }
+

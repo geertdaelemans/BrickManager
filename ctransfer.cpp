@@ -8,6 +8,7 @@
 
 #include "lzmadec.h"
 #include "datamodel.h"
+#include "sqldatabase.h"
 
 bool CTransfer::s_global_init = false;
 QMutex CTransfer::s_share_lock;
@@ -618,9 +619,22 @@ void CTransfer::brickLinkLogin(ProgressDialog *pd)
     QSettings settings;
     query["userid"] = settings.value("bricklinklogin/userName").toString();
     query["password"] = settings.value("bricklinklogin/passWord").toString();
+    query["keepme_loggedin"] = "true";
+    query["override"] = "false";
 
     // Submit the POST request
     m_job = retrieve(Job::Post, url, query, Job::Login, "login");
+
+    // Next just call "catalogDownload to update the cookie.
+    // This call returns an error page, but this can be ignored.
+    // No clue why this is working, but it does...
+
+    // Login URL for BrickLink
+    url = "http://www.bricklink.com/catalogDownload.asp";
+
+    // Submit the POST request
+    m_job = retrieve(Job::Post, url, query, Job::NoReturn, "login", false);
+
 }
 
 
@@ -801,6 +815,16 @@ void CTransfer::gotten(CTransfer::Job* job)
     else if (job->m_type == Job::Tab) {
         qDebug() << "Parsing catalog file" << job->effectiveUrl() << "ID" << job->m_id;
         if (job->m_data) {
+
+            // Testing for Log-in OK
+            if (job->m_data->mid(2, 15) == "<!doctype html>") {
+                if (m_progressDialog) {
+                    m_progressDialog->setMessageText(tr("Error logging in."));
+                    m_progressDialog->setTextBlock(tr("Either your username or password are incorrect."));
+                }
+                return;
+            }
+
             QString category = job->m_name;
             if (m_progressDialog) {
                 m_progressDialog->setMessageText(tr("Finished importing %1").arg(category));
@@ -1032,37 +1056,42 @@ int CTransfer::populateDatabase(QString category, QByteArray* data)
         m_progressDialog->setMessageText(tr("Started populating database."));
         m_progressDialog->setTextBlock(tr("Started populating database."));
 
+        QSqlDatabase::database("catalogDatabase").transaction();
 
-        QSqlQuery q(QSqlDatabase::database("tempDatabase"));
+        // Delete table if exists
+        QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
         q.exec("DROP TABLE IF EXISTS " + sqlTableName);
 
         DataModel *p_dataModel = new DataModel(Tables::parts, sqlTableName);
-        p_dataModel->initiateSqlTableAuto("tempDatabase");
+        p_dataModel->initiateSqlTableAuto("catalogDatabase");
 
+        // Prepare query string
+        QString qryString = "INSERT INTO ";
+        qryString += p_dataModel->getSqlTableName() + "(id, item_no, item_name, category_id) VALUES(?, ?, ?, ?)";
+
+        // Prepare query
+        if (!q.prepare(qryString)) {
+            qDebug() << "Failed to add item to database" << p_dataModel->getSqlTableName() << q.lastError();
+            m_progressDialog->setMessageText(tr("Failed to add item to database."));
+            return 0;
+        }
+
+        // Finally parse tab-delimited data
         QList<QByteArray> lines = data->split('\n');
-        int counter = 0;
+        counter = 0;
         foreach (const QByteArray &line, lines) {
-            // Prepare fields
-            QMap<QString, QVariant> fields;
-
             QList<QByteArray> dataFields = line.split('\t');
-            if (dataFields.size() > 1) {
-                if (counter == 0)
-                    qDebug() << dataFields.size() << dataFields[0] << dataFields[1] << dataFields[2] << dataFields[3];
-                fields["CATEGORY"] = dataFields[0].toInt(); // Category ID
-//                fields[] = dataFields[1]; // Category Name
-                fields["ITEMID"] = dataFields[2]; // Number
-                fields["ITEMNAME"] = dataFields[3]; // Name
-//                if (counter > 50) {
-//                    break;
-//                }
-                if (counter != 0)
-                    QSqlError error = p_dataModel->addItemToTable(fields);
-                counter++;
+            if (dataFields.size() > 3 && counter > 0) {
+                q.addBindValue(counter);
+                q.addBindValue(dataFields[2]); // Number
+                q.addBindValue(dataFields[3]); // Name
+                q.addBindValue(dataFields[0].toInt()); // Category ID
+                q.exec();
             }
+            counter++;
         }
     } else {
-        int counter = 0;
+        counter = 0;
 
         QFile file("database/" + category + ".xml");
 
@@ -1097,7 +1126,6 @@ int CTransfer::populateDatabase(QString category, QByteArray* data)
         p_dataModel->initiateSqlTableAuto("tempDatabase");
 
         // Read each child of the Inventory node
-//        while (!item.isNull() && counter < 10) {
         while (!item.isNull()) {
 
             // Prepare fields
@@ -1121,12 +1149,14 @@ int CTransfer::populateDatabase(QString category, QByteArray* data)
         }
     }
 
+    QSqlDatabase::database("catalogDatabase").commit();
+
     m_progressDialog->setMessageText(tr("Finished populating database."));
-    m_progressDialog->setTextBlock(tr("Finished populating database."));
+    m_progressDialog->setTextBlock(tr("Finished populating database with %1 records.").arg(counter));
 
     QString queryString;
     queryString = "SELECT DISTINCT category_id FROM " + sqlTableName;
-    QSqlQuery q(QSqlDatabase::database("tempDatabase"));
+    QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
     if (!q.prepare(queryString))
         qDebug() << q.lastError();
     q.exec();
@@ -1140,44 +1170,6 @@ int CTransfer::populateDatabase(QString category, QByteArray* data)
 
     m_progressDialog->setMessageText(tr("Database indexed."));
     m_progressDialog->setTextBlock(tr("Database indexed."));
-
-//    QSqlQuery query(QSqlDatabase::database("tempDatabase"));
-//    QStringList tables;
-//    query.prepare("SELECT * FROM sqlite_master");
-//    query.exec();
-//    while (query.next())
-//    {
-//        tables << query.value("name").toString();
-//    }
-//    qDebug() << tables;
-
-//    static const QString insert = QStringLiteral("INSERT INTO %1 (%2) VALUES (%3);");
-//    bool first = true;
-//    foreach (const QString& table, tables)
-//    {
-//        QStringList columns;
-//        QStringList values;
-//        QSqlRecord record;
-//        first = true;
-//        query.prepare(QString("SELECT * FROM [%1]").arg(table));
-//        query.exec();
-//        while (query.next())
-//        {
-//            record = query.record();
-//            for (int i = 0; i < record.count(); i++) {
-//                if (first)
-//                    columns << record.fieldName(i);
-//                values << record.value(i).toString();
-//            }
-//            first = false;
-//            QString q = insert.arg(table).arg(columns.join(", ")).arg(values.join(", "));
-//            qDebug() << q;
-//            QSqlQuery newQuery(q, QSqlDatabase::database("catalogDatabase"));
-//            newQuery.exec();
-//            qDebug() << "Error" << newQuery.lastError();
-//        }
-//    }
-//    m_progressDialog->setTextBlock(tr("Done."));
 
     return counter;
 }

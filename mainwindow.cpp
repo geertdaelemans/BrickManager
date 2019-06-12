@@ -25,8 +25,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     SqlDatabase mydB = SqlDatabase();
 
-//    bricklink.importColors();
-//    bricklink.importCategories();
+    m_trans->brickLinkLogin();
+
+    bricklink.importColors();
+    bricklink.importCategories();
 
     Q_UNUSED(mydB)
 }
@@ -298,8 +300,6 @@ void MainWindow::on_actionSettings_triggered()
 
 void MainWindow::on_actionUpdate_Database_triggered()
 {
-    m_trans->brickLinkLogin();
-
     ProgressDialog *pd = new ProgressDialog(this);
     m_trans->importCatalog(pd);
     pd->exec();

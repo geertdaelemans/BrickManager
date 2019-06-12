@@ -106,7 +106,7 @@ void BrickLink::parseJsonCategories()
             fields["category_id"] = object.value("category_id").toVariant();
             fields["category_name"] = object.value("category_name").toVariant();
             fields["parent_id"] = object.value("parent_id").toVariant();
-            model->addItemToTable(fields);
+            model->addItemToTable(fields, "catalogDatabase");
         }
     }
 }
@@ -131,7 +131,7 @@ void BrickLink::parseJsonColors()
             fields["color_name"] = object.value("color_name").toVariant();
             fields["color_code"] = object.value("color_code").toVariant();
             fields["color_type"] = object.value("color_type").toVariant();
-            model->addItemToTable(fields);
+            model->addItemToTable(fields, "catalogDatabase");
         }
     }
 }

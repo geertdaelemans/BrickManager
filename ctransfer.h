@@ -42,7 +42,7 @@ public:
         void *userObject ( ) const       { return m_userobject; }
         QDateTime lastModified ( ) const { QDateTime d; d.setTime_t ( m_filetime ); return d; }
         bool notModifiedSince ( ) const  { return m_not_modified; }
-        enum returnType {Login, File, XML, ZIP, Tab};
+        enum returnType {Login, File, XML, ZIP, Tab, NoReturn};
         enum httpMethod {Get, Post};
 
     private:

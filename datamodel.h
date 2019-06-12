@@ -61,7 +61,6 @@ public:
     QSqlError truncateSqlTable(QString database = "tempDatabase");
     QSqlError addItemToTable(QMap<QString, QVariant> fields, QString database = "tempDatabase");
 
-
 private:
     QString sqlTable;
     int sortColumn = 0;
