@@ -813,7 +813,6 @@ void CTransfer::gotten(CTransfer::Job* job)
 
     // TAB DELIMITED EXPERIMENT
     else if (job->m_type == Job::Tab) {
-        qDebug() << "Parsing catalog file" << job->effectiveUrl() << "ID" << job->m_id;
         if (job->m_data) {
 
             // Testing for Log-in OK
@@ -827,8 +826,8 @@ void CTransfer::gotten(CTransfer::Job* job)
 
             QString category = job->m_name;
             if (m_progressDialog) {
-                m_progressDialog->setMessageText(tr("Finished importing %1").arg(category));
-                m_progressDialog->setTextBlock(tr("Imported %1 (%2 kB)").arg(category).arg(QString::number(job->m_data->size()/1024.0, 'f', 1)));
+                m_progressDialog->setMessageText(tr("Finished importing %1.").arg(category));
+                m_progressDialog->setTextBlock(tr("Downloaded %1 (%2 kB).").arg(category).arg(QString::number(job->m_data->size()/1024.0, 'f', 1)));
             }
             QByteArray *data = job->m_data;
             populateDatabase(category, data);
@@ -844,7 +843,6 @@ void CTransfer::gotten(CTransfer::Job* job)
 
     // CATALOG FILE SEQUENCE
     else if (job->m_type == Job::File) {
-        qDebug() << "Parsing catalog file" << job->effectiveUrl() << "ID" << job->m_id;
         QFile *file = job->file();
         if(file) {
              if (file->size()) {
@@ -887,7 +885,7 @@ void CTransfer::gotten(CTransfer::Job* job)
                 file->close();
             }
         } else {
-    //            qDebug() << "No file detected...";
+            qDebug() << "No file detected...";
 
     //            QByteArray *data = j->data();
 
@@ -952,8 +950,6 @@ void CTransfer::gotten(CTransfer::Job* job)
         qDebug("gottenStore()");
         QByteArray *data = job->data();
 
-        bool ok = false;
-
         if (data && data->size()) {
             qDebug() << "Response" << data->mid(0, 1000);//   ->size();//      .toText.mid(0,100);
             QBuffer *store_buffer = new QBuffer(data);
@@ -974,7 +970,6 @@ void CTransfer::gotten(CTransfer::Job* job)
     //					if ( items ) {
     //						m_items += *items;
     //						delete items;
-                        ok = true;
     //					}
     //					else
     //						m_progress-> setErrorText ( tr( "Could not parse the XML data for the store inventory." ));
@@ -1051,11 +1046,7 @@ int CTransfer::populateDatabase(QString category, QByteArray* data)
 
     if (data) {
 
-        // Prepare data model
-        qDebug() << "TableName" << sqlTableName;
-        m_progressDialog->setMessageText(tr("Started populating database."));
-        m_progressDialog->setTextBlock(tr("Started populating database."));
-
+        // Prepare transaction
         QSqlDatabase::database("catalogDatabase").transaction();
 
         // Delete table if exists
@@ -1151,8 +1142,8 @@ int CTransfer::populateDatabase(QString category, QByteArray* data)
 
     QSqlDatabase::database("catalogDatabase").commit();
 
-    m_progressDialog->setMessageText(tr("Finished populating database."));
-    m_progressDialog->setTextBlock(tr("Finished populating database with %1 records.").arg(counter));
+    m_progressDialog->setMessageText(tr("Populated %1 database.").arg(category));
+    m_progressDialog->setTextBlock(tr("Populated %1 database with %2 records.").arg(category).arg(counter));
 
     QString queryString;
     queryString = "SELECT DISTINCT category_id FROM " + sqlTableName;
@@ -1167,10 +1158,6 @@ int CTransfer::populateDatabase(QString category, QByteArray* data)
             qDebug() << q.lastError();
         q.exec();
     }
-
-    m_progressDialog->setMessageText(tr("Database indexed."));
-    m_progressDialog->setTextBlock(tr("Database indexed."));
-
     return counter;
 }
 
