@@ -127,7 +127,7 @@ QByteArray CTransfer::buildQueryString( const QMap<QString, QString> &kvl)
  * @param high_priority
  * @return CTransfer::Job
  */
-CTransfer::Job *CTransfer::retrieve(Job::httpMethod method, const QByteArray &url, const QMap<QString, QString> &query, Job::returnType returnType, QString name, bool tracking, time_t ifnewer, QFile *file, void *userobject, bool high_priority)
+CTransfer::Job *CTransfer::retrieve(Job::httpMethod method, const QByteArray &url, const QMap<QString, QString> &query, Job::returnType returnType, QString name, bool tracking, time_t ifnewer, QFile *file, void *userobject, bool high_priority, Tables table)
 {
     if(url.isEmpty() || (file && (!file->isOpen() || !file->isWritable())))
         return nullptr;
@@ -143,6 +143,7 @@ CTransfer::Job *CTransfer::retrieve(Job::httpMethod method, const QByteArray &ur
     job->m_ifnewer = ifnewer;
 
     job->m_name = name;
+    job->m_table = table;
     job->m_data = file ? nullptr : new QByteArray ( );
     job->m_file = file;
     job->m_userobject = userobject;
@@ -560,8 +561,7 @@ void CTransfer::transferProgress(CTransfer::Job *j, int s, int t)
  */
 void CTransfer::transferDone(CTransfer::Job *j)
 {
-    qDebug() << "ProgressDialog::transferDone";
-    qDebug() << "ID" << j->m_id;
+    qDebug() << QString("CTransfer::transferDone ID%1").arg(j->m_id);
 
     if (j && j->file() && j->file()->isOpen()) {
         j->file()->close();
@@ -637,7 +637,6 @@ void CTransfer::brickLinkLogin(ProgressDialog *pd)
 
 }
 
-
 void CTransfer::importCatalog(ProgressDialog *pd)
 {
     m_progressDialog = pd;
@@ -656,6 +655,7 @@ void CTransfer::importCatalog(ProgressDialog *pd)
 
     char typeCode[] = {'S', 'P', 'M', 'B', 'G', 'C', 'I', 'O'};
     QString typeName[] = {"sets", "parts", "minifigs", "books", "gear", "catalogs", "instructions", "boxes"};
+    Tables tableName[] = {Tables::sets, Tables::parts, Tables::minifigs, Tables::books, Tables::gear, Tables::catalogs, Tables::instructions, Tables::boxes};
 
     QMap<QString, QString> query;
     query["viewType"] = "0";            // 0: Catalog Items, 1: Item Types, 2: Categories, 3: Colors, 4: Inventory, 5: Part and Color Codes
@@ -665,48 +665,17 @@ void CTransfer::importCatalog(ProgressDialog *pd)
     query["selDim"] = "Y";              // Include Dimensions
     query["itemTypeInv"] = "S";         // S: Set, P: Part, M: Minifig, B: Book, G: Gear
     query["itemNo"] = "";               // Item number
-//    query["downloadType"] = "X";        // T: Tab-Delimited File, X: XML
-    query["downloadType"] = "T";        // T: Tab-Delimited File, X: XML
-    QDateTime dt;
+    query["downloadType"] = "X";        // T: Tab-Delimited File, X: XML
 
+    // Process catalogs
     for (int i = 0; i < static_cast<int>(sizeof(typeCode)/sizeof(*typeCode)) ; i++) {
         query["itemType"] = typeCode[i];
-        m_job = retrieve(Job::Post, url, query, Job::Tab, typeName[i], true);
-    }
-}
-
-
-void CTransfer::importStore(ProgressDialog *pd)
-{
-    m_progressDialog = pd;
-    if (m_progressDialog) {
-        m_progressDialog->setAutoClose(false);
-        m_progressDialog->setProgressVisible(true);
-        m_progressDialog->setTextBlockVisible(true);
-        m_progressDialog->setWindowTitle(tr("Importing BrickLink Store"));
-        m_progressDialog->setHeaderText(tr("Importing BrickLink Store"));
-        m_progressDialog->setMessageText(tr("Download: %1/%2 KB"));
-        m_progressDialog->layout();
+        m_job = retrieve(Job::Post, url, query, Job::PartColor, typeName[i], true, 0, nullptr, nullptr, false, tableName[i]);
     }
 
-    const char *url = "http://www.bricklink.com/invExcelFinal.asp";
-
-    QMap<QString, QString> query;
-    query["itemType"] = "";
-    query["catID"] = "";
-    query["colorID"] = "";
-    query["invNew"] = "";
-    query["itemYear"] = "";
-    query["viewType"] = "x";    // XML
-    query["invStock"] = "Y";
-    query["invStockOnly"] = "";
-    query["invQty"] = "";
-    query["invQtyMin"] = "0";
-    query["invQtyMax"] = "0";
-    query["invBrikTrak"] = "";
-    query["invDesc"] = "";
-
-    m_job = retrieve(Job::Post, url, query, Job::XML, "store");
+    // Process partcolor
+    query["viewType"] = "5";
+    m_job = retrieve(Job::Post, url, query, Job::PartColor, "partcolor", true, 0, nullptr, nullptr, false, Tables::partcolor);
 }
 
 
@@ -714,7 +683,6 @@ void CTransfer::gotten(CTransfer::Job* job)
 {
     // LOGIN SEQUENCE
     if (job->m_type == Job::Login) {
-        qDebug("parseLogin()");
         QByteArray *data = job->data();
 
         if (data && data->size()) {
@@ -759,7 +727,7 @@ void CTransfer::gotten(CTransfer::Job* job)
     }
 
     // TAB DELIMITED INPUT
-    else if (job->m_type == Job::Tab) {
+    else {
         if (job->m_data) {
 
             // Testing for Log-in OK
@@ -776,8 +744,7 @@ void CTransfer::gotten(CTransfer::Job* job)
                 m_progressDialog->setMessageText(tr("Finished importing %1.").arg(category));
                 m_progressDialog->setTextBlock(tr("Downloaded %1 (%2 kB).").arg(category).arg(QString::number(job->m_data->size()/1024.0, 'f', 1)));
             }
-            QByteArray *data = job->m_data;
-            populateDatabase(category, data);
+            populateDatabase(job);
         }
         if (isJobCompleted(job)) {
             m_progressDialog->setMessageText(tr("Completed downloading."));
@@ -787,84 +754,51 @@ void CTransfer::gotten(CTransfer::Job* job)
             m_bytesReceived = 0;
         }
     }
-
-    // STORE INVENTORY SEQUENCE
-    else if (job->m_type == Job::XML) {
-        qDebug("gottenStore()");
-        QByteArray *data = job->data();
-
-        if (data && data->size()) {
-            qDebug() << "Response" << data->mid(0, 1000);//   ->size();//      .toText.mid(0,100);
-            QBuffer *store_buffer = new QBuffer(data);
-
-            if (store_buffer->open(QIODevice::ReadOnly)) {
-    //				BrickLink::InvItemList *items = 0;
-                qDebug() << store_buffer->data();
-                QString emsg;
-                int eline = 0, ecol = 0;
-                QDomDocument doc;
-
-                if (doc.setContent(store_buffer, &emsg, &eline, &ecol)) {
-    //					QDomElement root = doc. documentElement ( );
-
-    //					if (( root. nodeName ( ) == "INVENTORY" ))
-    //						items = BrickLink::inst ( )-> parseItemListXML ( root, BrickLink::XMLHint_MassUpload /*, &invalid_items */);
-
-    //					if ( items ) {
-    //						m_items += *items;
-    //						delete items;
-    //					}
-    //					else
-    //						m_progress-> setErrorText ( tr( "Could not parse the XML data for the store inventory." ));
-                }
-                else {
-                    if ((QByteArray(data->data(), 15) == "<!doctype html>") && (QByteArray(data->data(), data->size()).indexOf("Error!", 1) != -1 )) {
-                        qDebug("Either your username or password are incorrect.");
-                        if (m_progressDialog)
-                            m_progressDialog->setErrorText(tr("Either your username or password are incorrect."));
-                    }
-                    else {
-                        QString errorMessage = QString("Could not parse the XML data for the store inventory:<br /><i>Line %1, column %2: %3</i>" ).arg(eline).arg(ecol).arg(emsg);
-                        qDebug() << errorMessage;
-                        if (m_progressDialog)
-                            m_progressDialog->setErrorText(errorMessage);
-                    }
-                }
-            } else
-                qDebug("Error opening Store Buffer");
-            if (isJobCompleted(job)) {
-                m_progressDialog->setMessageText(tr("Completed downloading."));
-                m_progressDialog->setTextBlock(tr("Completed downloading %1 kB.").arg(QString::number(m_bytesReceived/1024.0, 'f', 1)));
-                m_progressDialog->setFinished(true);
-                m_progressDialog->setProgressVisible(false);
-                m_bytesReceived = 0;
-            }
-//            if (m_progressDialog)
-//                m_progressDialog->setFinished(ok);
-        }
-    }
 }
 
-int CTransfer::populateDatabase(QString category, QByteArray* data)
+int CTransfer::populateDatabase(CTransfer::Job* job)
 {
     int counter = 0;
-    QString sqlTableName = category;
+    QByteArray *data = job->m_data;
+    QString job_name = job->m_name;
+    Tables table = job->m_table;
+    QString sqlTableName = job->m_name;
 
-    if (data) {
+    if (data && data->size()) {
 
         // Prepare transaction
         QSqlDatabase::database("catalogDatabase").transaction();
+
+        DataModel *p_dataModel = new DataModel(table);
+        sqlTableName = p_dataModel->getSqlTableName();
 
         // Delete table if exists
         QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
         q.exec("DROP TABLE IF EXISTS " + sqlTableName);
 
-        DataModel *p_dataModel = new DataModel(Tables::parts, sqlTableName);
+        // Create table
         p_dataModel->initiateSqlTableAuto("catalogDatabase");
+
+        // Get translation table from XML tags to SQL columns
+        QMap<QString, QString> translationTable = p_dataModel->getTranslationTable();
+        translationTable.remove("id");
 
         // Prepare query string
         QString qryString = "INSERT INTO ";
-        qryString += p_dataModel->getSqlTableName() + "(id, item_no, item_name, category_id) VALUES(?, ?, ?, ?)";
+        qryString += p_dataModel->getSqlTableName() + " (";
+        bool first = true;
+        QString tempString;
+        for (QString key : translationTable.keys()) {
+            if (first) {
+                qryString += translationTable[key];
+                tempString += ":" + translationTable[key];
+                first = false;
+            } else {
+                qryString += ", " + translationTable[key];
+                tempString += ", :" + translationTable[key];
+            }
+        }
+        qryString += ") VALUES (" + tempString + ")";
 
         // Prepare query
         if (!q.prepare(qryString)) {
@@ -873,96 +807,64 @@ int CTransfer::populateDatabase(QString category, QByteArray* data)
             return 0;
         }
 
-        // Finally parse tab-delimited data
-        QList<QByteArray> lines = data->split('\n');
-        counter = 0;
-        foreach (const QByteArray &line, lines) {
-            QList<QByteArray> dataFields = line.split('\t');
-            if (dataFields.size() > 3 && counter > 0) {
-                q.addBindValue(counter);
-                q.addBindValue(dataFields[2]); // Number
-                q.addBindValue(dataFields[3]); // Name
-                q.addBindValue(dataFields[0].toInt()); // Category ID
-                q.exec();
-            }
-            counter++;
-        }
-    } else {
-        counter = 0;
-
-        QFile file("database/" + category + ".xml");
-
-        if(!file.open(QIODevice::ReadOnly)) {
-            QMessageBox msg;
-            msg.setIcon(QMessageBox::Critical);
-            msg.setText(file.errorString());
-            msg.exec();
-            return 0;
-        }
-
-        // Get file information
-        QFileInfo info(file);
-        QString tableName = info.baseName();
-        QString sqlTableName = tableName;
-        sqlTableName.remove(QRegExp("[^a-zA-Z\\d]"));
-
-        //The QDomDocument class represents an XML document.
-        QDomDocument xmlInventory;
-
-        // Set data into the QDomDocument before processing
-        xmlInventory.setContent(&file);
-        file.close();
-
-        // Extract the root markup
-        QDomElement catalog = xmlInventory.documentElement();
-        QDomElement item = catalog.firstChild().toElement();
-
-        // Prepare data model
-        qDebug() << "TableName" << sqlTableName;
-        DataModel *p_dataModel = new DataModel(Tables::parts, sqlTableName);
-        p_dataModel->initiateSqlTableAuto("tempDatabase");
-
-        // Read each child of the Inventory node
-        while (!item.isNull()) {
-
-            // Prepare fields
-            QMap<QString, QVariant> fields;
-            if (item.tagName() == "ITEM") {
-                QDomElement field = item.firstChild().toElement();
-                // Read Name and value
-                while (!field.isNull()) {
-                    fields[field.tagName()] = field.firstChild().toText().data();
-                    // Next field
-                    field = field.nextSibling().toElement();
+        // Parse XML data
+        QBuffer *store_buffer = new QBuffer(data);
+        if (store_buffer->open(QIODevice::ReadOnly)) {
+            QString emsg;
+            int eline = 0, ecol = 0;
+            QDomDocument doc;
+            if (doc.setContent(store_buffer, &emsg, &eline, &ecol)) {
+                QDomElement root = doc.documentElement();
+                QDomNodeList itemList = root.childNodes(); // CODES level
+                qDebug() << "path" << root.tagName() << itemList.at(0).toElement().tagName();
+                for (int i = 0; i < itemList.size(); i++){
+                    QDomNode activeNode = itemList.at(i);  // ITEM level
+                    for(QString tagName : translationTable.keys()) {
+                        q.bindValue(":" + translationTable[tagName], activeNode.firstChildElement(tagName).text());
+                    }
+                    q.exec();
+                    counter++;
                 }
             }
-
-            // Add collected fields to SQL database
-            QSqlError error = p_dataModel->addItemToTable(fields);
-
-            // Next sibling
-            counter++;
-            item = item.nextSibling().toElement();
+            else {
+                if ((QByteArray(data->data(), 15) == "<!doctype html>") && (QByteArray(data->data(), data->size()).indexOf("Error!", 1) != -1 )) {
+                    qDebug("Either your username or password are incorrect.");
+                    if (m_progressDialog)
+                        m_progressDialog->setErrorText(tr("Either your username or password are incorrect."));
+                }
+                else {
+                    QString errorMessage = QString("Could not parse the XML data for the store inventory:<br /><i>Line %1, column %2: %3</i>" ).arg(eline).arg(ecol).arg(emsg);
+                    qDebug() << errorMessage;
+                    if (m_progressDialog)
+                        m_progressDialog->setErrorText(errorMessage);
+                }
+            }
         }
+
+        QSqlDatabase::database("catalogDatabase").commit();
     }
 
-    QSqlDatabase::database("catalogDatabase").commit();
-
-    m_progressDialog->setMessageText(tr("Populated %1 database.").arg(category));
-    m_progressDialog->setTextBlock(tr("Populated %1 database with %2 records.").arg(category).arg(counter));
-
-    QString queryString;
-    queryString = "SELECT DISTINCT category_id FROM " + sqlTableName;
-    QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
-    if (!q.prepare(queryString))
-        qDebug() << q.lastError();
-    q.exec();
-    while (q.next()) {
-        int catNo = q.value(0).toInt();
+    // Update the categories database with catalog information
+    if (table != Tables::partcolor) {
+        QSqlDatabase::database("catalogDatabase").transaction();
+        QString queryString;
+        queryString = "SELECT DISTINCT category_id FROM " + sqlTableName;
         QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
-        if (!q.prepare(QString("UPDATE categories SET %1 = 1 WHERE category_id == %2").arg(sqlTableName).arg(catNo)))
+        if (!q.prepare(queryString))
             qDebug() << q.lastError();
         q.exec();
+        while (q.next()) {
+            int catNo = q.value(0).toInt();
+            QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
+            if (!q.prepare(QString("UPDATE categories SET %1 = 1 WHERE category_id == %2").arg(sqlTableName).arg(catNo)))
+                qDebug() << q.lastError();
+            q.exec();
+        }
+        QSqlDatabase::database("catalogDatabase").commit();
     }
+
+    m_progressDialog->setMessageText(tr("Populated %1 database.").arg(sqlTableName));
+    m_progressDialog->setTextBlock(tr("Populated %1 database with %2 records.").arg(sqlTableName).arg(counter));
+
     return counter;
 }

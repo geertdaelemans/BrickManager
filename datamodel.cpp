@@ -116,8 +116,42 @@ DataModel::DataModel(Tables table, QString tableName)
         sortColumn = 1;
         sortOrder = Qt::DescendingOrder;
         break;
+    case Tables::books:
+    case Tables::boxes:
+    case Tables::catalogs:
+    case Tables::gear:
+    case Tables::instructions:
+    case Tables::minifigs:
     case Tables::parts:
-        sqlTable = tableName;
+    case Tables::sets:
+        switch(table) {
+            case Tables::books:
+                sqlTable = "books";
+                break;
+            case Tables::boxes:
+                sqlTable = "boxes";
+                break;
+            case Tables::catalogs:
+                sqlTable = "catalogs";
+                break;
+            case Tables::gear:
+                sqlTable = "gear";
+                break;
+            case Tables::instructions:
+                sqlTable = "instructions";
+                break;
+            case Tables::minifigs:
+                sqlTable = "minifigs";
+                break;
+            case Tables::parts:
+                sqlTable = "parts";
+                break;
+            case Tables::sets:
+                sqlTable = "sets";
+                break;
+            default:
+                sqlTable = "parts";
+        }
         columns[0] = Column("id", "id", tr("ID"), "integer", false, 100);
         columns[1] = Column("item_type", "ITEMTYPE", tr("Type"), "varchar", false, 50);
         columns[2] = Column("item_no", "ITEMID", tr("Part #"), "varchar", true, 100);
@@ -129,6 +163,16 @@ DataModel::DataModel(Tables table, QString tableName)
         columns[8] = Column("size_y", "ITEMDIMY", tr("Size Y"), "integer", false, 50);
         columns[9] = Column("size_z", "ITEMDIMZ", tr("Size Z"), "integer", false, 50);
         sortColumn = 1;
+        sortOrder = Qt::DescendingOrder;
+        break;
+    case Tables::partcolor:
+        sqlTable = "partcolor";
+        columns[0] = Column("id", "id", tr("ID"), "integer", false, 100);
+        columns[1] = Column("codename", "CODENAME", tr("Codename"), "varchar", false, 50);
+        columns[2] = Column("color_name", "COLOR", tr("Color Name"), "varchar", false, 100);
+        columns[3] = Column("item_id", "ITEMID", tr("Item ID"), "varchar", false, 500);
+        columns[4] = Column("item_type", "ITEMTYPE", tr("Item Type"), "varchar", false, 500);
+        sortColumn = 3;
         sortOrder = Qt::DescendingOrder;
         break;
     case Tables::userinventories:
@@ -197,17 +241,24 @@ Qt::SortOrder DataModel::getSortOrder() {
     return sortOrder;
 }
 
+QMap<QString, QString> DataModel::getTranslationTable() {
+    QMap<QString, QString> output;
+    for(int i = 0; i < columns.size(); i++) {
+        output[columns[i].property.importName] = columns[i].property.name;
+    }
+    return output;
+}
+
 QSqlError DataModel::initiateSqlTable(QString database) {
     QString queryString;
-    queryString = "CREATE TABLE " + getSqlTableName() + "(" + columns[0].property.name + " " + columns[0].property.sqlType + " PRIMARY KEY" ;
+    queryString = "CREATE TABLE IF NOT EXISTS " + getSqlTableName() + "(" + columns[0].property.name + " " + columns[0].property.sqlType + " PRIMARY KEY" ;
     for(int i = 1; i < getNumberOfColumns(); i++) {
         queryString += ", " + columns[i].property.name + " " + columns[i].property.sqlType;
     }
     queryString += ")";
-    qDebug() << queryString;
     QSqlQuery q(queryString, QSqlDatabase::database(database));
     if (!q.exec()) {
-        qDebug() << q.lastError();
+        qDebug() << "DataModel::initiateSqlTableAuto" << q.lastError();
         return q.lastError();
     }
     return QSqlError();
@@ -215,14 +266,16 @@ QSqlError DataModel::initiateSqlTable(QString database) {
 
 QSqlError DataModel::initiateSqlTableAuto(QString database) {
     QString queryString;
-    queryString = "CREATE TABLE " + getSqlTableName() + "(id INTEGER PRIMARY KEY AUTOINCREMENT" ;
+    queryString = "CREATE TABLE IF NOT EXISTS " + getSqlTableName() + "(id INTEGER PRIMARY KEY AUTOINCREMENT" ;
     for(int i = 1; i < getNumberOfColumns(); i++) {
         queryString += ", " + columns[i].property.name + " " + columns[i].property.sqlType;
     }
     queryString += ")";
     QSqlQuery q(queryString, QSqlDatabase::database(database));
-    if (!q.exec())
+    if (!q.exec()) {
+        qDebug() << "DataModel::initiateSqlTableAuto" << q.lastError().text();
         return q.lastError();
+    }
     return QSqlError();
 }
 

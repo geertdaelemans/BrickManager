@@ -32,12 +32,20 @@ public:
 };
 
 enum Tables {
+    books,
+    boxes,
+    catalogs,
+    brickstock,
     categories,
     colors,
-    brickstock,
+    gear,
+    instructions,
+    minifigs,
     orderitem,
     orders,
+    partcolor,
     parts,
+    sets,
     userinventories
 };
 
@@ -51,6 +59,7 @@ public:
     int getNumberOfColumns();
     QString getSqlColumnName(int column);
     QString getColumnHeader(int column);
+    QMap<QString, QString> getTranslationTable();
     bool isColumnVisible(int column);
     void setColumnVisible(int column, bool visible);
     int getColumnWidth(int column);

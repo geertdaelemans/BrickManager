@@ -1,5 +1,6 @@
 #include "datamodel.h"
 #include "sqldatabase.h"
+#include "bricklink.h"
 
 SqlDatabase::SqlDatabase()
 {
@@ -134,9 +135,7 @@ QSqlError SqlDatabase::initDb()
         qDebug() << "tempDataBase" << tempDataBase.lastError();
 
     QStringList tables = catalogDataBase.tables();
-    qDebug() << "catalogDataBase" << tables;
     QStringList tempTables = tempDataBase.tables();
-    qDebug() << "tempDataBase" << tempTables;
 
     // Delete previous Order Item tables
     foreach (QString table, tables) {
