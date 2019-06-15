@@ -13,8 +13,8 @@ Currently supported features:
 * Import your filed orders from BrickLink
 * Get inventory of each order you imported
 * Add items to any inventory (limited functionality)
-* Import part catalog database (currently not live but based upon an internal XML)
-* All data stored in local SQL database (in memory)
+* Import part catalog database (using BrickLink log-in)
+* All data stored in local SQL database (local file)
 * Pop-up window to (un)hide columns
 
 This is still a work in progress... many features still need to be implemented.
