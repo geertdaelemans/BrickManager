@@ -47,17 +47,16 @@ DataModel::DataModel(Tables table, QString tableName)
         break;
     case Tables::categories:
         sqlTable = "categories";
-        columns[0] = Column("category_id", "category_id", tr("ID"), "integer", false, 50);
-        columns[1] = Column("category_name", "category_name", tr("Name"), "varchar", true, 300);
-        columns[2] = Column("parent_id", "parent_id", tr("Parent"), "integer", false, 80);
-        columns[3] = Column("books", "books", tr("Books"), "bool", false, 50);
-        columns[4] = Column("boxes", "boxes", tr("Original Boxes"), "bool", false, 50);
-        columns[5] = Column("catalogs", "catalogs", tr("Catalogs"), "bool", false, 50);
-        columns[6] = Column("gear", "gear", tr("Gear"), "bool", false, 50);
-        columns[7] = Column("instructions", "instructions", tr("Instructions"), "bool", false, 50);
-        columns[8] = Column("minifigs", "minifigs", tr("Minifigs"), "bool", false, 50);
-        columns[9] = Column("parts", "parts", tr("Parts"), "bool", false, 50);
-        columns[10] = Column("sets", "sets", tr("Sets"), "bool", false, 50);
+        columns[0] = Column("id", "CATEGORY", tr("ID"), "integer", false, 50);
+        columns[1] = Column("category_name", "CATEGORYNAME", tr("Name"), "varchar", true, 300);
+        columns[2] = Column("books", "books", tr("Books"), "bool", false, 50);
+        columns[3] = Column("boxes", "boxes", tr("Original Boxes"), "bool", false, 50);
+        columns[4] = Column("catalogs", "catalogs", tr("Catalogs"), "bool", false, 50);
+        columns[5] = Column("gear", "gear", tr("Gear"), "bool", false, 50);
+        columns[6] = Column("instructions", "instructions", tr("Instructions"), "bool", false, 50);
+        columns[7] = Column("minifigs", "minifigs", tr("Minifigs"), "bool", false, 50);
+        columns[8] = Column("parts", "parts", tr("Parts"), "bool", false, 50);
+        columns[9] = Column("sets", "sets", tr("Sets"), "bool", false, 50);
         sortColumn = 1;
         sortOrder = Qt::AscendingOrder;
         break;

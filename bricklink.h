@@ -10,7 +10,6 @@ class BrickLink : public QOAuth1
 public:
     BrickLink(QObject *parent = nullptr);
     bool checkConnection(QObject *parent = nullptr);
-    void importCategories();
     void importColors();
     void importOrderItem(int orderID);
     void importOrders(bool filed);
@@ -26,10 +25,8 @@ private slots:
 
 private:
     Q_DISABLE_COPY(BrickLink)
-    void parseJsonCategories();
     void parseJsonColors();
     void parseJsonOrders();
-//    void parseJsonOrderItem();
     void parseJsonUserInventory();
 };
 

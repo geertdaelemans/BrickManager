@@ -44,16 +44,6 @@ bool BrickLink::checkConnection(QObject *parent)
     return true;
 }
 
-
-void BrickLink::importCategories()
-{
-    QUrl url("https://api.bricklink.com/api/store/v1/categories");
-    QVariantMap parameters;
-    QNetworkReply *reply = this->get(url, parameters);
-
-    connect(reply, &QNetworkReply::finished, this, &BrickLink::parseJsonCategories);
-}
-
 void BrickLink::importColors()
 {
     QUrl url("https://api.bricklink.com/api/store/v1/colors");
@@ -92,23 +82,6 @@ void BrickLink::importUserInventory()
     QNetworkReply *reply = this->get(url, parameters);
 
     connect(reply, &QNetworkReply::finished, this, &BrickLink::parseJsonUserInventory);
-}
-
-void BrickLink::parseJsonCategories()
-{
-    QJsonArray array = BrickLink::validateBricklinkResponse(sender());
-    DataModel *model = new DataModel(Tables::categories);
-    if (array.size()) {
-        for (auto value : array) {
-            Q_ASSERT(value.isObject());
-            const auto object = value.toObject();
-            QMap<QString, QVariant> fields;
-            fields["category_id"] = object.value("category_id").toVariant();
-            fields["category_name"] = object.value("category_name").toVariant();
-            fields["parent_id"] = object.value("parent_id").toVariant();
-            model->addItemToTable(fields, "catalogDatabase");
-        }
-    }
 }
 
 void BrickLink::parseJsonColors()

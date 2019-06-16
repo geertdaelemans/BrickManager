@@ -667,7 +667,12 @@ void CTransfer::importCatalog(ProgressDialog *pd)
     query["itemNo"] = "";               // Item number
     query["downloadType"] = "X";        // T: Tab-Delimited File, X: XML
 
-    // Process catalogs
+    // Process categories
+    query["viewType"] = "2";            // Categories
+    m_job = retrieve(Job::Post, url, query, Job::PartColor, "categories", true, 0, nullptr, nullptr, false, Tables::categories);
+
+    // Process all catalogs
+    query["viewType"] = "0";            // Catalog Items
     for (int i = 0; i < static_cast<int>(sizeof(typeCode)/sizeof(*typeCode)) ; i++) {
         query["itemType"] = typeCode[i];
         m_job = retrieve(Job::Post, url, query, Job::PartColor, typeName[i], true, 0, nullptr, nullptr, false, tableName[i]);
@@ -856,7 +861,7 @@ int CTransfer::populateDatabase(CTransfer::Job* job)
         while (q.next()) {
             int catNo = q.value(0).toInt();
             QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
-            if (!q.prepare(QString("UPDATE categories SET %1 = 1 WHERE category_id == %2").arg(sqlTableName).arg(catNo)))
+            if (!q.prepare(QString("UPDATE categories SET %1 = 1 WHERE id == %2").arg(sqlTableName).arg(catNo)))
                 qDebug() << q.lastError();
             q.exec();
         }

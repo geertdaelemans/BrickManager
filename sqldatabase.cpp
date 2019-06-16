@@ -79,7 +79,7 @@ QString SqlDatabase::getCategoryById(int category_id)
 {
     QString output;
     QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
-    if (!q.prepare("SELECT category_name FROM categories WHERE category_id=" + QString::number(category_id)))
+    if (!q.prepare("SELECT category_name FROM categories WHERE id=" + QString::number(category_id)))
         return "";
     q.exec();
     while (q.next()) {
