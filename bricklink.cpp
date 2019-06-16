@@ -44,15 +44,6 @@ bool BrickLink::checkConnection(QObject *parent)
     return true;
 }
 
-void BrickLink::importColors()
-{
-    QUrl url("https://api.bricklink.com/api/store/v1/colors");
-    QVariantMap parameters;
-    QNetworkReply *reply = this->get(url, parameters);
-
-    connect(reply, &QNetworkReply::finished, this, &BrickLink::parseJsonColors);
-}
-
 void BrickLink::importOrderItem(int orderID)
 {
     QUrl url;
@@ -82,31 +73,6 @@ void BrickLink::importUserInventory()
     QNetworkReply *reply = this->get(url, parameters);
 
     connect(reply, &QNetworkReply::finished, this, &BrickLink::parseJsonUserInventory);
-}
-
-void BrickLink::parseJsonColors()
-{
-    QJsonArray array = BrickLink::validateBricklinkResponse(sender());
-    DataModel *model = new DataModel(Tables::colors);
-    if (array.size()) {
-        // Add the Not Applicable color
-        QMap<QString, QVariant> fields;
-        fields["color_id"] = 0;
-        fields["color_name"] = "(Not Applicable)";
-        fields["color_code"] = "FFFFFF";
-        fields["color_type"] = "(Not Applicable)";
-        model->addItemToTable(fields);
-        // Add all other colors
-        for (auto value : array) {
-            Q_ASSERT(value.isObject());
-            const auto object = value.toObject();
-            fields["color_id"] = object.value("color_id").toVariant();
-            fields["color_name"] = object.value("color_name").toVariant();
-            fields["color_code"] = object.value("color_code").toVariant();
-            fields["color_type"] = object.value("color_type").toVariant();
-            model->addItemToTable(fields, "catalogDatabase");
-        }
-    }
 }
 
 void BrickLink::parseJsonOrderItem(int orderID)

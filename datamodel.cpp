@@ -62,10 +62,10 @@ DataModel::DataModel(Tables table, QString tableName)
         break;
     case Tables::colors:
         sqlTable = "colors";
-        columns[0] = Column("color_id", "color_id", tr("ID"), "integer", false, 50);
-        columns[1] = Column("color_name", "color_name", tr("Name"), "varchar", true, 200);
-        columns[2] = Column("color_code", "color_code", tr("Code"), "varchar", false, 80);
-        columns[3] = Column("color_type", "color_type", tr("Type"), "varchar", true, 100);
+        columns[0] = Column("id", "COLOR", tr("ID"), "integer", false, 50);
+        columns[1] = Column("color_name", "COLORNAME", tr("Name"), "varchar", true, 200);
+        columns[2] = Column("color_code", "COLORRGB", tr("Code"), "varchar", false, 80);
+        columns[3] = Column("color_type", "COLORTYPE", tr("Type"), "varchar", true, 100);
         sortColumn = 1;
         sortOrder = Qt::AscendingOrder;
         break;

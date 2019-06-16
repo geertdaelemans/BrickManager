@@ -19,7 +19,7 @@ QString SqlDatabase::getColorById(int color_id)
 {
     QString output;
     QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
-    if (!q.prepare("SELECT color_name FROM colors WHERE color_id=" + QString::number(color_id)))
+    if (!q.prepare("SELECT color_name FROM colors WHERE id=" + QString::number(color_id)))
         return "Color not found";
     q.exec();
     while (q.next()) {
@@ -39,7 +39,7 @@ QString SqlDatabase::getColorCodeById(int color_id)
 {
     QString output;
     QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
-    if (!q.prepare("SELECT color_code FROM colors WHERE color_id=" + QString::number(color_id)))
+    if (!q.prepare("SELECT color_code FROM colors WHERE id=" + QString::number(color_id)))
         return "Color not found";
     q.exec();
     while (q.next()) {

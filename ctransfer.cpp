@@ -671,6 +671,10 @@ void CTransfer::importCatalog(ProgressDialog *pd)
     query["viewType"] = "2";            // Categories
     m_job = retrieve(Job::Post, url, query, Job::PartColor, "categories", true, 0, nullptr, nullptr, false, Tables::categories);
 
+    // Process colors
+    query["viewType"] = "3";            // Categories
+    m_job = retrieve(Job::Post, url, query, Job::PartColor, "colors", true, 0, nullptr, nullptr, false, Tables::colors);
+
     // Process all catalogs
     query["viewType"] = "0";            // Catalog Items
     for (int i = 0; i < static_cast<int>(sizeof(typeCode)/sizeof(*typeCode)) ; i++) {
@@ -679,7 +683,7 @@ void CTransfer::importCatalog(ProgressDialog *pd)
     }
 
     // Process partcolor
-    query["viewType"] = "5";
+    query["viewType"] = "5";            // Part and Color Codes
     m_job = retrieve(Job::Post, url, query, Job::PartColor, "partcolor", true, 0, nullptr, nullptr, false, Tables::partcolor);
 }
 

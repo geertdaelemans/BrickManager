@@ -27,8 +27,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_trans->brickLinkLogin();
 
-    bricklink.importColors();
-
     Q_UNUSED(mydB)
 }
 
