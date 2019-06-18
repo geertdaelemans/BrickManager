@@ -51,6 +51,26 @@ QString SqlDatabase::getColorCodeById(int color_id)
 
 
 /**
+ * Returns color ID by name
+ * @param name of color to retrieve
+ * @return color ID corresponding to id or -1 if no category
+ */
+int SqlDatabase::getColorIdByName(QString color_name)
+{
+    int id = -1;
+    QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
+    if (!q.prepare(QString("SELECT id FROM colors WHERE color_name='%1'").arg(color_name)))
+        return -1;
+    q.exec();
+    while(q.next()) {
+        id = q.value(0).toInt();
+    }
+    q.finish();
+    return id;
+}
+
+
+/**
  * Returns color code by name
  * @param name of color to retrieve
  * @return color code corresponding to id or empty string if no category
@@ -87,6 +107,26 @@ QString SqlDatabase::getCategoryById(int category_id)
     }
     q.finish();
     return output;
+}
+
+
+/**
+ * Returns ID's of all colors a part appears in
+ * @param id of part to retrieve
+ * @return list of color ID's, empty list when no colors found
+ */
+
+QList<int> SqlDatabase::getColorsOfPart(QString item_id)
+{
+    QList<int> colorList;
+    QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
+    if (!q.prepare("SELECT color_name FROM partcolor WHERE item_id=\"" + item_id + "\""))
+        return colorList;
+    q.exec();
+    while (q.next()) {
+        colorList.append(getColorIdByName(q.value(0).toString()));
+    }
+    return colorList;
 }
 
 
@@ -136,15 +176,6 @@ QSqlError SqlDatabase::initDb()
 
     QStringList tables = catalogDataBase.tables();
     QStringList tempTables = tempDataBase.tables();
-
-    // Delete previous Order Item tables
-    foreach (QString table, tables) {
-        if ((table != "colors") && (table != "categories") && (table != "parts") && (table != "books") && (table != "instructions")
-           && (table != "gear") && (table != "catalogs") && (table != "sets") && (table != "minifigs") && (table != "boxes")) {
-            QSqlQuery q(catalogDataBase);
-            q.exec("DROP TABLE IF EXISTS " + table);
-        }
-    }
 
     if (!tables.contains("categories")) {
         DataModel *catModel = new DataModel(Tables::categories);

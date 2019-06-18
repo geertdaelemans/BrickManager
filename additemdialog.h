@@ -19,25 +19,23 @@ public:
 private slots:
     void updateCategories(QString category = "parts");
     void statusAddButton();
-
-private slots:
     void on_addPushButton_clicked();
-
     void on_categoriesListView_clicked(const QModelIndex &index);
-
     void on_partsTableView_clicked(const QModelIndex &index);
-
     void on_colorsListView_clicked(const QModelIndex &index);
 
 signals:
     void insertItem(QList<QString> fields);
 
 private:
+    void setColorFilter(QString itemName = "");
     Ui::AddItemDialog *ui;
     QSqlTableModel *partsModel;
+    QSqlTableModel *colorsModel;
     bool m_categorySelected = false;
     bool m_partSelected = false;
     bool m_colorSelected = false;
+    int m_lastSelectedColor = -1;
 };
 
 #endif // ADDITEMDIALOG_H

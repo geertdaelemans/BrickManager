@@ -1,6 +1,7 @@
 #include "additemdialog.h"
 #include "datamodel.h"
 #include "listmodeldelegate.h"
+#include "sqldatabase.h"
 #include "ui_additemdialog.h"
 
 AddItemDialog::AddItemDialog(QWidget *parent) :
@@ -23,22 +24,12 @@ AddItemDialog::AddItemDialog(QWidget *parent) :
 
     connect(ui->w_item_types, SIGNAL(currentTextChanged(QString)), this, SLOT(updateCategories(QString)));
 
-    updateCategories();
-
     // Create the data models
     DataModel *colorsDataModel = new DataModel(Tables::colors);
-    QSqlTableModel *colorsModel = new QSqlTableModel(ui->colorsListView, QSqlDatabase::database("catalogDatabase"));
+    colorsModel = new QSqlTableModel(ui->colorsListView, QSqlDatabase::database("catalogDatabase"));
     colorsModel->setTable(colorsDataModel->getSqlTableName());
 
-    // Set filter to include BrickArm and/or Modulex colors
-    QSettings settings;
-    if(!settings.value("filter/includeBrickArmsColors").toBool() && !settings.value("filter/includeModulexColors").toBool()) {
-        colorsModel->setFilter(QString("color_type NOT LIKE '%%1%' AND color_type NOT LIKE '%%2%'").arg("BrickArms").arg("Modulex"));
-    } else if(!settings.value("filter/includeBrickArmsColors").toBool()) {
-        colorsModel->setFilter(QString("color_type NOT LIKE '%%1%'").arg("BrickArms"));
-    } else if(!settings.value("filter/includeModulexColors").toBool()) {
-        colorsModel->setFilter(QString("color_type NOT LIKE '%%1%'").arg("Modulex"));
-    }
+    updateCategories();
 
     // Set database relations
     int colorIdx = colorsModel->fieldIndex("color_name");
@@ -64,6 +55,54 @@ AddItemDialog::AddItemDialog(QWidget *parent) :
 AddItemDialog::~AddItemDialog()
 {
     delete ui;
+}
+
+void AddItemDialog::setColorFilter(QString itemName)
+{
+    bool reducedList = false;   // Reduced color list set to false by default
+
+    // Reduce color list if possible
+    if(itemName != "") {
+        QList<int> list = SqlDatabase::getColorsOfPart(itemName);
+        if (list.size()) {
+            QString filterString;
+            for(int i = 0; i < list.size(); i++) {
+                filterString += "id=" + QString::number(list[i]);
+                if(i < list.size()-1)
+                    filterString += " OR " ;
+            }
+            colorsModel->setFilter(filterString);
+            reducedList = true;
+        }
+    }
+
+    // Set filter to include BrickArm and/or Modulex colors
+    if (!reducedList) {
+        QSettings settings;
+        if(!settings.value("filter/includeBrickArmsColors").toBool() && !settings.value("filter/includeModulexColors").toBool()) {
+            colorsModel->setFilter(QString("color_type NOT LIKE '%%1%' AND color_type NOT LIKE '%%2%'").arg("BrickArms").arg("Modulex"));
+        } else if(!settings.value("filter/includeBrickArmsColors").toBool()) {
+            colorsModel->setFilter(QString("color_type NOT LIKE '%%1%'").arg("BrickArms"));
+        } else if(!settings.value("filter/includeModulexColors").toBool()) {
+            colorsModel->setFilter(QString("color_type NOT LIKE '%%1%'").arg("Modulex"));
+        }
+    }
+
+    m_colorSelected = false;
+
+    if (m_lastSelectedColor != -1) {
+        int numRows = ui->colorsListView->model()->rowCount();
+        for (int i = 0; i < numRows; i++) {
+            QModelIndex currentIndex = ui->colorsListView->model()->index(i, 0);
+            int colorIndex = ui->colorsListView->model()->data(currentIndex).toInt();
+            if (colorIndex == m_lastSelectedColor) {
+                ui->colorsListView->selectionModel()->setCurrentIndex(currentIndex.sibling(currentIndex.row(), 1), QItemSelectionModel::Select);
+                m_colorSelected = true;
+            }
+        }
+    }
+
+    statusAddButton();
 }
 
 void AddItemDialog::updateCategories(QString cat)
@@ -127,6 +166,11 @@ void AddItemDialog::updateCategories(QString cat)
 
     categoriesModel->select();
     partsModel->select();
+
+    m_categorySelected = false;
+    statusAddButton();
+
+    setColorFilter();
 }
 
 void AddItemDialog::on_addPushButton_clicked()
@@ -151,14 +195,19 @@ void AddItemDialog::on_categoriesListView_clicked(const QModelIndex &index)
     partsModel->setFilter(QString("category_id == %1").arg(selectedCategory));
     partsModel->select();
     m_categorySelected = true;
+    m_partSelected = false;
     statusAddButton();
+    setColorFilter();
 }
 
 
 void AddItemDialog::on_partsTableView_clicked(const QModelIndex &index)
 {
+    // Retrieve the part number from column 2
     const QModelIndex partNumber = index.sibling(index.row(), 2);
     QString selectedPart = partNumber.data(Qt::DisplayRole).toString();
+
+    setColorFilter(selectedPart);
 
     m_partSelected = true;
     statusAddButton();
@@ -166,17 +215,13 @@ void AddItemDialog::on_partsTableView_clicked(const QModelIndex &index)
 
 void AddItemDialog::on_colorsListView_clicked(const QModelIndex &index)
 {
-    Q_UNUSED(index);
-
+    // Get color ID in first column
+    m_lastSelectedColor = index.siblingAtColumn(0).data(Qt::DisplayRole).toInt();
     m_colorSelected = true;
     statusAddButton();
 }
 
 void AddItemDialog::statusAddButton() {
     // When category, part and color is selected, enable Add button
-    if (m_categorySelected && m_partSelected && m_colorSelected)
-        ui->addPushButton->setEnabled(true);
+    ui->addPushButton->setEnabled(m_categorySelected && m_partSelected && m_colorSelected);
 };
-
-
-
