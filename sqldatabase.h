@@ -13,6 +13,10 @@ public:
     static QString getCategoryById(int category_id);
     static int getColorIdByName(QString category_name);
     static QList<int> getColorsOfPart(QString item_id);
+    static QString getUniqueTableName(QString* name, QString sqlTableName = "");
+    static QString getTableName(QString name);
+    static void updateTableName(QString oldName, QString newName);
+    static void removeTable(QString name);
 
 private:
     QSqlError initDb();

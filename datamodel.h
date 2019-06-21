@@ -39,6 +39,7 @@ enum Tables {
     categories,
     colors,
     gear,
+    indextable,
     instructions,
     minifigs,
     orderitem,
@@ -58,6 +59,7 @@ public:
     QString getSqlTableName();
     int getNumberOfColumns();
     QString getSqlColumnName(int column);
+    QString getSqlColumnName(QString fieldName);
     QString getColumnHeader(int column);
     QMap<QString, QString> getTranslationTable();
     bool isColumnVisible(int column);

@@ -7,6 +7,7 @@
 #include "listmodel.h"
 #include "datamodel.h"
 #include "simplepopup.h"
+#include "exportxml.h"
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -95,7 +96,9 @@ void MainWindow::updateStatusBar(QString msg, int timeout) {
  */
 void MainWindow::removeTab(int index)
 {
-    tabList.remove(ui->tabWidget->tabText(index));
+    QString tabName = ui->tabWidget->tabText(index);    
+    SqlDatabase::removeTable(tabName);
+    tabList.remove(tabName);
     ui->tabWidget->removeTab(index);
     if (ui->tabWidget->count() == 0)
         ui->actionAdd_Items->setDisabled(true);
@@ -110,7 +113,8 @@ void MainWindow::removeTab(int index)
 void MainWindow::on_actionNew_triggered()
 {
     // Prepare data model
-    QString sqlTableName = "Untitled";
+    QString name = "Untitled";
+    QString sqlTableName = SqlDatabase::getUniqueTableName(&name);
     DataModel *p_dataModel = new DataModel(Tables::brickstock, sqlTableName);
     p_dataModel->initiateSqlTableAuto("tempDatabase");
 
@@ -118,7 +122,7 @@ void MainWindow::on_actionNew_triggered()
     ListModel *listModel = new ListModel(this, p_dataModel, QSqlDatabase::database("tempDatabase"));
 
     // Add tab
-    addTab(listModel, sqlTableName);
+    addTab(listModel, name);
 }
 
 
@@ -134,8 +138,29 @@ void MainWindow::on_actionOrders_triggered()
 }
 
 
+void MainWindow::on_actionSave_As_triggered()
+{
+    QString tabName = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
+    QString sqlTableName = SqlDatabase::getTableName(tabName);
+
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File as"), QString("./%1").arg(tabName), tr("BrickStock XML Data (*.bsx)"));
+    if (fileName != "") {
+        ExportXml::SaveXMLFile(sqlTableName, fileName);
+        QString name = QFileInfo(fileName).baseName().toLatin1();
+        SqlDatabase::updateTableName(tabName, name);
+        ui->tabWidget->setTabText(ui->tabWidget->currentIndex(), name);
+    }
+}
+
+
 void MainWindow::on_actionMy_Inventory_triggered()
 {
+    // Prepare list
+    QString header = "My Inventory";
+    SqlDatabase::getUniqueTableName(&header, "userinventories");
+    DataModel *p_dataModel = new DataModel(Tables::userinventories);
+    p_dataModel->initiateSqlTableAuto("tempDatabase");
+
     // Import User Inventory through the BrickLink class
     bricklink.importUserInventory();
 
@@ -152,10 +177,7 @@ void MainWindow::on_actionMy_Inventory_triggered()
     // Hide message box
     p_popup->hide();
 
-    // Prepare list
-    DataModel *p_dataModel = new DataModel(Tables::userinventories);
     ListModel *listModel = new ListModel(this, p_dataModel, QSqlDatabase::database("tempDatabase"));
-    QString header = "My Inventory";
     addTab(listModel, header);
 }
 
@@ -188,7 +210,8 @@ void MainWindow::openInventoryTab(QList<QString> orderIDs)
         // Prepare list
         DataModel *p_dataModel = new DataModel(Tables::orderitem, orderID);
         ListModel *inv = new ListModel(this, p_dataModel, QSqlDatabase::database("tempDatabase"));
-        const QString tabName = "Order#" + orderID;
+        QString tabName = "Order#" + orderID;
+        SqlDatabase::getUniqueTableName(&tabName, p_dataModel->getSqlTableName());
         tabList[tabName] = inv;
         addTab(inv, tabName);
     }
@@ -210,8 +233,6 @@ void MainWindow::on_actionOpen_triggered()
         // Get file information
         QFileInfo info(file);
         QString tableName = info.baseName();
-        QString sqlTableName = tableName;
-        sqlTableName.remove(QRegExp("[^a-zA-Z\\d]"));
 
         //The QDomDocument class represents an XML document.
         QDomDocument xmlInventory;
@@ -226,6 +247,7 @@ void MainWindow::on_actionOpen_triggered()
         QDomElement item = inventory.firstChild().toElement();          // Item
 
         // Prepare data model
+        QString sqlTableName = SqlDatabase::getUniqueTableName(&tableName);
         DataModel *p_dataModel = new DataModel(Tables::brickstock, sqlTableName);
         p_dataModel->initiateSqlTableAuto("tempDatabase");
 
@@ -321,6 +343,3 @@ void MainWindow::on_tabWidget_tabCloseRequested(int index)
 {
     removeTab(index);
 }
-
-
-

@@ -115,7 +115,6 @@ QString SqlDatabase::getCategoryById(int category_id)
  * @param id of part to retrieve
  * @return list of color ID's, empty list when no colors found
  */
-
 QList<int> SqlDatabase::getColorsOfPart(QString item_id)
 {
     QList<int> colorList;
@@ -129,6 +128,84 @@ QList<int> SqlDatabase::getColorsOfPart(QString item_id)
     return colorList;
 }
 
+
+QString SqlDatabase::getUniqueTableName(QString* name, QString sqlTableName)
+{
+    QString uniqueName = *name;
+    QSqlQuery q(QSqlDatabase::database("tempDatabase"));
+    int counter = 1;
+    bool found = true;
+    while(found) {
+        QString query = QString("SELECT EXISTS(SELECT 1 FROM indextable WHERE name='%1')").arg(uniqueName);
+        q.exec(query);
+        while(q.next())
+            found = q.value(0).toBool();
+        if (found) {
+            uniqueName = QString("%1 (%2)").arg(*name).arg(counter);
+            counter++;
+        }
+    }
+    *name = uniqueName;
+    if (sqlTableName == "") {
+        q.exec(QString("SELECT MAX(id) FROM indextable"));
+        int maxIndex = 0;
+        while(q.next())
+            maxIndex = q.value(0).toInt();
+        sqlTableName = QString("table_%1").arg(maxIndex+1);
+    }
+
+    qDebug() << sqlTableName;
+
+    QString qryString = QString("INSERT INTO 'indextable' ('name', 'sqltable') VALUES ('%1', '%2')").arg(uniqueName).arg(sqlTableName);
+
+    if (!q.exec(qryString)) {
+        qDebug() << "Failed to add item to database" << uniqueName << q.lastError();
+        qDebug() << q.lastError();
+    }
+
+    return sqlTableName;
+}
+
+
+QString SqlDatabase::getTableName(QString name)
+{
+    QString output;
+    QSqlQuery q(QSqlDatabase::database("tempDatabase"));
+    if (!q.prepare(QString("SELECT sqltable FROM indextable WHERE name='%1'").arg(name)))
+        return "";
+    q.exec();
+    while (q.next()) {
+        output = q.value(0).toString();
+    }
+    q.finish();
+    return output;
+}
+
+
+void SqlDatabase::updateTableName(QString oldName, QString newName)
+{
+    QSqlQuery q(QSqlDatabase::database("tempDatabase"));
+    if (!q.prepare(QString("UPDATE indextable SET name='%1' WHERE name='%2'").arg(newName).arg(oldName)))
+        qDebug() << "Error updating table name";
+    q.exec();
+    q.finish();
+}
+
+
+void SqlDatabase::removeTable(QString name)
+{
+    QString sqlTableName = getTableName(name);
+    QSqlQuery q(QSqlDatabase::database("tempDatabase"));
+    if (!q.prepare(QString("DELETE FROM indextable WHERE name='%1'").arg(name)))
+        qDebug() << "Problem deleting row from indextable";
+    q.exec();
+    q.first();
+    if (!q.prepare(QString("DROP TABLE %1").arg(sqlTableName)))
+        qDebug() << QString("Problem dropping table %1").arg(sqlTableName);
+    q.exec();
+    q.first();
+    q.finish();
+}
 
 /**
  * Initializes the SQL database and creates the common tables
@@ -185,6 +262,11 @@ QSqlError SqlDatabase::initDb()
     if (!tables.contains("colors")) {
         DataModel *colModel = new DataModel(Tables::colors);
         colModel->initiateSqlTable("catalogDatabase");
+    }
+
+    if (!tables.contains("indextable")) {
+        DataModel *indexModel = new DataModel(Tables::indextable);
+        indexModel->initiateSqlTableAuto("tempDatabase");
     }
 
     // Delete previous Order Item tables

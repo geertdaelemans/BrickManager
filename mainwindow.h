@@ -31,17 +31,17 @@ public slots:
 private slots:
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
+    void on_actionSave_As_triggered();
     void on_actionOrders_triggered();
     void on_actionMy_Inventory_triggered();
     void on_actionExit_triggered();
     void on_actionAdd_Items_triggered();
+    void on_actionUpdate_Database_triggered();
     void on_actionSettings_triggered();
     void on_actionAbout_triggered();
     void on_actionAboutQt_triggered();
 
     void on_tabWidget_tabCloseRequested(int index);
-
-    void on_actionUpdate_Database_triggered();
     void updateStatusBar(QString msg, int timeout);
 
 private:

@@ -5,6 +5,14 @@ DataModel::DataModel(Tables table, QString tableName)
 {
     switch (table)
     {
+    case Tables::indextable:
+        sqlTable = "indextable";
+        columns[0] = Column("id", "id", tr("ID"), "integer", false, 50);
+        columns[1] = Column("sqltable", "sqltable", tr("SQL Table"), "varchar", false, 173);
+        columns[2] = Column("name", "name", tr("Name"), "varchar", false, 173);
+        sortColumn = 0;
+        sortOrder = Qt::AscendingOrder;
+        break;
     case Tables::brickstock:
         sqlTable = tableName;
         columns[0] = Column("id", "id", tr("ID"), "integer", false, 100);
@@ -176,7 +184,7 @@ DataModel::DataModel(Tables table, QString tableName)
         break;
     case Tables::userinventories:
         sqlTable = "userinventories";
-        columns[0] = Column("inventory_id", "inventory_id", tr("ID"), "integer", false, 80);
+        columns[0] = Column("id", "inventory_id", tr("ID"), "integer", false, 80);
         columns[1] = Column("item_no", "item_no", tr("Part #"), "varchar", true, 100);
         columns[2] = Column("item_name", "item_name", tr("Name"), "varchar", true, 300);
         columns[3] = Column("item_type", "item_type", tr("Type"), "varchar", false, 80);
@@ -220,6 +228,14 @@ int DataModel::getNumberOfColumns() {
 }
 QString DataModel::getSqlColumnName(int column) {
     return columns[column].property.importName;
+}
+QString DataModel::getSqlColumnName(QString fieldName) {
+    QString output = fieldName;
+    for(int i = 0; i < columns.size(); i++) {
+        if (columns[i].property.name == fieldName)
+            return columns[i].property.importName;
+    }
+    return output;
 }
 QString DataModel::getColumnHeader(int column) {
     return columns[column].property.displayName;

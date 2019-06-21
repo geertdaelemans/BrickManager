@@ -155,7 +155,7 @@ void BrickLink::parseJsonUserInventory()
             Q_ASSERT(value.isObject());
             const auto object = value.toObject();
             QMap<QString, QVariant> fields;
-            fields["inventory_id"] = object.value("inventory_id").toVariant();
+            fields["id"] = object.value("inventory_id").toVariant();
             fields["item_no"] = object.value("item").toObject().value("no").toVariant();
             fields["item_name"] = object.value("item").toObject().value("name").toVariant();
             fields["item_type"] = object.value("item").toObject().value("type").toVariant();
