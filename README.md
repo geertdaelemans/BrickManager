@@ -7,12 +7,14 @@ You can apply for these values on the Bricklink.com site (https://www.bricklink.
 In order to get the software to compile you will need ssleay32.dll and libeay32.dll in your workspace (required for SSL support).
 
 Currently supported features:
-* Import BrickStock files (*.bsx)
+* Open BrickStock files (*.bsx)
+* Save As... BrickStock files (*.bsx)
 * Import your complete inventory from BrickLink
 * Import your current orders from BricklLink
 * Import your filed orders from BrickLink
 * Get inventory of each order you imported
 * Add items to any inventory (limited functionality)
+* Filter on available colors in Add menu
 * Import part catalog database (using BrickLink log-in)
 * All data stored in local SQL database (local file)
 * Pop-up window to (un)hide columns
