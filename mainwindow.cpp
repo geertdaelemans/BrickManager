@@ -69,6 +69,14 @@ int MainWindow::addTab(ListModel *page, const QString &label)
     if (!ui->actionAdd_Items->isEnabled())
         ui->actionAdd_Items->setEnabled(true);
 
+    // Enable the Save As... dialog
+    if (!ui->actionSave_As->isEnabled())
+        ui->actionSave_As->setEnabled(true);
+
+    // Enable the Close button
+    if (!ui->actionClose->isEnabled())
+        ui->actionClose->setEnabled(true);
+
     return tabNumber;
 }
 
@@ -100,8 +108,11 @@ void MainWindow::removeTab(int index)
     SqlDatabase::removeTable(tabName);
     tabList.remove(tabName);
     ui->tabWidget->removeTab(index);
-    if (ui->tabWidget->count() == 0)
+    if (ui->tabWidget->count() == 0) {
+        ui->actionSave_As->setDisabled(true);
+        ui->actionClose->setDisabled(true);
         ui->actionAdd_Items->setDisabled(true);
+    }
 }
 
 
@@ -289,6 +300,12 @@ void MainWindow::on_actionOpen_triggered()
 }
 
 
+void MainWindow::on_actionClose_triggered()
+{
+    removeTab(ui->tabWidget->currentIndex());
+}
+
+
 void MainWindow::on_actionExit_triggered()
 {
     QCoreApplication::quit();
@@ -343,3 +360,5 @@ void MainWindow::on_tabWidget_tabCloseRequested(int index)
 {
     removeTab(index);
 }
+
+

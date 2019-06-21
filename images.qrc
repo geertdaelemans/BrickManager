@@ -7,5 +7,7 @@
         <file>images/22x22/edit_additems.png</file>
         <file>images/22x22/extras_configure.png</file>
         <file>images/22x22/extras_update_database.png</file>
+        <file>images/22x22/file_saveas.png</file>
+        <file>images/22x22/file_close.png</file>
     </qresource>
 </RCC>

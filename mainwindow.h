@@ -44,6 +44,8 @@ private slots:
     void on_tabWidget_tabCloseRequested(int index);
     void updateStatusBar(QString msg, int timeout);
 
+    void on_actionClose_triggered();
+
 private:
     Ui::MainWindow *ui;
     CTransfer *m_trans;

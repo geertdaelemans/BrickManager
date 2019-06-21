@@ -154,8 +154,6 @@ QString SqlDatabase::getUniqueTableName(QString* name, QString sqlTableName)
         sqlTableName = QString("table_%1").arg(maxIndex+1);
     }
 
-    qDebug() << sqlTableName;
-
     QString qryString = QString("INSERT INTO 'indextable' ('name', 'sqltable') VALUES ('%1', '%2')").arg(uniqueName).arg(sqlTableName);
 
     if (!q.exec(qryString)) {
