@@ -18,7 +18,7 @@ AddItemDialog::AddItemDialog(QWidget *parent) :
     ui->w_item_types->addItem("Instruction", 'I');
     ui->w_item_types->addItem("Minifig", 'M');
     ui->w_item_types->addItem("Original box", 'O');
-    ui->w_item_types->addItem("Parts", 'P');
+    ui->w_item_types->addItem("Part", 'P');
     ui->w_item_types->addItem("Set", 'S');
     ui->w_item_types->setCurrentIndex(6);
 
@@ -177,14 +177,20 @@ void AddItemDialog::on_addPushButton_clicked()
 {
     QList<QString> fields;
     const QModelIndex categoryIndex = ui->categoriesListView->currentIndex();
-    const QModelIndex colorIndex = ui->colorsListView->currentIndex();
+    const QModelIndex colorName = ui->colorsListView->currentIndex();
+    const QModelIndex colorIndex = colorName.siblingAtColumn(0);
     const QModelIndex partsIndex = ui->partsTableView->currentIndex();
-    const QModelIndex partsName = partsIndex.sibling(partsIndex.row(), 3);
-    const QModelIndex partsNumber = partsIndex.sibling(partsIndex.row(), 2);
+    const QModelIndex partsName = partsIndex.siblingAtColumn(3);
+    const QModelIndex partsNumber = partsIndex.siblingAtColumn(2);
+    const QString itemTypeName = ui->w_item_types->currentText();
+    const QVariant itemTypeID = ui->w_item_types->currentData();
     fields.append(categoryIndex.data(Qt::DisplayRole).toString());
     fields.append(colorIndex.data(Qt::DisplayRole).toString());
+    fields.append(colorName.data(Qt::DisplayRole).toString());
     fields.append(partsName.data(Qt::DisplayRole).toString());
     fields.append(partsNumber.data(Qt::DisplayRole).toString());
+    fields.append(itemTypeName);
+    fields.append(itemTypeID.toChar());
     emit insertItem(fields);
 }
 

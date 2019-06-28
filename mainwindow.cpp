@@ -154,7 +154,7 @@ void MainWindow::on_actionSave_As_triggered()
     QString tabName = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
     QString sqlTableName = SqlDatabase::getTableName(tabName);
 
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File as"), QString("./%1").arg(tabName), tr("BrickStock XML Data (*.bsx)"));
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File as"), QString("d:\\%1").arg(tabName), tr("BrickStock XML Data (*.bsx)"));
     if (fileName != "") {
         ExportXml::SaveXMLFile(sqlTableName, fileName);
         QString name = QFileInfo(fileName).baseName().toLatin1();
