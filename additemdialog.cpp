@@ -175,22 +175,16 @@ void AddItemDialog::updateCategories(QString cat)
 
 void AddItemDialog::on_addPushButton_clicked()
 {
-    QList<QString> fields;
-    const QModelIndex categoryIndex = ui->categoriesListView->currentIndex();
+    QMap<QString, QVariant> fields;
     const QModelIndex colorName = ui->colorsListView->currentIndex();
-    const QModelIndex colorIndex = colorName.siblingAtColumn(0);
     const QModelIndex partsIndex = ui->partsTableView->currentIndex();
-    const QModelIndex partsName = partsIndex.siblingAtColumn(3);
-    const QModelIndex partsNumber = partsIndex.siblingAtColumn(2);
-    const QString itemTypeName = ui->w_item_types->currentText();
-    const QVariant itemTypeID = ui->w_item_types->currentData();
-    fields.append(categoryIndex.data(Qt::DisplayRole).toString());
-    fields.append(colorIndex.data(Qt::DisplayRole).toString());
-    fields.append(colorName.data(Qt::DisplayRole).toString());
-    fields.append(partsName.data(Qt::DisplayRole).toString());
-    fields.append(partsNumber.data(Qt::DisplayRole).toString());
-    fields.append(itemTypeName);
-    fields.append(itemTypeID.toChar());
+    fields["item_no"] = partsIndex.siblingAtColumn(2).data(Qt::DisplayRole).toString();
+    fields["item_name"] = partsIndex.siblingAtColumn(3).data(Qt::DisplayRole).toString();
+    fields["color_name"] = colorName.data(Qt::DisplayRole).toString();
+    fields["category_name"] = ui->categoriesListView->currentIndex().data(Qt::DisplayRole).toString();
+    fields["ItemTypeName"] = ui->w_item_types->currentText();
+    fields["color_id"] = colorName.siblingAtColumn(0).data(Qt::DisplayRole).toString();
+    fields["ItemTypeID"] = ui->w_item_types->currentData().toChar();
     emit insertItem(fields);
 }
 

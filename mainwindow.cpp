@@ -192,7 +192,7 @@ void MainWindow::on_actionMy_Inventory_triggered()
     addTab(listModel, header);
 }
 
-void MainWindow::insertItemIntoSheet(QList<QString> fields)
+void MainWindow::insertItemIntoSheet(QMap<QString, QVariant> fields)
 {
     ListModel *model = tabList[ui->tabWidget->tabText(ui->tabWidget->currentIndex())];
     model->insertRow(fields);
@@ -319,7 +319,7 @@ void MainWindow::on_actionExit_triggered()
 void MainWindow::on_actionAdd_Items_triggered()
 {
     AddItemDialog *addItemDialog = new AddItemDialog(this);
-    QObject::connect(addItemDialog, SIGNAL(insertItem(QList<QString>)), this, SLOT(insertItemIntoSheet(QList<QString>)));
+    QObject::connect(addItemDialog, SIGNAL(insertItem(QMap<QString, QVariant>)), this, SLOT(insertItemIntoSheet(QMap<QString, QVariant>)));
     addItemDialog->exec();
 }
 

@@ -26,7 +26,7 @@ public:
 
 public slots:
     void openInventoryTab(QList<QString>);
-    void insertItemIntoSheet(QList<QString>);
+    void insertItemIntoSheet(QMap<QString, QVariant> fields);
 
 private slots:
     void on_actionNew_triggered();

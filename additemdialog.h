@@ -25,7 +25,7 @@ private slots:
     void on_colorsListView_clicked(const QModelIndex &index);
 
 signals:
-    void insertItem(QList<QString> fields);
+    void insertItem(QMap<QString, QVariant> fields);
 
 private:
     void setColorFilter(QString itemName = "");

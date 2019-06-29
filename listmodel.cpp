@@ -99,24 +99,14 @@ void ListModel::showError(const QSqlError &err)
                 "Error initializing database: " + err.text());
 }
 
-bool ListModel::insertRow(QList<QString> fields)
+bool ListModel::insertRow(QMap<QString, QVariant> fields)
 {
-    int colorName = model->fieldIndex("color_name");
-    int colorIdx = model->fieldIndex("color_id");
-    int categoryIdx = model->fieldIndex("category_name");
-    int nameIdx = model->fieldIndex("item_name");
-    int numberIdx = model->fieldIndex("item_no");
-    int itemTypeNameIdx = model->fieldIndex("ItemTypeName");
-    int itemTypeIDIdx = model->fieldIndex("ItemTypeID");
-
     bool reply = model->insertRow(0);
-    model->setData(model->index(0, colorIdx), fields[1]);
-    model->setData(model->index(0, colorName), fields[2]);
-    model->setData(model->index(0, categoryIdx), fields[0]);
-    model->setData(model->index(0, nameIdx), fields[3]);
-    model->setData(model->index(0, numberIdx), fields[4]);
-    model->setData(model->index(0, itemTypeNameIdx), fields[5]);
-    model->setData(model->index(0, itemTypeIDIdx), fields[6]);
+
+    // Maps all data from fields onto the respective indexes in the model
+    for(auto key : fields.keys()) {
+      model->setData(model->index(0, model->fieldIndex(key)), fields[key]);
+    }
 
     // Submits all pending changes and returns detailed error information if this fails.
     if (!model->submitAll()) {

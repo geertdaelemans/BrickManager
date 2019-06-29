@@ -18,7 +18,7 @@ class ListModel : public QDialog
 public:
     explicit ListModel(QWidget *parent = nullptr, DataModel *tableModel = nullptr, QSqlDatabase database = QSqlDatabase());
     ~ListModel() override;
-    bool insertRow(QList<QString> fields);
+    bool insertRow(QMap<QString, QVariant> fields);
 
 private slots:
     void slotCustomMenuRequested(QPoint);
