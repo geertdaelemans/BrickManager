@@ -49,7 +49,7 @@ void ExportXml::SaveXMLFile(QString table, QString fileName)
     while(q.next()) {
         xmlWriter.writeStartElement("Item");
         for (int i = 0; i < numberOfFields; i++) {
-            if(q.value(i).toString() != "") {
+            if(q.value(i).toString() != "" && sqlDataField[i] != "id") {
                 xmlWriter.writeTextElement(sqlDataField[i], q.value(i).toString());
             }
         }

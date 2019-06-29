@@ -23,6 +23,8 @@ AddItemDialog::AddItemDialog(QWidget *parent) :
     ui->w_item_types->setCurrentIndex(6);
 
     connect(ui->w_item_types, SIGNAL(currentTextChanged(QString)), this, SLOT(updateCategories(QString)));
+    connect(ui->priceInput, SIGNAL(valueChanged(QString)), this, SLOT(updateTotalCost()));
+    connect(ui->quantityInput, SIGNAL(valueChanged(QString)), this, SLOT(updateTotalCost()));
 
     // Create the data models
     DataModel *colorsDataModel = new DataModel(Tables::colors);
@@ -176,14 +178,21 @@ void AddItemDialog::updateCategories(QString cat)
 void AddItemDialog::on_addPushButton_clicked()
 {
     QMap<QString, QVariant> fields;
-    const QModelIndex colorName = ui->colorsListView->currentIndex();
+    const QModelIndex categoryIndex = ui->categoriesListView->currentIndex();
+    const QModelIndex colorIndex = ui->colorsListView->currentIndex();
     const QModelIndex partsIndex = ui->partsTableView->currentIndex();
+    fields["Status"] = "I";
     fields["item_no"] = partsIndex.siblingAtColumn(2).data(Qt::DisplayRole).toString();
     fields["item_name"] = partsIndex.siblingAtColumn(3).data(Qt::DisplayRole).toString();
-    fields["color_name"] = colorName.data(Qt::DisplayRole).toString();
-    fields["category_name"] = ui->categoriesListView->currentIndex().data(Qt::DisplayRole).toString();
+    fields["Condition"] = (ui->radioButtonNew->isChecked() ? "N" : "U");
+    fields["color_name"] = colorIndex.data(Qt::DisplayRole).toString();
+    fields["quantity"] = ui->quantityInput->value();
+    fields["unit_price"] = ui->priceInput->value();
+    fields["Remarks"] = ui->remarksInput->text();
+    fields["category_name"] = categoryIndex.data(Qt::DisplayRole).toString();
     fields["ItemTypeName"] = ui->w_item_types->currentText();
-    fields["color_id"] = colorName.siblingAtColumn(0).data(Qt::DisplayRole).toString();
+    fields["category_id"] = categoryIndex.siblingAtColumn(0).data(Qt::DisplayRole).toInt();
+    fields["color_id"] = colorIndex.siblingAtColumn(0).data(Qt::DisplayRole).toString();
     fields["ItemTypeID"] = ui->w_item_types->currentData().toChar();
     emit insertItem(fields);
 }
@@ -225,3 +234,13 @@ void AddItemDialog::statusAddButton() {
     // When category, part and color is selected, enable Add button
     ui->addPushButton->setEnabled(m_categorySelected && m_partSelected && m_colorSelected);
 };
+
+/**
+ * @brief Slot function to calculate the total cost in the Add Item window
+ *
+ * This slot gets triggered when either the Quantity or the Price fiels
+ * gets updated.
+ */
+void AddItemDialog::updateTotalCost() {
+    ui->totalInput->setValue(ui->quantityInput->value() * ui->priceInput->value());
+}

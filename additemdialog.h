@@ -23,6 +23,7 @@ private slots:
     void on_categoriesListView_clicked(const QModelIndex &index);
     void on_partsTableView_clicked(const QModelIndex &index);
     void on_colorsListView_clicked(const QModelIndex &index);
+    void updateTotalCost();
 
 signals:
     void insertItem(QMap<QString, QVariant> fields);
