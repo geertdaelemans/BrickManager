@@ -57,8 +57,7 @@ DISTFILES += \
 
 RESOURCES += \
     images.qrc \
-    auth.qrc \
-    testdata.qrc
+    auth.qrc
 
 unix|win32: LIBS += -L$$PWD/../../libs/curl-7.64.0-win32-mingw/lib/ -llibcurl.dll
 
