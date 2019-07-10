@@ -110,7 +110,7 @@ bool ListModel::insertRow(QMap<QString, QVariant> fields)
 
     // Submits all pending changes and returns detailed error information if this fails.
     if (!model->submitAll()) {
-        qDebug() << model->lastError();
+        qDebug() << "insertRow" << model->lastError();
     }
 
     return reply;

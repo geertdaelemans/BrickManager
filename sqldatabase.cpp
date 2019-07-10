@@ -119,7 +119,7 @@ QList<int> SqlDatabase::getColorsOfPart(QString item_id)
 {
     QList<int> colorList;
     QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
-    if (!q.prepare("SELECT color_name FROM partcolor WHERE item_id=\"" + item_id + "\""))
+    if (!q.prepare("SELECT color_name FROM partcolor WHERE item_id='" + item_id + "'"))
         return colorList;
     q.exec();
     while (q.next()) {
@@ -269,7 +269,7 @@ QSqlError SqlDatabase::initDb()
 
     // Delete previous Order Item tables
     foreach (QString table, tempTables) {
-        QSqlQuery q("DROP TABLE IF EXISTS " + table, tempDataBase);
+        QSqlQuery q(QString("DROP TABLE IF EXISTS '%1'").arg(table), tempDataBase);
         q.exec();
     }
 

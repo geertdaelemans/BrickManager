@@ -18,8 +18,92 @@ BrickLink::BrickLink(QObject *parent) :
     setTokenCredentials(
                 settings.value("credentials/tokenValue").toString(),
                 settings.value("credentials/tokenSecret").toString());
+
+    m_pictures.transfer = new CTransfer();
+    m_pictures.update_iv = 0;
+
+    connect(m_pictures.transfer, SIGNAL(finished(CTransfer::Job*)), this, SLOT(pictureJobFinished(CTransfer::Job*)));
 }
 
+
+BrickLink* BrickLink::s_inst = nullptr;
+
+BrickLink* BrickLink::inst()
+{
+    if (!s_inst) {
+        s_inst = new BrickLink();
+    }
+    return s_inst;
+}
+
+BrickLink::ItemType::ItemType()
+{
+
+}
+
+BrickLink::ItemType::~ItemType()
+{
+
+}
+
+
+BrickLink::Item::Item()
+{
+
+}
+
+BrickLink::Item::~Item()
+{
+
+}
+
+const BrickLink::ItemType* BrickLink::itemType(const QString name) const
+{
+    ItemType *type = new ItemType();
+    if (name == "Book") {
+        type->m_name = "book";
+        type->m_table_name = Tables::books;
+        type->m_picture_id = 'B';
+    } else if (name == "Catalog") {
+        type->m_name = "catalog";
+        type->m_table_name = Tables::catalogs;
+        type->m_picture_id = 'C';
+    } else if (name == "Gear") {
+        type->m_name = "gear";
+        type->m_table_name = Tables::gear;
+        type->m_picture_id = 'G';
+    } else if (name == "Instruction") {
+        type->m_name = "instruction";
+        type->m_table_name = Tables::instructions;
+        type->m_picture_id = 'I';
+    } else if (name == "Minifig") {
+        type->m_name = "minifig";
+        type->m_table_name = Tables::minifigs;
+        type->m_picture_id = 'M';
+    } else if (name == "Original box") {
+        type->m_name = "original_box";
+        type->m_table_name = Tables::boxes;
+        type->m_picture_id = 'O';
+    } else if (name == "Set") {
+        type->m_name = "set";
+        type->m_table_name = Tables::sets;
+        type->m_picture_id = 'S';
+    } else {
+        type->m_name = "part";
+        type->m_table_name = Tables::parts;
+        type->m_picture_id = 'P';
+    }
+    type->m_id = 1;
+    return type;
+}
+
+const BrickLink::Item* BrickLink::item(const QString itemType, const char *id) const
+{
+    Item* key = new Item();
+    key->m_item_type = inst()->itemType(itemType);
+    key->m_id = const_cast <char *>(id);
+    return key;
+}
 
 bool BrickLink::checkConnection(QObject *parent)
 {
@@ -73,6 +157,25 @@ void BrickLink::importUserInventory()
     QNetworkReply *reply = this->get(url, parameters);
 
     connect(reply, &QNetworkReply::finished, this, &BrickLink::parseJsonUserInventory);
+}
+
+QString BrickLink::getItemInformation(QString type, QString no)
+{
+    QUrl url(QString("https://api.bricklink.com/api/store/v1/items/%1/%2").arg(type).arg(no));
+    qDebug() << "URL" << url;
+    QNetworkReply *reply = this->get(url);
+
+    QEventLoop loop;
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+
+    if (reply->error() == QNetworkReply::NoError) {
+        QJsonArray array = BrickLink::validateBricklinkResponse(reply);
+        foreach(const QJsonValue &batch, array) {
+            return batch.toString();
+        }
+    }
+    return QString();
 }
 
 void BrickLink::parseJsonOrderItem(int orderID)
@@ -140,7 +243,7 @@ void BrickLink::parseJsonOrders()
             fields["cost_currency_code"] = object.value("cost").toObject().value("currency_code").toVariant();
             QSqlError error = model->addItemToTable(fields);
             if(error.type() != QSqlError::NoError)
-                qDebug() << error.text();
+                qDebug() << "parseJsonOrders()" << error.text();
         }
     }
     emit dataBaseUpdatedWithOrders();
@@ -185,7 +288,7 @@ void BrickLink::parseJsonUserInventory()
             fields["my_weight"] = object.value("my_weight").toVariant();
             QSqlError error = model->addItemToTable(fields);
             if(error.type() != QSqlError::NoError)
-                qDebug() << error.text();
+                qDebug() << "parseJsonUserInventory()" << error.text();
         }
     }
     emit dataBaseUpdated();
@@ -211,7 +314,296 @@ QJsonArray BrickLink::validateBricklinkResponse(QObject* obj) {
         QString strReply = static_cast<QString>(data);
         QJsonDocument jsonResponse = QJsonDocument::fromJson(strReply.toUtf8());
         QJsonObject jsonObject = jsonResponse.object();
-        output = jsonObject.value("data").toArray();
+        if (jsonObject.value("data").isArray())
+            output = jsonObject.value("data").toArray();
+        else {
+            QJsonObject tester = jsonObject.value("data").toObject();
+            output.push_front(tester.value("image_url"));
+        }
     }
     return output;
+}
+
+
+BrickLink::Picture *BrickLink::picture(const Item *item, const BrickLink::Color *color, bool high_priority)
+{
+    if (!item) {
+        return nullptr;
+    }
+
+    QString key;
+    if (color) {
+        key = QString("%1@%2@%3").arg(item->itemType()->pictureId()).arg(item->id()).arg(color->id());
+    } else{
+        key = QString("%1@%2").arg(item->itemType()->pictureId()).arg(item->id());
+    }
+
+    qDebug() << "Key" << key;
+    qDebug() << "High priority" << high_priority;
+
+    Picture *pic = m_pictures.cache[key];
+    bool need_to_load = false;
+
+    if (!pic) {
+        pic = new Picture(item, color, key);
+
+        if (color) {
+            m_pictures.cache.insert(key, pic);
+        }
+
+        need_to_load = true;
+    }
+
+    qDebug() << "Need to load" << need_to_load;
+
+    if (high_priority) {
+        if (!pic->valid()) {
+//            pic->load_from_disk();
+        }
+
+//        if (updateNeeded(pic->valid(), pic->lastUpdate(), m_pictures.update_iv)) {
+//            addPictureToUpdate(pic, high_priority);
+//        }
+    } else if (need_to_load) {
+        pic->addRef();
+        m_pictures.diskload.append(pic);
+
+        if (m_pictures.diskload.count() == 1) {
+            QTimer::singleShot(0, BrickLink::inst(), SLOT(pictureIdleLoader()));
+        }
+    }
+
+    return pic;
+}
+
+
+
+
+BrickLink::Picture *BrickLink::largePicture(const Item *item, bool high_priority)
+{
+    if (!item)
+    {
+        return nullptr;
+    }
+    return picture(item, nullptr, high_priority);
+}
+
+BrickLink::Picture::Picture(const Item *item, const Color *color, const QString key)
+{
+    m_item = item;
+    m_color = color;
+
+    m_valid = false;
+//    m_update_status = Ok;
+    m_key = key.isNull() ? nullptr : key.toLatin1().data();
+}
+
+BrickLink::Picture::~Picture()
+{
+    if (m_key)
+    {
+//        QPixmapCache::remove(m_key);
+        free(m_key);
+    }
+}
+
+//void BrickLink::Picture::load_from_disk()
+//{
+//    QString path;
+//    bool large = !m_color;
+
+//    if (!large && m_item->itemType()->hasColors()) {
+//        path = BrickLink::inst()->dataPath(m_item, m_color);
+//    } else {
+//        path = BrickLink::inst()->dataPath(m_item);
+//    }
+
+//    if (path.isEmpty()) {
+//        return;
+//    }
+
+//    path += large ? "large.png" : "small.png";
+
+//    QFileInfo fi(path);
+//    if (fi.exists()) {
+//        if (fi.size() > 0)
+//        {
+//            m_valid = m_image.load(path);
+//        }
+//        else
+//        {
+//            if (!large && m_item && m_item->itemType())
+//            {
+//                m_image = BrickLink::inst()->noImage(m_item->itemType()->imageSize())->convertToImage();
+//            }
+//            else
+//            {
+//                m_image.create(0, 0, 32);
+//            }
+
+//            m_valid = true;
+//        }
+
+//        m_fetched = fi.lastModified();
+//    }
+//    else
+//    {
+//        m_valid = false;
+//    }
+
+//    QPixmapCache::remove(m_key);
+//}
+
+void BrickLink::pictureJobFinished(CTransfer::Job *j)
+{
+    if (!j || !j->data() || !j->userObject())
+    {
+        return;
+    }
+
+    qDebug() << "pictureJobFinished";
+
+//    if (!j->contentType().isEmpty())
+//    {
+//        // Image names fetched, now fetch actual images
+
+//        bool ok = false;
+//        QMap<QString, QJsonObject> pictureItems;
+//        if (!j->failed())
+//        {
+//            QJsonParseError jerror;
+//            QJsonDocument jsonResponse = QJsonDocument::fromJson(*(j->data()), &jerror);
+//            ok = jerror.error == QJsonParseError::NoError && jsonResponse.object()["meta"].toObject()["code"].toInt() == 200;
+
+//            if (ok)
+//            {
+//                QJsonArray pgData = jsonResponse.object()["data"].toArray();
+//                foreach (QJsonValue value, pgData)
+//                {
+//                    QJsonObject obj = value.toObject();
+//                    QJsonObject item = obj["item"].toObject();
+
+//                    QString key;
+//                    QTextStream (&key) << "" << item["type"].toString() << "@" << item["no"].toString() << "@" << obj["color_id"].toInt();
+
+//                    pictureItems.insert(key.toLower(), obj, true);
+//                }
+//            }
+//        }
+
+//        QVector<BrickLink::Picture *> *pictures = static_cast<QVector<BrickLink::Picture *> *>(j->userObject());
+
+//        foreach (Picture *pic, *pictures)
+//        {
+//            if (ok)
+//            {
+//                QString key;
+//                QTextStream (&key) << "" << pic->item()->itemType()->apiName() << "@" << pic->item()->id() << "@" << pic->color()->id();
+
+//                QJsonObject pictureItem = pictureItems[key.toLower()];
+//                if (pictureItem["image_url"].isString())
+//                {
+//                    QString imageUrl = pictureItem["image_url"].toString();
+
+//                    if (imageUrl == "N/A")
+//                    {
+//                        bool large = !pic->color();
+//                        QString path;
+
+//                        if (!large && pic->item()->itemType()->hasColors())
+//                        {
+//                            path = BrickLink::inst()->dataPath(pic->item(), pic->color());
+//                        }
+//                        else
+//                        {
+//                            path = BrickLink::inst()->dataPath(pic->item());
+//                        }
+
+//                        path.append(large ? "large.png" : "small.png");
+//                        pic-> m_update_status = Ok;
+
+//                        QFile f(path);
+//                        f.open(QIODevice::WriteOnly | QIODevice::Truncate);
+//                        f.close();
+
+//                        pic->load_from_disk();
+
+//                        return;
+//                    }
+
+//                    m_pictures.transfer->get("http:" + imageUrl, CKeyValueList(), 0, pic);
+//                }
+//            }
+//        }
+
+//        return;
+//    }
+
+//    Picture *pic = static_cast<Picture *>(j->userObject());
+//    bool large = !pic->color();
+
+//    pic->m_update_status = UpdateFailed;
+
+//    if (!j->failed())
+//    {
+//        QString path;
+//        QImage img;
+
+//        if (!large && pic->item()->itemType()->hasColors())
+//        {
+//            path = BrickLink::inst()->dataPath(pic->item(), pic->color());
+//        }
+//        else
+//        {
+//            path = BrickLink::inst()->dataPath(pic->item());
+//        }
+
+//        if (!path.isEmpty())
+//        {
+//            path.append(large ? "large.png" : "small.png");
+//            pic-> m_update_status = Ok;
+
+//            if (j->effectiveUrl().toLower().find("noimage", 0) == -1 && j->data()->size() && img.loadFromData(*j->data()))
+//            {
+//                if (!large)
+//                {
+//                    img = img.convertToFormat(QImage::Format_ARGB32, Qt::ColorOnly | Qt::DiffuseDither | Qt::DiffuseAlphaDither);
+//                }
+
+//                img.save(path, "PNG");
+//            }
+//            else
+//            {
+//                QFile f(path);
+//                f.open(QIODevice::WriteOnly | QIODevice::Truncate);
+//                f.close();
+
+//                qWarning("No image !");
+//            }
+
+//            pic->load_from_disk();
+//        }
+//        else
+//        {
+//            qWarning("Couldn't get path to save image");
+//        }
+//    }
+//    else if (large && j->responseCode() == 404 && j->url().right(3) == "jpg")
+//    {
+//        // no large JPG image -> try a GIF image instead
+//        pic->m_update_status = Updating;
+
+//        QString url = j->url();
+//        url.replace(url.length() - 3, 3, "gif");
+
+//        m_pictures.transfer->get(url, CKeyValueList(), 0, pic);
+//        return;
+//    }
+//    else
+//    {
+//        qWarning("Image download failed");
+//    }
+
+//    emit pictureUpdated(pic);
+//    pic->release();
 }

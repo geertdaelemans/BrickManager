@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QtSql>
+#include <QNetworkReply>
 
 namespace Ui {
 class AddItemDialog;
@@ -15,15 +16,17 @@ class AddItemDialog : public QDialog
 public:
     explicit AddItemDialog(QWidget *parent = nullptr);
     ~AddItemDialog();
+    void getImage(QString part, QString itemType = "part");
 
 private slots:
-    void updateCategories(QString category = "parts");
+    void updateCategories(QString m_category = "parts");
     void statusAddButton();
     void on_addPushButton_clicked();
     void on_categoriesListView_clicked(const QModelIndex &index);
     void on_partsTableView_clicked(const QModelIndex &index);
     void on_colorsListView_clicked(const QModelIndex &index);
     void updateTotalCost();
+    void finishedSlot(QNetworkReply* reply);
 
 signals:
     void insertItem(QMap<QString, QVariant> fields);
@@ -37,6 +40,15 @@ private:
     bool m_partSelected = false;
     bool m_colorSelected = false;
     int m_lastSelectedColor = -1;
+    QString m_category;
+
+    QImage * image;
+    QPixmap screenImage;
+    QPainter * p;
+    QBuffer *buffer;
+    QByteArray bytes;
+    int Request;
+    QNetworkAccessManager* nam;
 };
 
 #endif // ADDITEMDIALOG_H

@@ -57,14 +57,14 @@ DataModel::DataModel(Tables table, QString tableName)
         sqlTable = "categories";
         columns[0] = Column("id", "CATEGORY", tr("ID"), "integer", false, 50);
         columns[1] = Column("category_name", "CATEGORYNAME", tr("Name"), "varchar", true, 300);
-        columns[2] = Column("books", "books", tr("Books"), "bool", false, 50);
-        columns[3] = Column("boxes", "boxes", tr("Original Boxes"), "bool", false, 50);
-        columns[4] = Column("catalogs", "catalogs", tr("Catalogs"), "bool", false, 50);
-        columns[5] = Column("gear", "gear", tr("Gear"), "bool", false, 50);
-        columns[6] = Column("instructions", "instructions", tr("Instructions"), "bool", false, 50);
-        columns[7] = Column("minifigs", "minifigs", tr("Minifigs"), "bool", false, 50);
-        columns[8] = Column("parts", "parts", tr("Parts"), "bool", false, 50);
-        columns[9] = Column("sets", "sets", tr("Sets"), "bool", false, 50);
+        columns[2] = Column("xbook", "books", tr("Books"), "bool", false, 50);
+        columns[3] = Column("xoriginal_box", "boxes", tr("Original Boxes"), "bool", false, 50);
+        columns[4] = Column("xcatalog", "catalogs", tr("Catalogs"), "bool", false, 50);
+        columns[5] = Column("xgear", "gear", tr("Gear"), "bool", false, 50);
+        columns[6] = Column("xinstruction", "instructions", tr("Instructions"), "bool", false, 50);
+        columns[7] = Column("xminifig", "minifigs", tr("Minifigs"), "bool", false, 50);
+        columns[8] = Column("xpart", "parts", tr("Parts"), "bool", false, 50);
+        columns[9] = Column("xset", "sets", tr("Sets"), "bool", false, 50);
         sortColumn = 1;
         sortOrder = Qt::AscendingOrder;
         break;
@@ -133,31 +133,31 @@ DataModel::DataModel(Tables table, QString tableName)
     case Tables::sets:
         switch(table) {
             case Tables::books:
-                sqlTable = "books";
+                sqlTable = "xbook";
                 break;
             case Tables::boxes:
-                sqlTable = "boxes";
+                sqlTable = "xoriginal_box";
                 break;
             case Tables::catalogs:
-                sqlTable = "catalogs";
+                sqlTable = "xcatalog";
                 break;
             case Tables::gear:
-                sqlTable = "gear";
+                sqlTable = "xgear";
                 break;
             case Tables::instructions:
-                sqlTable = "instructions";
+                sqlTable = "xinstruction";
                 break;
             case Tables::minifigs:
-                sqlTable = "minifigs";
+                sqlTable = "xminifig";
                 break;
             case Tables::parts:
-                sqlTable = "parts";
+                sqlTable = "xpart";
                 break;
             case Tables::sets:
-                sqlTable = "sets";
+                sqlTable = "xset";
                 break;
             default:
-                sqlTable = "parts";
+                sqlTable = "xpart";
         }
         columns[0] = Column("id", "id", tr("ID"), "integer", false, 100);
         columns[1] = Column("item_type", "ITEMTYPE", tr("Type"), "varchar", false, 50);
@@ -266,9 +266,9 @@ QMap<QString, QString> DataModel::getTranslationTable() {
 
 QSqlError DataModel::initiateSqlTable(QString database) {
     QString queryString;
-    queryString = "CREATE TABLE IF NOT EXISTS " + getSqlTableName() + "(" + columns[0].property.name + " " + columns[0].property.sqlType + " PRIMARY KEY" ;
+    queryString = "CREATE TABLE IF NOT EXISTS '" + getSqlTableName() + "'('" + columns[0].property.name + "' " + columns[0].property.sqlType + " PRIMARY KEY" ;
     for(int i = 1; i < getNumberOfColumns(); i++) {
-        queryString += ", " + columns[i].property.name + " " + columns[i].property.sqlType;
+        queryString += ", '" + columns[i].property.name + "' " + columns[i].property.sqlType;
     }
     queryString += ")";
     QSqlQuery q(queryString, QSqlDatabase::database(database));
@@ -281,9 +281,9 @@ QSqlError DataModel::initiateSqlTable(QString database) {
 
 QSqlError DataModel::initiateSqlTableAuto(QString database) {
     QString queryString;
-    queryString = "CREATE TABLE IF NOT EXISTS " + getSqlTableName() + "(id INTEGER PRIMARY KEY AUTOINCREMENT" ;
+    queryString = "CREATE TABLE IF NOT EXISTS '" + getSqlTableName() + "'(id INTEGER PRIMARY KEY AUTOINCREMENT" ;
     for(int i = 1; i < getNumberOfColumns(); i++) {
-        queryString += ", " + columns[i].property.name + " " + columns[i].property.sqlType;
+        queryString += ", '" + columns[i].property.name + "' " + columns[i].property.sqlType;
     }
     queryString += ")";
     QSqlQuery q(queryString, QSqlDatabase::database(database));
@@ -295,7 +295,7 @@ QSqlError DataModel::initiateSqlTableAuto(QString database) {
 }
 
 QSqlError DataModel::truncateSqlTable(QString database) {
-    QString queryString = "DELETE FROM " + getSqlTableName();
+    QString queryString = QString("DELETE FROM '%1'").arg(getSqlTableName());
     QSqlQuery q(queryString, QSqlDatabase::database(database));
     if (!q.exec()) {
         qDebug() << "Failed to truncate" << getSqlTableName() << q.lastError();
@@ -306,8 +306,8 @@ QSqlError DataModel::truncateSqlTable(QString database) {
 
 QSqlError DataModel::addItemToTable(QMap<QString, QVariant> fields, QString database)
 {
-    QString qryString = "INSERT INTO ";
-    qryString += this->getSqlTableName() + "(" + this->columns[0].property.name;
+    QString qryString = "INSERT INTO '";
+    qryString += this->getSqlTableName() + "'(" + this->columns[0].property.name;
     QString qryStringEnd = "";
     for (int i = 1; i < this->getNumberOfColumns(); i++) {
         if(fields[columns[i].property.importName].isValid()) {

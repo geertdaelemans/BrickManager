@@ -3,6 +3,9 @@
 #include "listmodeldelegate.h"
 #include "sqldatabase.h"
 #include "ui_additemdialog.h"
+#include "bricklink.h"
+
+#include <QPixmap>
 
 AddItemDialog::AddItemDialog(QWidget *parent) :
     QDialog(parent),
@@ -109,33 +112,36 @@ void AddItemDialog::setColorFilter(QString itemName)
 
 void AddItemDialog::updateCategories(QString cat)
 {
-    QString category;
-    Tables table = Tables::parts;
-    if (cat == "Book") {
-        category = "books";
-        table = Tables::books;
-    } else if (cat == "Catalog") {
-        category = "catalogs";
-        table = Tables::catalogs;
-    } else if (cat == "Gear") {
-        category = "gear";
-        table = Tables::gear;
-    } else if (cat == "Instruction") {
-        category = "instructions";
-        table = Tables::instructions;
-    } else if (cat == "Minifig") {
-        category = "minifigs";
-        table = Tables::minifigs;
-    } else if (cat == "Original box") {
-        category = "boxes";
-        table = Tables::boxes;
-    } else if (cat == "Set") {
-        category = "sets";
-        table = Tables::sets;
-    } else {
-        category = "parts";
-        table = Tables::parts;
-    }
+//    QString category;
+//    Tables table = Tables::parts;
+    const BrickLink::ItemType* type = BrickLink::inst()->itemType(cat);
+    m_category = type->name();
+    Tables table = type->tableName();
+//    if (cat == "Book") {
+//        m_category = "book";
+//        table = Tables::books;
+//    } else if (cat == "Catalog") {
+//        m_category = "catalog";
+//        table = Tables::catalogs;
+//    } else if (cat == "Gear") {
+//        m_category = "gear";
+//        table = Tables::gear;
+//    } else if (cat == "Instruction") {
+//        m_category = "instruction";
+//        table = Tables::instructions;
+//    } else if (cat == "Minifig") {
+//        m_category = "minifig";
+//        table = Tables::minifigs;
+//    } else if (cat == "Original box") {
+//        m_category = "original_box";
+//        table = Tables::boxes;
+//    } else if (cat == "Set") {
+//        m_category = "set";
+//        table = Tables::sets;
+//    } else {
+//        m_category = "part";
+//        table = Tables::parts;
+//    }
 
     DataModel *categoriesDataModel = new DataModel(Tables::categories);
     DataModel *partsDataModel = new DataModel(table);
@@ -145,7 +151,7 @@ void AddItemDialog::updateCategories(QString cat)
     categoriesModel->setTable(categoriesDataModel->getSqlTableName());
     partsModel = new QSqlTableModel(ui->partsTableView, QSqlDatabase::database("catalogDatabase"));
     partsModel->setTable(partsDataModel->getSqlTableName());
-    categoriesModel->setFilter(category + " == 1");
+    categoriesModel->setFilter("x"+m_category + " == 1");
 
     int categoryIdx = categoriesModel->fieldIndex("category_name");
 
@@ -173,6 +179,8 @@ void AddItemDialog::updateCategories(QString cat)
     statusAddButton();
 
     setColorFilter();
+
+    delete type;
 }
 
 void AddItemDialog::on_addPushButton_clicked()
@@ -202,6 +210,7 @@ void AddItemDialog::on_categoriesListView_clicked(const QModelIndex &index)
     const QModelIndex categoryID = index.sibling(index.row(), 0);
     int selectedCategory = categoryID.data(Qt::DisplayRole).toInt();
     partsModel->setFilter(QString("category_id == %1").arg(selectedCategory));
+    qDebug() << "Filter" << QString("category_id == %1").arg(selectedCategory);
     partsModel->select();
     m_categorySelected = true;
     m_partSelected = false;
@@ -215,7 +224,7 @@ void AddItemDialog::on_partsTableView_clicked(const QModelIndex &index)
     // Retrieve the part number from column 2
     const QModelIndex partNumber = index.sibling(index.row(), 2);
     QString selectedPart = partNumber.data(Qt::DisplayRole).toString();
-
+    getImage(selectedPart, m_category);
     setColorFilter(selectedPart);
 
     m_partSelected = true;
@@ -243,4 +252,59 @@ void AddItemDialog::statusAddButton() {
  */
 void AddItemDialog::updateTotalCost() {
     ui->totalInput->setValue(ui->quantityInput->value() * ui->priceInput->value());
+}
+
+
+
+
+
+void AddItemDialog::getImage(QString part, QString itemType)
+{
+    nam = new QNetworkAccessManager(this);
+
+    ui->w_picture->clear();
+    ui->w_picture->setText("Loading image...");
+
+    QUrl url("http:" + BrickLink::inst()->getItemInformation(itemType, part));
+
+    QNetworkReply* reply = nam->get(QNetworkRequest(url));
+
+    QEventLoop loop;
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+
+    finishedSlot(reply);
+    qDebug() << "URL" << url;
+}
+
+void AddItemDialog::finishedSlot(QNetworkReply *reply)
+{
+    // Reading attributes of the reply
+    // e.g. the HTTP status code
+    QVariant statusCodeV = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
+    // Or the target URL if it was a redirect:
+    QVariant redirectionTargetUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
+
+    // no error received?
+    if (reply->error() == QNetworkReply::NoError) {
+        // read data from QNetworkReply here
+        QByteArray bytes = reply->readAll();  // bytes
+        QPixmap pixmap;
+        pixmap.loadFromData(bytes);
+        int w = ui->w_picture->width();
+        int h = ui->w_picture->height();
+        ui->w_picture->setPixmap(pixmap.scaled(w,h,Qt::KeepAspectRatio));
+    }
+    // Some http error received
+    else {
+        const QPixmap noImage(":/images/no_image.jpg");
+        int w = ui->w_picture->width();
+        int h = ui->w_picture->height();
+        ui->w_picture->setPixmap(noImage.scaled(w,h,Qt::KeepAspectRatio));
+    }
+
+    // We receive ownership of the reply object
+    // and therefore need to handle deletion.
+    delete reply;
 }

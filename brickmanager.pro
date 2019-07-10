@@ -4,6 +4,7 @@ CONFIG -= app_bundle
 
 HEADERS += \
     bricklink.h \
+    cref.h \
     exportxml.h \
     mainwindow.h \
     ordersdialog.h \
@@ -22,6 +23,7 @@ HEADERS += \
     ctransfer.h
 
 SOURCES += \
+    cref.cpp \
     exportxml.cpp \
     main.cpp \
     bricklink.cpp \

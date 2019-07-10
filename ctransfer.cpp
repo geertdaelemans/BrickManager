@@ -653,8 +653,8 @@ void CTransfer::importCatalog(ProgressDialog *pd)
 
     const char *url = "https://www.bricklink.com/catalogDownload.asp";
 
-    char typeCode[] = {'S', 'P', 'M', 'B', 'G', 'C', 'I', 'O'};
-    QString typeName[] = {"sets", "parts", "minifigs", "books", "gear", "catalogs", "instructions", "boxes"};
+    const char typeCode[] = {'S', 'P', 'M', 'B', 'G', 'C', 'I', 'O'};
+    const QString typeName[] = {"set", "part", "minifig", "book", "gear", "catalog", "instruction", "original_box"};
     Tables tableName[] = {Tables::sets, Tables::parts, Tables::minifigs, Tables::books, Tables::gear, Tables::catalogs, Tables::instructions, Tables::boxes};
 
     QMap<QString, QString> query;
@@ -783,7 +783,7 @@ int CTransfer::populateDatabase(CTransfer::Job* job)
 
         // Delete table if exists
         QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
-        q.exec("DROP TABLE IF EXISTS " + sqlTableName);
+        q.exec(QString("DROP TABLE IF EXISTS '%1'").arg(sqlTableName));
 
         // Create table
         p_dataModel->initiateSqlTableAuto("catalogDatabase");
@@ -793,22 +793,21 @@ int CTransfer::populateDatabase(CTransfer::Job* job)
         translationTable.remove("id");
 
         // Prepare query string
-        QString qryString = "INSERT INTO ";
-        qryString += p_dataModel->getSqlTableName() + " (";
+//        QString qryString = QString("INSERT INTO '%1' (").arg(p_dataModel->getSqlTableName());
         bool first = true;
-        QString tempString;
+        QString firstString;
+        QString secondString;
         for (QString key : translationTable.keys()) {
             if (first) {
-                qryString += translationTable[key];
-                tempString += ":" + translationTable[key];
+                firstString += QString("'%1'").arg(translationTable[key]);
+                secondString += QString(":%1").arg(translationTable[key]);
                 first = false;
             } else {
-                qryString += ", " + translationTable[key];
-                tempString += ", :" + translationTable[key];
+                firstString += QString(", '%1'").arg(translationTable[key]);
+                secondString += QString(", :%1").arg(translationTable[key]);
             }
         }
-        qryString += ") VALUES (" + tempString + ")";
-
+        QString qryString = QString("INSERT INTO '%1' (%2) VALUES (%3)").arg(p_dataModel->getSqlTableName()).arg(firstString).arg(secondString);
         // Prepare query
         if (!q.prepare(qryString)) {
             qDebug() << "Failed to add item to database" << p_dataModel->getSqlTableName() << q.lastError();
@@ -854,19 +853,18 @@ int CTransfer::populateDatabase(CTransfer::Job* job)
     }
 
     // Update the categories database with catalog information
-    if (table != Tables::partcolor) {
+    if (table != Tables::partcolor && table != Tables::colors && table != Tables::categories) {
         QSqlDatabase::database("catalogDatabase").transaction();
-        QString queryString;
-        queryString = "SELECT DISTINCT category_id FROM " + sqlTableName;
+        QString queryString = QString("SELECT DISTINCT category_id FROM '%1'").arg(sqlTableName);
         QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
         if (!q.prepare(queryString))
-            qDebug() << q.lastError();
+            qDebug() << "Tables::partcolor" << q.lastError() << queryString;
         q.exec();
         while (q.next()) {
             int catNo = q.value(0).toInt();
             QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
-            if (!q.prepare(QString("UPDATE categories SET %1 = 1 WHERE id == %2").arg(sqlTableName).arg(catNo)))
-                qDebug() << q.lastError();
+            if (!q.prepare(QString("UPDATE categories SET '%1' = 1 WHERE id == %2").arg(sqlTableName).arg(catNo)))
+                qDebug() << "Tables::partcolor" << q.lastError();
             q.exec();
         }
         QSqlDatabase::database("catalogDatabase").commit();

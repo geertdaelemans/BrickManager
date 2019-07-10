@@ -10,4 +10,7 @@
         <file>images/22x22/file_saveas.png</file>
         <file>images/22x22/file_close.png</file>
     </qresource>
+    <qresource prefix="/">
+        <file>images/no_image.jpg</file>
+    </qresource>
 </RCC>
