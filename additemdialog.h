@@ -5,6 +5,8 @@
 #include <QtSql>
 #include <QNetworkReply>
 
+#include "bricklink.h"
+
 namespace Ui {
 class AddItemDialog;
 }
@@ -19,7 +21,7 @@ public:
     void getImage(QString part, QString itemType = "part");
 
 private slots:
-    void updateCategories(QString m_category = "parts");
+    void updateCategories(QString category = "parts");
     void statusAddButton();
     void on_addPushButton_clicked();
     void on_categoriesListView_clicked(const QModelIndex &index);
@@ -40,7 +42,7 @@ private:
     bool m_partSelected = false;
     bool m_colorSelected = false;
     int m_lastSelectedColor = -1;
-    QString m_category;
+    BrickLink::ItemType* m_category;
 
     QImage * image;
     QPixmap screenImage;

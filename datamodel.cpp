@@ -1,8 +1,10 @@
 #include "datamodel.h"
+#include "bricklink.h"
 
 
 DataModel::DataModel(Tables table, QString tableName)
 {
+    QString prefix = BrickLink::ItemType::getTablePrefix();
     switch (table)
     {
     case Tables::indextable:
@@ -57,14 +59,14 @@ DataModel::DataModel(Tables table, QString tableName)
         sqlTable = "categories";
         columns[0] = Column("id", "CATEGORY", tr("ID"), "integer", false, 50);
         columns[1] = Column("category_name", "CATEGORYNAME", tr("Name"), "varchar", true, 300);
-        columns[2] = Column("xbook", "books", tr("Books"), "bool", false, 50);
-        columns[3] = Column("xoriginal_box", "boxes", tr("Original Boxes"), "bool", false, 50);
-        columns[4] = Column("xcatalog", "catalogs", tr("Catalogs"), "bool", false, 50);
-        columns[5] = Column("xgear", "gear", tr("Gear"), "bool", false, 50);
-        columns[6] = Column("xinstruction", "instructions", tr("Instructions"), "bool", false, 50);
-        columns[7] = Column("xminifig", "minifigs", tr("Minifigs"), "bool", false, 50);
-        columns[8] = Column("xpart", "parts", tr("Parts"), "bool", false, 50);
-        columns[9] = Column("xset", "sets", tr("Sets"), "bool", false, 50);
+        columns[2] = Column(prefix + "book", "books", tr("Books"), "bool", false, 50);
+        columns[3] = Column(prefix + "original_box", "boxes", tr("Original Boxes"), "bool", false, 50);
+        columns[4] = Column(prefix + "catalog", "catalogs", tr("Catalogs"), "bool", false, 50);
+        columns[5] = Column(prefix + "gear", "gear", tr("Gear"), "bool", false, 50);
+        columns[6] = Column(prefix + "instruction", "instructions", tr("Instructions"), "bool", false, 50);
+        columns[7] = Column(prefix + "minifig", "minifigs", tr("Minifigs"), "bool", false, 50);
+        columns[8] = Column(prefix + "part", "parts", tr("Parts"), "bool", false, 50);
+        columns[9] = Column(prefix + "set", "sets", tr("Sets"), "bool", false, 50);
         sortColumn = 1;
         sortOrder = Qt::AscendingOrder;
         break;
@@ -131,34 +133,7 @@ DataModel::DataModel(Tables table, QString tableName)
     case Tables::minifigs:
     case Tables::parts:
     case Tables::sets:
-        switch(table) {
-            case Tables::books:
-                sqlTable = "xbook";
-                break;
-            case Tables::boxes:
-                sqlTable = "xoriginal_box";
-                break;
-            case Tables::catalogs:
-                sqlTable = "xcatalog";
-                break;
-            case Tables::gear:
-                sqlTable = "xgear";
-                break;
-            case Tables::instructions:
-                sqlTable = "xinstruction";
-                break;
-            case Tables::minifigs:
-                sqlTable = "xminifig";
-                break;
-            case Tables::parts:
-                sqlTable = "xpart";
-                break;
-            case Tables::sets:
-                sqlTable = "xset";
-                break;
-            default:
-                sqlTable = "xpart";
-        }
+        sqlTable = tableName;
         columns[0] = Column("id", "id", tr("ID"), "integer", false, 100);
         columns[1] = Column("item_type", "ITEMTYPE", tr("Type"), "varchar", false, 50);
         columns[2] = Column("item_no", "ITEMID", tr("Part #"), "varchar", true, 100);

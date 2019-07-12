@@ -112,46 +112,17 @@ void AddItemDialog::setColorFilter(QString itemName)
 
 void AddItemDialog::updateCategories(QString cat)
 {
-//    QString category;
-//    Tables table = Tables::parts;
-    const BrickLink::ItemType* type = BrickLink::inst()->itemType(cat);
-    m_category = type->name();
-    Tables table = type->tableName();
-//    if (cat == "Book") {
-//        m_category = "book";
-//        table = Tables::books;
-//    } else if (cat == "Catalog") {
-//        m_category = "catalog";
-//        table = Tables::catalogs;
-//    } else if (cat == "Gear") {
-//        m_category = "gear";
-//        table = Tables::gear;
-//    } else if (cat == "Instruction") {
-//        m_category = "instruction";
-//        table = Tables::instructions;
-//    } else if (cat == "Minifig") {
-//        m_category = "minifig";
-//        table = Tables::minifigs;
-//    } else if (cat == "Original box") {
-//        m_category = "original_box";
-//        table = Tables::boxes;
-//    } else if (cat == "Set") {
-//        m_category = "set";
-//        table = Tables::sets;
-//    } else {
-//        m_category = "part";
-//        table = Tables::parts;
-//    }
+    m_category = BrickLink::inst()->itemType(cat);
 
     DataModel *categoriesDataModel = new DataModel(Tables::categories);
-    DataModel *partsDataModel = new DataModel(table);
+    DataModel *partsDataModel = new DataModel(m_category->tableName(), m_category->sqlName());
 
     // Set table source
     QSqlTableModel *categoriesModel = new QSqlTableModel(ui->categoriesListView, QSqlDatabase::database("catalogDatabase"));
     categoriesModel->setTable(categoriesDataModel->getSqlTableName());
     partsModel = new QSqlTableModel(ui->partsTableView, QSqlDatabase::database("catalogDatabase"));
     partsModel->setTable(partsDataModel->getSqlTableName());
-    categoriesModel->setFilter("x"+m_category + " == 1");
+    categoriesModel->setFilter(m_category->sqlName() + " == 1");
 
     int categoryIdx = categoriesModel->fieldIndex("category_name");
 
@@ -179,8 +150,6 @@ void AddItemDialog::updateCategories(QString cat)
     statusAddButton();
 
     setColorFilter();
-
-    delete type;
 }
 
 void AddItemDialog::on_addPushButton_clicked()
@@ -210,7 +179,6 @@ void AddItemDialog::on_categoriesListView_clicked(const QModelIndex &index)
     const QModelIndex categoryID = index.sibling(index.row(), 0);
     int selectedCategory = categoryID.data(Qt::DisplayRole).toInt();
     partsModel->setFilter(QString("category_id == %1").arg(selectedCategory));
-    qDebug() << "Filter" << QString("category_id == %1").arg(selectedCategory);
     partsModel->select();
     m_categorySelected = true;
     m_partSelected = false;
@@ -224,7 +192,7 @@ void AddItemDialog::on_partsTableView_clicked(const QModelIndex &index)
     // Retrieve the part number from column 2
     const QModelIndex partNumber = index.sibling(index.row(), 2);
     QString selectedPart = partNumber.data(Qt::DisplayRole).toString();
-    getImage(selectedPart, m_category);
+    getImage(selectedPart, m_category->apiName());
     setColorFilter(selectedPart);
 
     m_partSelected = true;
@@ -274,7 +242,6 @@ void AddItemDialog::getImage(QString part, QString itemType)
     loop.exec();
 
     finishedSlot(reply);
-    qDebug() << "URL" << url;
 }
 
 void AddItemDialog::finishedSlot(QNetworkReply *reply)

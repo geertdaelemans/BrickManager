@@ -27,6 +27,7 @@ BrickLink::BrickLink(QObject *parent) :
 
 
 BrickLink* BrickLink::s_inst = nullptr;
+const QString BrickLink::ItemType::m_table_prefix = "cat_";
 
 BrickLink* BrickLink::inst()
 {
@@ -57,39 +58,39 @@ BrickLink::Item::~Item()
 
 }
 
-const BrickLink::ItemType* BrickLink::itemType(const QString name) const
+BrickLink::ItemType *BrickLink::itemType(const QString name) const
 {
     ItemType *type = new ItemType();
     if (name == "Book") {
-        type->m_name = "book";
+        type->m_api_name = "book";
         type->m_table_name = Tables::books;
         type->m_picture_id = 'B';
     } else if (name == "Catalog") {
-        type->m_name = "catalog";
+        type->m_api_name = "catalog";
         type->m_table_name = Tables::catalogs;
         type->m_picture_id = 'C';
     } else if (name == "Gear") {
-        type->m_name = "gear";
+        type->m_api_name = "gear";
         type->m_table_name = Tables::gear;
         type->m_picture_id = 'G';
     } else if (name == "Instruction") {
-        type->m_name = "instruction";
+        type->m_api_name = "instruction";
         type->m_table_name = Tables::instructions;
         type->m_picture_id = 'I';
     } else if (name == "Minifig") {
-        type->m_name = "minifig";
+        type->m_api_name = "minifig";
         type->m_table_name = Tables::minifigs;
         type->m_picture_id = 'M';
     } else if (name == "Original box") {
-        type->m_name = "original_box";
+        type->m_api_name = "original_box";
         type->m_table_name = Tables::boxes;
         type->m_picture_id = 'O';
     } else if (name == "Set") {
-        type->m_name = "set";
+        type->m_api_name = "set";
         type->m_table_name = Tables::sets;
         type->m_picture_id = 'S';
     } else {
-        type->m_name = "part";
+        type->m_api_name = "part";
         type->m_table_name = Tables::parts;
         type->m_picture_id = 'P';
     }
@@ -162,7 +163,6 @@ void BrickLink::importUserInventory()
 QString BrickLink::getItemInformation(QString type, QString no)
 {
     QUrl url(QString("https://api.bricklink.com/api/store/v1/items/%1/%2").arg(type).arg(no));
-    qDebug() << "URL" << url;
     QNetworkReply *reply = this->get(url);
 
     QEventLoop loop;

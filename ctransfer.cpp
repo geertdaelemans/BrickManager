@@ -9,6 +9,7 @@
 #include "lzmadec.h"
 #include "datamodel.h"
 #include "sqldatabase.h"
+#include "bricklink.h"
 
 bool CTransfer::s_global_init = false;
 QMutex CTransfer::s_share_lock;
@@ -653,9 +654,7 @@ void CTransfer::importCatalog(ProgressDialog *pd)
 
     const char *url = "https://www.bricklink.com/catalogDownload.asp";
 
-    const char typeCode[] = {'S', 'P', 'M', 'B', 'G', 'C', 'I', 'O'};
-    const QString typeName[] = {"set", "part", "minifig", "book", "gear", "catalog", "instruction", "original_box"};
-    Tables tableName[] = {Tables::sets, Tables::parts, Tables::minifigs, Tables::books, Tables::gear, Tables::catalogs, Tables::instructions, Tables::boxes};
+    const QString typeName[] = {"Set", "Part", "Minifig", "Book", "Gear", "Catalog", "Instruction", "Original box"};
 
     QMap<QString, QString> query;
     query["viewType"] = "0";            // 0: Catalog Items, 1: Item Types, 2: Categories, 3: Colors, 4: Inventory, 5: Part and Color Codes
@@ -677,9 +676,9 @@ void CTransfer::importCatalog(ProgressDialog *pd)
 
     // Process all catalogs
     query["viewType"] = "0";            // Catalog Items
-    for (int i = 0; i < static_cast<int>(sizeof(typeCode)/sizeof(*typeCode)) ; i++) {
-        query["itemType"] = typeCode[i];
-        m_job = retrieve(Job::Post, url, query, Job::PartColor, typeName[i], true, 0, nullptr, nullptr, false, tableName[i]);
+    for (int i = 0; i < static_cast<int>(sizeof(typeName)/sizeof(*typeName)) ; i++) {
+        query["itemType"] = BrickLink::inst()->itemType(typeName[i])->pictureId();
+        m_job = retrieve(Job::Post, url, query, Job::PartColor, BrickLink::inst()->itemType(typeName[i])->sqlName(), true, 0, nullptr, nullptr, false, BrickLink::inst()->itemType(typeName[i])->tableName());
     }
 
     // Process partcolor
@@ -777,8 +776,7 @@ int CTransfer::populateDatabase(CTransfer::Job* job)
 
         // Prepare transaction
         QSqlDatabase::database("catalogDatabase").transaction();
-
-        DataModel *p_dataModel = new DataModel(table);
+        DataModel *p_dataModel = new DataModel(table, sqlTableName);
         sqlTableName = p_dataModel->getSqlTableName();
 
         // Delete table if exists
@@ -824,7 +822,6 @@ int CTransfer::populateDatabase(CTransfer::Job* job)
             if (doc.setContent(store_buffer, &emsg, &eline, &ecol)) {
                 QDomElement root = doc.documentElement();
                 QDomNodeList itemList = root.childNodes(); // CODES level
-                qDebug() << "path" << root.tagName() << itemList.at(0).toElement().tagName();
                 for (int i = 0; i < itemList.size(); i++){
                     QDomNode activeNode = itemList.at(i);  // ITEM level
                     for(QString tagName : translationTable.keys()) {

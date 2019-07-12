@@ -32,7 +32,7 @@ public:
 
     static BrickLink *inst();
 
-    const ItemType *itemType(const QString name) const;
+    ItemType *itemType(const QString name) const;
     const Item* item(const QString itemType, const char *id) const;
 
 signals:
@@ -62,10 +62,12 @@ private:
 public:
     class ItemType {
     public:
-        char id ( ) const                 { return m_id; }
-        QString name() const              { return m_name; }
-        QString apiName () const          { return QString(m_name).replace(" ", "_"); }
-        Tables tableName() const          { return m_table_name; }
+        char id( ) const                { return m_id; }
+        QString name() const            { return m_api_name; }
+        QString apiName() const         { return m_api_name; }
+        QString sqlName() const         { return m_table_prefix + m_api_name; }
+        Tables tableName() const        { return m_table_name; }
+        static QString getTablePrefix() { return m_table_prefix; }
 
 //		const Category **categories ( ) const { return m_categories; }
         bool hasInventories ( ) const     { return m_has_inventories; }
@@ -74,7 +76,7 @@ public:
         bool hasWeight ( ) const          { return m_has_weight; }
         char pictureId ( ) const          { return m_picture_id; }
         QSize imageSize ( ) const;
-
+        ItemType ( );
         ~ItemType();
 
     private:
@@ -86,14 +88,14 @@ public:
         bool     m_has_weight      : 1;
         bool     m_has_year        : 1;
 
-        QString  m_name;
-
+        QString  m_api_name;
         Tables   m_table_name;
+        static const QString m_table_prefix;
 
 //		const Category **m_categories;
 
     private:
-        ItemType ( );
+
 
         friend class BrickLink;
 //		friend class BrickLink::TextImport;
