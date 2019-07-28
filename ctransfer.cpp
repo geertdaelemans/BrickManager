@@ -677,8 +677,8 @@ void CTransfer::importCatalog(ProgressDialog *pd)
     // Process all catalogs
     query["viewType"] = "0";            // Catalog Items
     for (int i = 0; i < static_cast<int>(sizeof(typeName)/sizeof(*typeName)) ; i++) {
-        query["itemType"] = BrickLink::inst()->itemType(typeName[i])->pictureId();
-        m_job = retrieve(Job::Post, url, query, Job::PartColor, BrickLink::inst()->itemType(typeName[i])->sqlName(), true, 0, nullptr, nullptr, false, BrickLink::inst()->itemType(typeName[i])->tableName());
+        query["itemType"] = ItemType::getPictureId(i);
+        m_job = retrieve(Job::Post, url, query, Job::PartColor, ItemType::getSqlName(i), true, 0, nullptr, nullptr, false, ItemType::getTableName(i));
     }
 
     // Process partcolor

@@ -4,7 +4,7 @@
 
 DataModel::DataModel(Tables table, QString tableName)
 {
-    QString prefix = BrickLink::ItemType::getTablePrefix();
+    QString prefix = ItemType::getTablePrefix();
     switch (table)
     {
     case Tables::indextable:

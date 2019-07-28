@@ -112,7 +112,7 @@ void AddItemDialog::setColorFilter(QString itemName)
 
 void AddItemDialog::updateCategories(QString cat)
 {
-    m_category = BrickLink::inst()->itemType(cat);
+    m_category = new ItemType(cat);
 
     DataModel *categoriesDataModel = new DataModel(Tables::categories);
     DataModel *partsDataModel = new DataModel(m_category->tableName(), m_category->sqlName());

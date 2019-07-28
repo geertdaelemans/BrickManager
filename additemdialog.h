@@ -42,7 +42,7 @@ private:
     bool m_partSelected = false;
     bool m_colorSelected = false;
     int m_lastSelectedColor = -1;
-    BrickLink::ItemType* m_category;
+    ItemType* m_category;
 
     QImage * image;
     QPixmap screenImage;

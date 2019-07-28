@@ -7,6 +7,59 @@
 
 #include <QtNetworkAuth>
 
+
+class ItemType {
+public:
+    ItemType(const QString name);
+    ~ItemType();
+
+    char id() const                { return m_id; }
+    QString name() const            { return m_api_name; }
+    QString apiName() const         { return m_api_name; }
+    QString sqlName() const         { return m_table_prefix + m_api_name; }
+    Tables tableName() const        { return m_table_name; }
+    static QString getTablePrefix() { return m_table_prefix; }
+    static QString getSqlName(QString name);
+    static QString getSqlName(int id)   { return m_table_prefix + m_api_names[id]; }
+    static Tables getTableName(int id)  { return m_table_names[id]; }
+    static char getPictureId(int id)    { return m_picture_ids[id]; }
+
+//		const Category **categories ( ) const { return m_categories; }
+    bool hasInventories ( ) const     { return m_has_inventories; }
+    bool hasColors ( ) const          { return m_has_colors; }
+    bool hasYearReleased ( ) const    { return m_has_year; }
+    bool hasWeight ( ) const          { return m_has_weight; }
+    char pictureId ( ) const          { return m_picture_id; }
+    QSize imageSize ( ) const;
+
+private:
+    char     m_id;
+    char     m_picture_id;
+
+    bool     m_has_inventories : 1;
+    bool     m_has_colors      : 1;
+    bool     m_has_weight      : 1;
+    bool     m_has_year        : 1;
+
+    QString  m_api_name;
+    Tables   m_table_name;
+
+    static const QString m_table_prefix;
+    static const QString m_names[8];
+    static const char m_picture_ids[8];
+    static const QString m_api_names[8];
+    static const Tables m_table_names[8];
+
+//		const Category **m_categories;
+
+private:
+    friend class BrickLink;
+//		friend class BrickLink::TextImport;
+    friend QDataStream &operator << (QDataStream &ds, const ItemType *itt);
+    friend QDataStream &operator >> (QDataStream &ds, ItemType *itt);
+};
+
+
 class BrickLink : public QOAuth1
 {
     Q_OBJECT
@@ -24,15 +77,12 @@ public:
     class Picture;
     class Color;
     class Item;
-    class ItemType;
-
 
     Picture *picture ( const Item *item, const Color *color, bool high_priority = false );
     Picture *largePicture ( const Item *item, bool high_priority = false );
 
     static BrickLink *inst();
 
-    ItemType *itemType(const QString name) const;
     const Item* item(const QString itemType, const char *id) const;
 
 signals:
@@ -60,49 +110,6 @@ private:
     static BrickLink *s_inst;
 
 public:
-    class ItemType {
-    public:
-        char id( ) const                { return m_id; }
-        QString name() const            { return m_api_name; }
-        QString apiName() const         { return m_api_name; }
-        QString sqlName() const         { return m_table_prefix + m_api_name; }
-        Tables tableName() const        { return m_table_name; }
-        static QString getTablePrefix() { return m_table_prefix; }
-
-//		const Category **categories ( ) const { return m_categories; }
-        bool hasInventories ( ) const     { return m_has_inventories; }
-        bool hasColors ( ) const          { return m_has_colors; }
-        bool hasYearReleased ( ) const    { return m_has_year; }
-        bool hasWeight ( ) const          { return m_has_weight; }
-        char pictureId ( ) const          { return m_picture_id; }
-        QSize imageSize ( ) const;
-        ItemType ( );
-        ~ItemType();
-
-    private:
-        char     m_id;
-        char     m_picture_id;
-
-        bool     m_has_inventories : 1;
-        bool     m_has_colors      : 1;
-        bool     m_has_weight      : 1;
-        bool     m_has_year        : 1;
-
-        QString  m_api_name;
-        Tables   m_table_name;
-        static const QString m_table_prefix;
-
-//		const Category **m_categories;
-
-    private:
-
-
-        friend class BrickLink;
-//		friend class BrickLink::TextImport;
-        friend QDataStream &operator << ( QDataStream &ds, const BrickLink::ItemType *itt );
-        friend QDataStream &operator >> ( QDataStream &ds, BrickLink::ItemType *itt );
-    };
-
     class Color {
     public:
         uint id ( ) const           { return m_id; }

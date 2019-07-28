@@ -27,7 +27,11 @@ BrickLink::BrickLink(QObject *parent) :
 
 
 BrickLink* BrickLink::s_inst = nullptr;
-const QString BrickLink::ItemType::m_table_prefix = "cat_";
+const QString ItemType::m_table_prefix = "cat_";
+const QString ItemType::m_names[8] = {"Book", "Catalog", "Gear", "Instruction", "Minifig", "Original box", "Set", "Part"};
+const char ItemType::m_picture_ids[8] = {'B', 'C', 'G', 'I', 'M', 'O', 'S', 'P'};
+const QString ItemType::m_api_names[8] = {"book", "catalog", "gear", "instruction", "minifig", "original_box", "set", "part"};
+const Tables ItemType::m_table_names[8] = {Tables::books, Tables::catalogs, Tables::gear, Tables::instructions, Tables::minifigs, Tables::boxes, Tables::sets, Tables::parts};
 
 BrickLink* BrickLink::inst()
 {
@@ -37,14 +41,52 @@ BrickLink* BrickLink::inst()
     return s_inst;
 }
 
-BrickLink::ItemType::ItemType()
+ItemType::ItemType(const QString name)
+{
+    if (name == "Book") {
+        m_api_name = "book";
+        m_table_name = Tables::books;
+        m_picture_id = 'B';
+    } else if (name == "Catalog") {
+        m_api_name = "catalog";
+        m_table_name = Tables::catalogs;
+        m_picture_id = 'C';
+    } else if (name == "Gear") {
+        m_api_name = "gear";
+        m_table_name = Tables::gear;
+        m_picture_id = 'G';
+    } else if (name == "Instruction") {
+        m_api_name = "instruction";
+        m_table_name = Tables::instructions;
+        m_picture_id = 'I';
+    } else if (name == "Minifig") {
+        m_api_name = "minifig";
+        m_table_name = Tables::minifigs;
+        m_picture_id = 'M';
+    } else if (name == "Original box") {
+        m_api_name = "original_box";
+        m_table_name = Tables::boxes;
+        m_picture_id = 'O';
+    } else if (name == "Set") {
+        m_api_name = "set";
+        m_table_name = Tables::sets;
+        m_picture_id = 'S';
+    } else {
+        m_api_name = "part";
+        m_table_name = Tables::parts;
+        m_picture_id = 'P';
+    }
+    m_id = 1;
+}
+
+ItemType::~ItemType()
 {
 
 }
 
-BrickLink::ItemType::~ItemType()
+QString ItemType::getSqlName(QString name)
 {
-
+    return m_table_prefix + m_api_names->at(m_names->indexOf(name));
 }
 
 
@@ -58,50 +100,10 @@ BrickLink::Item::~Item()
 
 }
 
-BrickLink::ItemType *BrickLink::itemType(const QString name) const
-{
-    ItemType *type = new ItemType();
-    if (name == "Book") {
-        type->m_api_name = "book";
-        type->m_table_name = Tables::books;
-        type->m_picture_id = 'B';
-    } else if (name == "Catalog") {
-        type->m_api_name = "catalog";
-        type->m_table_name = Tables::catalogs;
-        type->m_picture_id = 'C';
-    } else if (name == "Gear") {
-        type->m_api_name = "gear";
-        type->m_table_name = Tables::gear;
-        type->m_picture_id = 'G';
-    } else if (name == "Instruction") {
-        type->m_api_name = "instruction";
-        type->m_table_name = Tables::instructions;
-        type->m_picture_id = 'I';
-    } else if (name == "Minifig") {
-        type->m_api_name = "minifig";
-        type->m_table_name = Tables::minifigs;
-        type->m_picture_id = 'M';
-    } else if (name == "Original box") {
-        type->m_api_name = "original_box";
-        type->m_table_name = Tables::boxes;
-        type->m_picture_id = 'O';
-    } else if (name == "Set") {
-        type->m_api_name = "set";
-        type->m_table_name = Tables::sets;
-        type->m_picture_id = 'S';
-    } else {
-        type->m_api_name = "part";
-        type->m_table_name = Tables::parts;
-        type->m_picture_id = 'P';
-    }
-    type->m_id = 1;
-    return type;
-}
-
 const BrickLink::Item* BrickLink::item(const QString itemType, const char *id) const
 {
     Item* key = new Item();
-    key->m_item_type = inst()->itemType(itemType);
+    key->m_item_type = new ItemType(itemType);
     key->m_id = const_cast <char *>(id);
     return key;
 }
@@ -607,3 +609,5 @@ void BrickLink::pictureJobFinished(CTransfer::Job *j)
 //    emit pictureUpdated(pic);
 //    pic->release();
 }
+
+
