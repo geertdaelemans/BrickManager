@@ -161,7 +161,10 @@ DataModel::DataModel(Tables table, QString tableName)
         sqlTable = "storage";
         columns[0] = Column("id", "id", tr("ID"), "integer", false, 100);
         columns[1] = Column("name", "name", tr("Container name"), "varchar", true, 300);
-        columns[2] = Column("item_id", "ITEMID", tr("Item ID"), "varchar", true, 250);
+        columns[2] = Column("sort", "sort", tr("Type"), "varchar", true, 150);
+        columns[3] = Column("item_id", "ITEMID", tr("Item ID"), "varchar", true, 250);
+        sortColumn = 1;
+        sortOrder = Qt::AscendingOrder;
         break;
     case Tables::userinventories:
         sqlTable = "userinventories";

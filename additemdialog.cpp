@@ -168,7 +168,8 @@ void AddItemDialog::on_addPushButton_clicked()
     fields["color_name"] = colorIndex.data(Qt::DisplayRole).toString();
     fields["quantity"] = ui->quantityInput->value();
     fields["unit_price"] = ui->priceInput->value();
-    fields["Remarks"] = ui->remarksInput->text();
+//    fields["Remarks"] = ui->remarksInput->text();
+    fields["Remarks"] = SqlDatabase::getContainerLabel(fields["item_no"].toString()) + (ui->remarksInput->text() == "" ? "" : "<" + ui->remarksInput->text());
     fields["category_name"] = categoryIndex.data(Qt::DisplayRole).toString();
     fields["ItemTypeName"] = ui->w_item_types->currentText();
     fields["category_id"] = categoryIndex.siblingAtColumn(0).data(Qt::DisplayRole).toInt();

@@ -143,17 +143,31 @@ QList<Container> SqlDatabase::getLabels(const QString tableName)
 void SqlDatabase::importLabels(QList<Container> containers)
 {
     QSqlDatabase::database("catalogDatabase").transaction();
-    qDebug() << "Length" << containers.length();
     for (int i = 0; i < containers.length(); i++) {
-        QString queryString = QString("REPLACE INTO storage (name, item_id) VALUES (:name, :item_id)");
+        QString queryString = QString("REPLACE INTO storage (name, sort, item_id) VALUES (:name, :sort, :item_id)");
         QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
         if (!q.prepare(queryString))
             qDebug() << "SqlDatabase::importLabels" << q.lastError() << queryString;
         q.bindValue(":name", containers[i].getName());
+        q.bindValue(":sort", containers[i].getName().split(" ").at(0));
         q.bindValue(":item_id", containers[i].getItemID());
         q.exec();
     }
     QSqlDatabase::database("catalogDatabase").commit();
+}
+
+QString SqlDatabase::getContainerLabel(const QString item_id)
+{
+    QString output;
+    QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
+    if (!q.prepare("SELECT name FROM storage WHERE item_id='" + item_id + "'"))
+        return "";
+    q.exec();
+    while (q.next()) {
+        output = q.value(0).toString();;
+    }
+    q.finish();
+    return output;
 }
 
 void SqlDatabase::clearAllLabels()

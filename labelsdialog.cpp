@@ -55,8 +55,6 @@ LabelsDialog::~LabelsDialog()
 
 void LabelsDialog::refreshLabelList()
 {
-    qDebug() << "refreshLabelList()";
-
     if (labelsModel) {
         // Populate the model:
         if (!labelsModel->select()) {

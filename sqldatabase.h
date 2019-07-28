@@ -21,6 +21,7 @@ public:
     static void clearAllLabels();
     static QList<Container> getLabels(const QString tableName);
     static void importLabels(QList<Container> containers);
+    static QString getContainerLabel(const QString itemID);
 
 private:
     QSqlError initDb();
