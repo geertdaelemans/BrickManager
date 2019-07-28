@@ -3,6 +3,7 @@
 
 #include "ordersdialog.h"
 #include "settingsdialog.h"
+#include "labelsdialog.h"
 #include "listmodel.h"
 #include "bricklink.h"
 #include "ctransfer.h"
@@ -40,17 +41,18 @@ private slots:
     void on_actionSettings_triggered();
     void on_actionAbout_triggered();
     void on_actionAboutQt_triggered();
-
     void on_tabWidget_tabCloseRequested(int index);
-    void updateStatusBar(QString msg, int timeout);
-
     void on_actionClose_triggered();
+    void on_actionManage_labels_triggered();
+
+    void updateStatusBar(QString msg, int timeout);
 
 private:
     Ui::MainWindow *ui;
     CTransfer *m_trans;
     OrdersDialog *ordersDialog;
     SettingsDialog *settingsDialog;
+    LabelsDialog *labelsDialog;
     QMap<QString, ListModel*> tabList;
     BrickLink bricklink;
 };

@@ -11,7 +11,12 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Add Item</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normalon>:/icons/images/22x22/edit_additems.png</normalon>
+   </iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

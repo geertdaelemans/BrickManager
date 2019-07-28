@@ -31,6 +31,7 @@ public:
 
 };
 
+
 enum Tables {
     books,
     boxes,
@@ -47,6 +48,7 @@ enum Tables {
     partcolor,
     parts,
     sets,
+    storage,
     userinventories
 };
 

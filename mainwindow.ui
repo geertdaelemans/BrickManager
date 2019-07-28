@@ -106,8 +106,15 @@
     </property>
     <addaction name="actionAdd_Items"/>
    </widget>
+   <widget class="QMenu" name="menuStorage">
+    <property name="title">
+     <string>Storage</string>
+    </property>
+    <addaction name="actionManage_labels"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
+   <addaction name="menuStorage"/>
    <addaction name="menuExtras"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -249,6 +256,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+F4</string>
+   </property>
+  </action>
+  <action name="actionManage_labels">
+   <property name="text">
+    <string>Manage Labels...</string>
    </property>
   </action>
  </widget>

@@ -3,6 +3,7 @@
 #include "ordersdialog.h"
 #include "settingsdialog.h"
 #include "additemdialog.h"
+#include "labelsdialog.h"
 #include "sqldatabase.h"
 #include "listmodel.h"
 #include "datamodel.h"
@@ -325,6 +326,19 @@ void MainWindow::on_actionAdd_Items_triggered()
 
 
 /**
+ * @brief MainWindow Storage Menu
+ */
+
+void MainWindow::on_actionManage_labels_triggered()
+{
+    QString tabName = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
+    QString sqlTableName = SqlDatabase::getTableName(tabName);
+    labelsDialog = new LabelsDialog(this, sqlTableName);
+    labelsDialog->exec();
+}
+
+
+/**
  * @brief MainWindow Extra's Menu
  */
 
@@ -360,5 +374,4 @@ void MainWindow::on_tabWidget_tabCloseRequested(int index)
 {
     removeTab(index);
 }
-
 

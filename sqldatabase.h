@@ -2,6 +2,7 @@
 #define SQLDATABASE_H
 
 #include <QtSql>
+#include "container.h"
 
 class SqlDatabase
 {
@@ -17,6 +18,9 @@ public:
     static QString getTableName(QString name);
     static void updateTableName(QString oldName, QString newName);
     static void removeTable(QString name);
+    static void clearAllLabels();
+    static QList<Container> getLabels(const QString tableName);
+    static void importLabels(QList<Container> containers);
 
 private:
     QSqlError initDb();

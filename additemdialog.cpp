@@ -11,6 +11,9 @@ AddItemDialog::AddItemDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::AddItemDialog)
 {
+    // remove question mark from the title bar
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
     ui->setupUi(this);
 
     // Populate Item Types

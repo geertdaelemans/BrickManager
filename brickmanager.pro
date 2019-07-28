@@ -4,8 +4,10 @@ CONFIG -= app_bundle
 
 HEADERS += \
     bricklink.h \
+    container.h \
     cref.h \
     exportxml.h \
+    labelsdialog.h \
     mainwindow.h \
     ordersdialog.h \
     settingsdialog.h \
@@ -25,6 +27,7 @@ HEADERS += \
 SOURCES += \
     cref.cpp \
     exportxml.cpp \
+    labelsdialog.cpp \
     main.cpp \
     bricklink.cpp \
     mainwindow.cpp \
@@ -44,6 +47,7 @@ SOURCES += \
     ctransfer.cpp
 
 FORMS += \
+    labelsdialog.ui \
     mainwindow.ui \
     ordersdialog.ui \
     inventory.ui \

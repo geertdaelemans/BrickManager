@@ -1,4 +1,3 @@
-#include "datamodel.h"
 #include "sqldatabase.h"
 #include "bricklink.h"
 
@@ -118,16 +117,56 @@ QString SqlDatabase::getCategoryById(int category_id)
 QList<int> SqlDatabase::getColorsOfPart(QString item_id)
 {
     QList<int> colorList;
-    QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
-    if (!q.prepare("SELECT color_name FROM partcolor WHERE item_id='" + item_id + "'"))
+    QSqlQuery query(QSqlDatabase::database("catalogDatabase"));
+    if (!query.prepare("SELECT color_name FROM partcolor WHERE item_id='" + item_id + "'"))
         return colorList;
-    q.exec();
-    while (q.next()) {
-        colorList.append(getColorIdByName(q.value(0).toString()));
+    query.exec();
+    while (query.next()) {
+        colorList.append(getColorIdByName(query.value(0).toString()));
     }
     return colorList;
 }
 
+QList<Container> SqlDatabase::getLabels(const QString tableName)
+{
+    QList<Container> containerList;
+    QSqlQuery query(QSqlDatabase::database("tempDatabase"));
+    if (!query.prepare("SELECT DISTINCT remarks, item_no FROM " + tableName + " WHERE remarks != ''"))
+        return containerList;
+    query.exec();
+    while (query.next()) {
+        containerList.append(Container(query.value(0).toString(), query.value(1).toString()));
+    }
+    return containerList;
+}
+
+void SqlDatabase::importLabels(QList<Container> containers)
+{
+    QSqlDatabase::database("catalogDatabase").transaction();
+    qDebug() << "Length" << containers.length();
+    for (int i = 0; i < containers.length(); i++) {
+        QString queryString = QString("REPLACE INTO storage (name, item_id) VALUES (:name, :item_id)");
+        QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
+        if (!q.prepare(queryString))
+            qDebug() << "SqlDatabase::importLabels" << q.lastError() << queryString;
+        q.bindValue(":name", containers[i].getName());
+        q.bindValue(":item_id", containers[i].getItemID());
+        q.exec();
+    }
+    QSqlDatabase::database("catalogDatabase").commit();
+}
+
+void SqlDatabase::clearAllLabels()
+{
+    QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
+    if (!q.prepare(QString("DROP TABLE IF EXISTS storage")))
+        qDebug() << QString("Problem dropping storage table");
+    q.exec();
+    q.first();
+    q.finish();
+    DataModel *storageModel = new DataModel(Tables::storage);
+    storageModel->initiateSqlTableAuto("catalogDatabase");
+}
 
 QString SqlDatabase::getUniqueTableName(QString* name, QString sqlTableName)
 {
@@ -205,6 +244,7 @@ void SqlDatabase::removeTable(QString name)
     q.finish();
 }
 
+
 /**
  * Initializes the SQL database and creates the common tables
  * @param none
@@ -260,6 +300,11 @@ QSqlError SqlDatabase::initDb()
     if (!tables.contains("colors")) {
         DataModel *colModel = new DataModel(Tables::colors);
         colModel->initiateSqlTable("catalogDatabase");
+    }
+
+    if (!tables.contains("storage")) {
+        DataModel *storageModel = new DataModel(Tables::storage);
+        storageModel->initiateSqlTableAuto("catalogDatabase");
     }
 
     if (!tables.contains("indextable")) {
