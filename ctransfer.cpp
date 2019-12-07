@@ -81,6 +81,13 @@ CTransfer::~CTransfer()
 //	m_queue_lock. unlock ( );
 //}
 
+CTransfer::Job *CTransfer::postJson(const QString &url, const QString &data, void *userobject, bool high_priority )
+{
+    QByteArray urlArray = url.toUtf8();
+    QByteArray dataArray = data.toUtf8();
+    return retrieve(Job::Post, urlArray, dataArray, "application/json", Job::Images, "", true, 0, nullptr, userobject, high_priority, Tables::categories);
+}
+
 /**
  * @brief
  *
@@ -115,6 +122,14 @@ QByteArray CTransfer::buildQueryString( const QMap<QString, QString> &kvl)
     return query;
 }
 
+
+CTransfer::Job *CTransfer::retrieve(Job::httpMethod method, const QByteArray &url, const QMap<QString, QString> &query, Job::returnType returnType, QString name, bool tracking, time_t ifnewer, QFile *file, void *userobject, bool high_priority, Tables table)
+{
+    QByteArray queryString = buildQueryString(query);
+    return retrieve(method, url, queryString, nullptr, returnType, name, tracking, ifnewer, file, userobject, high_priority, table);
+}
+
+
 /**
  * @brief
  *
@@ -128,7 +143,7 @@ QByteArray CTransfer::buildQueryString( const QMap<QString, QString> &kvl)
  * @param high_priority
  * @return CTransfer::Job
  */
-CTransfer::Job *CTransfer::retrieve(Job::httpMethod method, const QByteArray &url, const QMap<QString, QString> &query, Job::returnType returnType, QString name, bool tracking, time_t ifnewer, QFile *file, void *userobject, bool high_priority, Tables table)
+CTransfer::Job *CTransfer::retrieve(Job::httpMethod method, const QByteArray &url, const QByteArray &query, const QString &contentType, Job::returnType returnType, QString name, bool tracking, time_t ifnewer, QFile *file, void *userobject, bool high_priority, Tables table)
 {
     if(url.isEmpty() || (file && (!file->isOpen() || !file->isWritable())))
         return nullptr;
@@ -140,7 +155,8 @@ CTransfer::Job *CTransfer::retrieve(Job::httpMethod method, const QByteArray &ur
         m_tracker.insert(job->m_id, false);
     job->m_type = returnType;
     job->m_url = url;
-    job->m_query = buildQueryString(query);
+    job->m_query = query;
+    job->m_contentType = contentType;
     job->m_ifnewer = ifnewer;
 
     job->m_name = name;
@@ -292,17 +308,24 @@ void CTransfer::run()
                 ::curl_easy_setopt(m_curl, CURLOPT_TIMEVALUE, job->m_ifnewer);
                 ::curl_easy_setopt(m_curl, CURLOPT_TIMECONDITION, job->m_ifnewer ? CURL_TIMECOND_IFMODSINCE : CURL_TIMECOND_NONE);
                 qDebug("CTransfer::get [%s]", url.toLocal8Bit().data());
-            }
-            else {
+
+            } else {
 
                 // Prepare POST URL
                 url = job->m_url;
                 query = job->m_query;
 
+                if(!job->m_contentType.isEmpty()) {
+                    QString contentTypeHeader = "Content-Type: " + job->m_contentType;
+                    struct curl_slist *headers = nullptr;
+                    headers = ::curl_slist_append(headers, contentTypeHeader.toLocal8Bit().data());
+                    ::curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, headers);
+                }
+
                 ::curl_easy_setopt(m_curl, CURLOPT_POST, 1);
                 ::curl_easy_setopt(m_curl, CURLOPT_URL, url.toLocal8Bit().data());
                 ::curl_easy_setopt(m_curl, CURLOPT_POSTFIELDS, query.data());
-                ::curl_easy_setopt(m_curl, CURLOPT_POSTFIELDSIZE, job->m_query.length());
+                ::curl_easy_setopt(m_curl, CURLOPT_POSTFIELDSIZE, query.length());
                 qDebug("CTransfer::post [%s] - form-data [%s]", url.toLocal8Bit().data(), query.data());
             }
         }
@@ -686,6 +709,17 @@ void CTransfer::importCatalog(ProgressDialog *pd)
     m_job = retrieve(Job::Post, url, query, Job::PartColor, "partcolor", true, 0, nullptr, nullptr, false, Tables::partcolor);
 }
 
+void CTransfer::importImages(QJsonArray imageArray) {
+    QString url = "https://api.bricklink.com/api/affiliate/v1/item_image_list?use_default=false&api_key=0BF5DEB0485C4F86A3CD23B57297E9AF";
+
+    QJsonDocument doc(imageArray);
+    QString strJson(doc.toJson(QJsonDocument::Compact));
+
+    QJsonDocument* returnJson;
+
+    m_job = postJson(url, strJson, &returnJson, true);
+}
+
 
 void CTransfer::gotten(CTransfer::Job* job)
 {
@@ -733,6 +767,10 @@ void CTransfer::gotten(CTransfer::Job* job)
             m_bytesReceived = 0;
         }
     }
+    // GET IMAGE LINKS
+    else if(job->m_type == Job::Images) {
+        pictureJobFinished(job);
+    }
 
     // TAB DELIMITED INPUT
     else {
@@ -755,10 +793,12 @@ void CTransfer::gotten(CTransfer::Job* job)
             populateDatabase(job);
         }
         if (isJobCompleted(job)) {
-            m_progressDialog->setMessageText(tr("Completed downloading."));
-            m_progressDialog->setTextBlock(tr("Completed downloading %1 kB.").arg(QString::number(m_bytesReceived/1024.0, 'f', 1)));
-            m_progressDialog->setFinished(true);
-            m_progressDialog->setProgressVisible(false);
+            if(m_progressDialog) {
+                m_progressDialog->setMessageText(tr("Completed downloading."));
+                m_progressDialog->setTextBlock(tr("Completed downloading %1 kB.").arg(QString::number(m_bytesReceived/1024.0, 'f', 1)));
+                m_progressDialog->setFinished(true);
+                m_progressDialog->setProgressVisible(false);
+            }
             m_bytesReceived = 0;
         }
     }
@@ -842,6 +882,7 @@ int CTransfer::populateDatabase(CTransfer::Job* job)
                     qDebug() << errorMessage;
                     if (m_progressDialog)
                         m_progressDialog->setErrorText(errorMessage);
+                    return 0;
                 }
             }
         }
@@ -871,4 +912,36 @@ int CTransfer::populateDatabase(CTransfer::Job* job)
     m_progressDialog->setTextBlock(tr("Populated %1 database with %2 records.").arg(sqlTableName).arg(counter));
 
     return counter;
+}
+
+void CTransfer::pictureJobFinished(CTransfer::Job *j) {
+    qDebug() << "CTransfer::pictureJobFinished";
+    if(!j || !j->data() || !j->userObject()) {
+        return;
+    }
+    bool ok = false;
+    QMap<QString, QJsonObject> pictureItems;
+    if (!j->contentType().isEmpty()) {
+        // Image names fetched, now fetch actual images
+        if(!j->failed()) {
+            QJsonParseError jerror;
+            QJsonDocument jsonResponse = QJsonDocument::fromJson(j->data()->data(), &jerror);
+            // Check if parse was succesfull and HTTP Status Code was received
+            ok = (jerror.error == QJsonParseError::NoError) && (jsonResponse.object()["meta"].toObject()["code"].toInt() == 200);
+            if(ok) {
+                QJsonArray pgData = jsonResponse.object()["data"].toArray();
+                foreach(QJsonValue value, pgData) {
+                    QJsonObject obj = value.toObject();
+                    QJsonObject item = obj["item"].toObject();
+
+                    QString key;
+                    QTextStream (&key) << "" << item["type"].toString() << "@" << item["no"].toString() << "@" << obj["color_id"].toInt();
+                    pictureItems.insert(key.toLower(),obj);
+                }
+            } else {
+                qDebug() << "JSON Parse error - CTransfer::pictureJobFinished()";
+            }
+            qDebug() << pictureItems;
+        }
+    }
 }

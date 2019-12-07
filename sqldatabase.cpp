@@ -42,7 +42,7 @@ QString SqlDatabase::getColorCodeById(int color_id)
         return "Color not found";
     q.exec();
     while (q.next()) {
-        output = q.value(0).toString();;
+        output = q.value(0).toString();
     }
     q.finish();
     return output;
@@ -82,7 +82,7 @@ QString SqlDatabase::getColorCodeByName(const QString &color_name)
         return "Color not found";
     q.exec();
     while (q.next()) {
-        output = q.value(0).toString();;
+        output = q.value(0).toString();
     }
     q.finish();
     return output;
@@ -102,7 +102,7 @@ QString SqlDatabase::getCategoryById(int category_id)
         return "";
     q.exec();
     while (q.next()) {
-        output = q.value(0).toString();;
+        output = q.value(0).toString();
     }
     q.finish();
     return output;
@@ -135,7 +135,11 @@ QList<Container> SqlDatabase::getLabels(const QString tableName)
         return containerList;
     query.exec();
     while (query.next()) {
-        containerList.append(Container(query.value(0).toString(), query.value(1).toString()));
+        Container container(query.value(0).toString(), query.value(1).toString());
+        if (!containerListed(container)) {
+            containerList.append(container);
+            qDebug() << "New item" << container.getItemID() << "to" << container.getName();
+        }
     }
     return containerList;
 }
@@ -156,18 +160,54 @@ void SqlDatabase::importLabels(QList<Container> containers)
     QSqlDatabase::database("catalogDatabase").commit();
 }
 
+bool SqlDatabase::containerListed(Container container)
+{
+    bool output = false;
+    QString queryString = QString("SELECT EXISTS(SELECT 1 FROM storage WHERE name=:name AND sort=:sort AND item_id=:item_id)");
+    QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
+    if (!q.prepare(queryString))
+        qDebug() << "SqlDatabase::containerListed" << q.lastError() << queryString;
+    q.bindValue(":name", container.getName());
+    q.bindValue(":sort", container.getName().split(" ").at(0));
+    q.bindValue(":item_id", container.getItemID());
+    q.exec();
+    while(q.next())
+        output = q.value(0).toBool();
+    return output;
+}
+
 QString SqlDatabase::getContainerLabel(const QString item_id)
 {
     QString output;
-    QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
-    if (!q.prepare("SELECT name FROM storage WHERE item_id='" + item_id + "'"))
+    QSqlQuery query(QSqlDatabase::database("catalogDatabase"));
+    if (!query.prepare("SELECT name FROM storage WHERE item_id='" + item_id + "'"))
         return "";
-    q.exec();
-    while (q.next()) {
-        output = q.value(0).toString();;
+    query.exec();
+    while (query.next()) {
+        output = query.value(0).toString();;
     }
-    q.finish();
+    query.finish();
     return output;
+}
+
+void SqlDatabase::updateLabels(const QString table)
+{
+    QSqlQuery query(QSqlDatabase::database("tempDatabase"));
+    QSqlQuery queryUpdate(QSqlDatabase::database("tempDatabase"));
+    if (!query.prepare("SELECT id, item_no, Remarks FROM " + table))
+        return;
+    query.exec();
+    while (query.next()) {
+        QString containerLabel = getContainerLabel(query.value(1).toString());
+        QString remarks = query.value(2).toString();
+        if (containerLabel != "" && containerLabel != remarks) {
+            int id = query.value(0).toInt();
+            qDebug() << "Updated label for " << query.value(1).toString() << "to" << containerLabel;
+            queryUpdate.exec(QString("UPDATE %1 SET Remarks='%2' WHERE id=%3").arg(table).arg(containerLabel).arg(id));
+            queryUpdate.first();
+        }
+    }
+    queryUpdate.finish();
 }
 
 void SqlDatabase::clearAllLabels()
@@ -180,6 +220,17 @@ void SqlDatabase::clearAllLabels()
     q.finish();
     DataModel *storageModel = new DataModel(Tables::storage);
     storageModel->initiateSqlTableAuto("catalogDatabase");
+}
+
+void SqlDatabase::clearTable(QString tableName)
+{
+    QSqlQuery query(QSqlDatabase::database("tempDatabase"));
+    query.prepare("DELETE FROM " + tableName);
+    if (!query.exec())
+        qDebug("Failed to execute sql query: %s, Error: %s", qPrintable(query.lastQuery()), qPrintable(query.lastError().text()));
+    query.prepare("VACUUM");
+    if (!query.exec())
+        qDebug("Failed to execute sql query: %s, Error: %s", qPrintable(query.lastQuery()), qPrintable(query.lastError().text()));
 }
 
 QString SqlDatabase::getUniqueTableName(QString* name, QString sqlTableName)
@@ -340,3 +391,22 @@ QSqlError SqlDatabase::initDb()
     return QSqlError();
 }
 
+QJsonArray SqlDatabase::getImagesJson(QString sqlTableName) {
+    QJsonArray array;
+    QSqlQuery query(QSqlDatabase::database("tempDatabase"));
+    if (!query.prepare("SELECT item_no, item_type, color_id FROM " + sqlTableName)) {
+        qDebug() << "Error";
+        return array;
+    }
+    query.exec();
+    while (query.next()) {
+        QJsonObject itemObject;
+        itemObject.insert("no", QJsonValue::fromVariant(query.value(0).toString()));
+        itemObject.insert("type", QJsonValue::fromVariant(query.value(1).toString()));
+        QJsonObject recordObject;
+        recordObject.insert("item", itemObject);
+        recordObject.insert("color_id", query.value(2).toInt());
+        array.push_back(recordObject);
+    }
+    return array;
+}

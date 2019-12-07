@@ -168,10 +168,9 @@ void AddItemDialog::on_addPushButton_clicked()
     fields["color_name"] = colorIndex.data(Qt::DisplayRole).toString();
     fields["quantity"] = ui->quantityInput->value();
     fields["unit_price"] = ui->priceInput->value();
-//    fields["Remarks"] = ui->remarksInput->text();
     fields["Remarks"] = SqlDatabase::getContainerLabel(fields["item_no"].toString()) + (ui->remarksInput->text() == "" ? "" : "<" + ui->remarksInput->text());
     fields["category_name"] = categoryIndex.data(Qt::DisplayRole).toString();
-    fields["ItemTypeName"] = ui->w_item_types->currentText();
+    fields["item_type"] = ui->w_item_types->currentText();
     fields["category_id"] = categoryIndex.siblingAtColumn(0).data(Qt::DisplayRole).toInt();
     fields["color_id"] = colorIndex.siblingAtColumn(0).data(Qt::DisplayRole).toString();
     fields["ItemTypeID"] = ui->w_item_types->currentData().toChar();
@@ -238,6 +237,7 @@ void AddItemDialog::getImage(QString part, QString itemType)
     ui->w_picture->setText("Loading image...");
 
     QUrl url("http:" + BrickLink::inst()->getItemInformation(itemType, part));
+    qDebug() << "Loading image:" << BrickLink::inst()->getItemInformation(itemType, part);
 
     QNetworkReply* reply = nam->get(QNetworkRequest(url));
 

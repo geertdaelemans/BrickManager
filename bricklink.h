@@ -259,7 +259,6 @@ public:
 
         friend class BrickLink;
     };
-
 };
 
 #endif // BRICKLINK_H

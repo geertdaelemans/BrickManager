@@ -40,10 +40,11 @@ public:
         bool finished ( ) const          { return m_finished; }
         QFile *file ( ) const            { return m_file; }
         QByteArray *data ( ) const       { return m_data; }
+        QString contentType ( ) const    { return m_contentType; }
         void *userObject ( ) const       { return m_userobject; }
         QDateTime lastModified ( ) const { QDateTime d; d.setTime_t ( m_filetime ); return d; }
         bool notModifiedSince ( ) const  { return m_not_modified; }
-        enum returnType {Login, Catalog, PartColor, NoReturn};
+        enum returnType {Login, Catalog, PartColor, Images, NoReturn};
         enum httpMethod {Get, Post};
 
     private:
@@ -56,6 +57,7 @@ public:
         returnType   m_type;
         QByteArray   m_url;
         QByteArray   m_query;
+        QString      m_contentType;
         QByteArray   m_effective_url;
         QString      m_name;
         Tables       m_table;
@@ -91,7 +93,9 @@ public:
     bool init();
 
     void brickLinkLogin(ProgressDialog *pd = nullptr);
-    void importCatalog(ProgressDialog *pd = nullptr);
+    void importCatalog(ProgressDialog *pd = nullptr);    
+    void importImages(QJsonArray imageArray);
+    Job *postJson(const QString &url, const QString &data, void *userobject, bool high_priority);
 
 public slots:
     void cancelAllJobs();
@@ -116,6 +120,8 @@ protected:
 private:
     virtual void run() override;
     Job *retrieve(Job::httpMethod method, const QByteArray &url, const QMap<QString, QString> &query, Job::returnType returnType, QString name, bool tracking = false, time_t ifnewer = 0, QFile *file = nullptr, void *userobject = nullptr, bool high_priority = false, Tables table = Tables::parts);
+    Job *retrieve(Job::httpMethod method, const QByteArray &url, const QByteArray &query, const QString &contentType, Job::returnType returnType, QString name, bool tracking, time_t ifnewer, QFile *file, void *userobject, bool high_priority, Tables table);
+
     void cancel(Job *j);
     void updateProgress(int delta);
 
@@ -162,6 +168,7 @@ private:
 
     ProgressDialog *m_progressDialog;
 
+    void pictureJobFinished(CTransfer::Job *j);
 private slots:
     virtual void gotten(CTransfer::Job*);
     void transferProgress(CTransfer::Job *job, int, int);

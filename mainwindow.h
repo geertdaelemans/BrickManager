@@ -47,6 +47,10 @@ private slots:
 
     void updateStatusBar(QString msg, int timeout);
 
+    void on_actionUpdate_Labels_triggered();
+
+    void on_actionImage_Tester_triggered();
+
 private:
     Ui::MainWindow *ui;
     CTransfer *m_trans;

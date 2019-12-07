@@ -19,6 +19,7 @@ public:
     explicit ListModel(QWidget *parent = nullptr, DataModel *tableModel = nullptr, QSqlDatabase database = QSqlDatabase());
     ~ListModel() override;
     bool insertRow(QMap<QString, QVariant> fields);
+    void refresh();
 
 private slots:
     void slotCustomMenuRequested(QPoint);

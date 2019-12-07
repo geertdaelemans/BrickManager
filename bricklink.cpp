@@ -255,14 +255,21 @@ void BrickLink::parseJsonUserInventory()
 {
     QJsonArray array = BrickLink::validateBricklinkResponse(sender());
     DataModel *model = new DataModel(Tables::userinventories);
+    SqlDatabase::clearTable(model->getSqlTableName());
+
+
     if (array.size()) {
+        QString input;
+        QTextDocument textDocument;
         for (auto value : array) {
             Q_ASSERT(value.isObject());
             const auto object = value.toObject();
             QMap<QString, QVariant> fields;
             fields["id"] = object.value("inventory_id").toVariant();
             fields["item_no"] = object.value("item").toObject().value("no").toVariant();
-            fields["item_name"] = object.value("item").toObject().value("name").toVariant();
+            input = object.value("item").toObject().value("name").toString();
+            textDocument.setHtml(input);
+            fields["item_name"] = textDocument.toPlainText();
             fields["item_type"] = object.value("item").toObject().value("type").toVariant();
             fields["category_id"] = object.value("item").toObject().value("category_id").toVariant();
             fields["category_name"] = SqlDatabase::getCategoryById(fields["category_id"].toInt());
@@ -274,7 +281,9 @@ void BrickLink::parseJsonUserInventory()
             fields["unit_price"] = object.value("unit_price").toVariant();
             fields["bind_id"] = object.value("bind_id").toVariant();
             fields["description"] = object.value("description").toVariant();
-            fields["remarks"] = object.value("remarks").toVariant();
+            input = object.value("remarks").toString();
+            textDocument.setHtml(input);
+            fields["remarks"] = textDocument.toPlainText();
             fields["bulk"] = object.value("bulk").toVariant();
             fields["is_retain"] = object.value("is_retain").toVariant();
             fields["is_stock_room"] = object.value("is_stock_room").toVariant();
@@ -307,15 +316,17 @@ QJsonArray BrickLink::validateBricklinkResponse(QObject* obj) {
     Q_ASSERT(reply);
     QJsonParseError parseError;
     QJsonArray output;
-    const auto data = reply->readAll();
-    const auto document = QJsonDocument::fromJson(data, &parseError);
+    const QByteArray data = reply->readAll();
+    const QJsonDocument document = QJsonDocument::fromJson(data, &parseError);
     if (parseError.error) {
         qCritical() << "BrickLink connection error while parsing JSON. Error at:" << parseError.offset
                     << parseError.errorString();
     } else {
-        QString strReply = static_cast<QString>(data);
-        QJsonDocument jsonResponse = QJsonDocument::fromJson(strReply.toUtf8());
-        QJsonObject jsonObject = jsonResponse.object();
+// TODO
+        //https://stackoverflow.com/questions/17686561/qt-qnetworkreply-is-always-empty
+//        QString strReply = static_cast<QString>(data);
+//        QJsonDocument jsonResponse = QJsonDocument::fromJson(strReply.toUtf8());
+        QJsonObject jsonObject = document.object();
         if (jsonObject.value("data").isArray())
             output = jsonObject.value("data").toArray();
         else {
@@ -609,5 +620,3 @@ void BrickLink::pictureJobFinished(CTransfer::Job *j)
 //    emit pictureUpdated(pic);
 //    pic->release();
 }
-
-

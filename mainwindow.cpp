@@ -70,6 +70,10 @@ int MainWindow::addTab(ListModel *page, const QString &label)
     if (!ui->actionAdd_Items->isEnabled())
         ui->actionAdd_Items->setEnabled(true);
 
+    // Enable the Update Labels menu
+    if (!ui->actionUpdate_Labels->isEnabled())
+        ui->actionUpdate_Labels->setEnabled(true);
+
     // Enable the Save As... dialog
     if (!ui->actionSave_As->isEnabled())
         ui->actionSave_As->setEnabled(true);
@@ -113,6 +117,7 @@ void MainWindow::removeTab(int index)
         ui->actionSave_As->setDisabled(true);
         ui->actionClose->setDisabled(true);
         ui->actionAdd_Items->setDisabled(true);
+        ui->actionUpdate_Labels->setDisabled(true);
     }
 }
 
@@ -325,6 +330,27 @@ void MainWindow::on_actionAdd_Items_triggered()
 }
 
 
+void MainWindow::on_actionUpdate_Labels_triggered()
+{
+    QString tabName = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
+    QString sqlTableName = SqlDatabase::getTableName(tabName);
+
+    SqlDatabase::updateLabels(sqlTableName);
+
+    tabList[tabName]->refresh();
+}
+
+
+void MainWindow::on_actionImage_Tester_triggered()
+{
+    QString tabName = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
+    QString sqlTableName = SqlDatabase::getTableName(tabName);
+
+    QJsonArray imagesJson = SqlDatabase::getImagesJson(sqlTableName);
+
+    m_trans->importImages(imagesJson);
+}
+
 /**
  * @brief MainWindow Storage Menu
  */
@@ -374,4 +400,3 @@ void MainWindow::on_tabWidget_tabCloseRequested(int index)
 {
     removeTab(index);
 }
-

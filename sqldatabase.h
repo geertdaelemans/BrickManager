@@ -19,9 +19,13 @@ public:
     static void updateTableName(QString oldName, QString newName);
     static void removeTable(QString name);
     static void clearAllLabels();
+    static void clearTable(QString tableName);
     static QList<Container> getLabels(const QString tableName);
     static void importLabels(QList<Container> containers);
     static QString getContainerLabel(const QString itemID);
+    static void updateLabels(const QString table);
+    static bool containerListed(Container container);
+    static QJsonArray getImagesJson(QString sqlTableName);
 
 private:
     QSqlError initDb();

@@ -24,7 +24,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="tabsClosable">
        <bool>true</bool>
@@ -55,7 +55,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -105,6 +105,9 @@
      <string>Edit</string>
     </property>
     <addaction name="actionAdd_Items"/>
+    <addaction name="separator"/>
+    <addaction name="actionUpdate_Labels"/>
+    <addaction name="actionImage_Tester"/>
    </widget>
    <widget class="QMenu" name="menuStorage">
     <property name="title">
@@ -261,6 +264,19 @@
   <action name="actionManage_labels">
    <property name="text">
     <string>Manage Labels...</string>
+   </property>
+  </action>
+  <action name="actionUpdate_Labels">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Update Labels</string>
+   </property>
+  </action>
+  <action name="actionImage_Tester">
+   <property name="text">
+    <string>Image Tester</string>
    </property>
   </action>
  </widget>

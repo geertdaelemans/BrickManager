@@ -115,3 +115,8 @@ bool ListModel::insertRow(QMap<QString, QVariant> fields)
 
     return reply;
 }
+
+void ListModel::refresh()
+{
+    model->select();
+}

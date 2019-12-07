@@ -32,7 +32,7 @@ DataModel::DataModel(Tables table, QString tableName)
         columns[12] = Column("Comments", "Comments", tr("Comments"), "varchar", true, 53);
         columns[13] = Column("Remarks", "Remarks", tr("Remarks"), "varchar", true, 53);
         columns[14] = Column("category_name", "CategoryName", tr("Category"), "integer", true, 77);
-        columns[15] = Column("ItemTypeName", "ItemTypeName", tr("Item Type"), "varchar", true, 77);
+        columns[15] = Column("item_type", "ItemTypeName", tr("Item Type"), "varchar", true, 77);
         columns[16] = Column("TQ1", "TQ1", tr("Tier Q1"), "integer", true, 35);
         columns[17] = Column("TP1", "TP1", tr("Tier P1"), "double", true, 53);
         columns[18] = Column("TQ2", "TQ2", tr("Tier Q2"), "integer", true, 35);
