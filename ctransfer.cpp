@@ -710,7 +710,8 @@ void CTransfer::importCatalog(ProgressDialog *pd)
 }
 
 void CTransfer::importImages(QJsonArray imageArray) {
-    QString url = "https://api.bricklink.com/api/affiliate/v1/item_image_list?use_default=false&api_key=0BF5DEB0485C4F86A3CD23B57297E9AF";
+    QString apiKey = BrickLink::inst()->getApiKey();
+    QString url = QString("https://api.bricklink.com/api/affiliate/v1/item_image_list?use_default=false&api_key=%1").arg(apiKey);
 
     QJsonDocument doc(imageArray);
     QString strJson(doc.toJson(QJsonDocument::Compact));

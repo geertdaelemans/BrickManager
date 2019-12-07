@@ -84,6 +84,7 @@ public:
     static BrickLink *inst();
 
     const Item* item(const QString itemType, const char *id) const;
+    const QString getApiKey() const;
 
 signals:
     void dataBaseUpdated();

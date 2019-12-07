@@ -131,6 +131,12 @@ bool BrickLink::checkConnection(QObject *parent)
     return true;
 }
 
+const QString BrickLink::getApiKey() const
+{
+    QSettings settings;
+    return settings.value("credentials/consumerKey").toString();
+}
+
 void BrickLink::importOrderItem(int orderID)
 {
     QUrl url;
