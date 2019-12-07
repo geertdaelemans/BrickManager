@@ -7,6 +7,7 @@
 #include "listmodel.h"
 #include "bricklink.h"
 #include "ctransfer.h"
+#include "cdocument.h"
 
 #include <QMainWindow>
 #include <QtSql>
@@ -44,11 +45,8 @@ private slots:
     void on_tabWidget_tabCloseRequested(int index);
     void on_actionClose_triggered();
     void on_actionManage_labels_triggered();
-
     void updateStatusBar(QString msg, int timeout);
-
     void on_actionUpdate_Labels_triggered();
-
     void on_actionImage_Tester_triggered();
 
 private:
@@ -57,7 +55,7 @@ private:
     OrdersDialog *ordersDialog;
     SettingsDialog *settingsDialog;
     LabelsDialog *labelsDialog;
-    QMap<QString, ListModel*> tabList;
+    QMap<QString, CDocument*> tabList;
     BrickLink bricklink;
 };
 

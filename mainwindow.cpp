@@ -61,7 +61,10 @@ int MainWindow::addTab(ListModel *page, const QString &label)
     // If no tab found, add new tab in leftmost position.
     if(tabNumber == -1) {
         tabNumber = ui->tabWidget->insertTab(0, page, label);
-        tabList[label] = page;
+        CDocument *newWindow = new CDocument();
+        newWindow->setModel(page);
+        newWindow->setName(label);
+        tabList[label] = newWindow;
     }
     // Activate current tab
     ui->tabWidget->setCurrentIndex(tabNumber);
@@ -165,6 +168,7 @@ void MainWindow::on_actionSave_As_triggered()
         ExportXml::SaveXMLFile(sqlTableName, fileName);
         QString name = QFileInfo(fileName).baseName().toLatin1();
         SqlDatabase::updateTableName(tabName, name);
+        tabList[tabName]->setFileName(fileName);
         ui->tabWidget->setTabText(ui->tabWidget->currentIndex(), name);
     }
 }
@@ -200,7 +204,7 @@ void MainWindow::on_actionMy_Inventory_triggered()
 
 void MainWindow::insertItemIntoSheet(QMap<QString, QVariant> fields)
 {
-    ListModel *model = tabList[ui->tabWidget->tabText(ui->tabWidget->currentIndex())];
+    ListModel *model = tabList[ui->tabWidget->tabText(ui->tabWidget->currentIndex())]->getModel();
     model->insertRow(fields);
 }
 
@@ -229,7 +233,6 @@ void MainWindow::openInventoryTab(QList<QString> orderIDs)
         ListModel *inv = new ListModel(this, p_dataModel, QSqlDatabase::database("tempDatabase"));
         QString tabName = "Order#" + orderID;
         SqlDatabase::getUniqueTableName(&tabName, p_dataModel->getSqlTableName());
-        tabList[tabName] = inv;
         addTab(inv, tabName);
     }
     ordersDialog->close();
@@ -337,7 +340,7 @@ void MainWindow::on_actionUpdate_Labels_triggered()
 
     SqlDatabase::updateLabels(sqlTableName);
 
-    tabList[tabName]->refresh();
+    tabList[tabName]->getModel()->refresh();
 }
 
 
