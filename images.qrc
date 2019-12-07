@@ -9,6 +9,7 @@
         <file>images/22x22/extras_update_database.png</file>
         <file>images/22x22/file_saveas.png</file>
         <file>images/22x22/file_close.png</file>
+        <file>images/22x22/file_save.png</file>
     </qresource>
     <qresource prefix="/">
         <file>images/no_image.jpg</file>

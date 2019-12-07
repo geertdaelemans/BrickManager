@@ -24,6 +24,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     int addTab(ListModel *page, const QString &label);
+    int addTab(CDocument *document);
     void removeTab(int index);
 
 public slots:
@@ -48,6 +49,8 @@ private slots:
     void updateStatusBar(QString msg, int timeout);
     void on_actionUpdate_Labels_triggered();
     void on_actionImage_Tester_triggered();
+
+    void on_actionSave_triggered();
 
 private:
     Ui::MainWindow *ui;

@@ -37,6 +37,14 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+int MainWindow::addTab(ListModel *page, const QString &label)
+{
+    CDocument *newTable = new CDocument();
+    newTable->setModel(page);
+    newTable->setName(label);
+    addTab(newTable);
+}
+
 /**
  * @brief adds a tab to the main window
  *
@@ -47,10 +55,14 @@ MainWindow::~MainWindow()
  * @param label Pointer to label string of tab.
  * @return tab id of the added tab.
  */
-int MainWindow::addTab(ListModel *page, const QString &label)
+int MainWindow::addTab(CDocument *document)
 {
     int numberOfTabs = ui->tabWidget->count();
     int tabNumber = -1;     // -1 means nothing found
+
+    QString label = document->getName();
+    ListModel *page = document->getModel();
+
     // Search for tab with same name
     for(int i = 0; i < numberOfTabs; i++) {
         if (ui->tabWidget->tabText(i) == label) {
@@ -58,13 +70,11 @@ int MainWindow::addTab(ListModel *page, const QString &label)
             break;
         }
     }
+
     // If no tab found, add new tab in leftmost position.
     if(tabNumber == -1) {
         tabNumber = ui->tabWidget->insertTab(0, page, label);
-        CDocument *newWindow = new CDocument();
-        newWindow->setModel(page);
-        newWindow->setName(label);
-        tabList[label] = newWindow;
+        tabList[label] = document;
     }
     // Activate current tab
     ui->tabWidget->setCurrentIndex(tabNumber);
@@ -76,6 +86,10 @@ int MainWindow::addTab(ListModel *page, const QString &label)
     // Enable the Update Labels menu
     if (!ui->actionUpdate_Labels->isEnabled())
         ui->actionUpdate_Labels->setEnabled(true);
+
+    // Enable the Save dialog
+    if (!ui->actionSave->isEnabled() && tabList[label]->getFileName() != "")
+        ui->actionSave->setEnabled(true);
 
     // Enable the Save As... dialog
     if (!ui->actionSave_As->isEnabled())
@@ -117,6 +131,7 @@ void MainWindow::removeTab(int index)
     tabList.remove(tabName);
     ui->tabWidget->removeTab(index);
     if (ui->tabWidget->count() == 0) {
+        ui->actionSave->setDisabled(true);
         ui->actionSave_As->setDisabled(true);
         ui->actionClose->setDisabled(true);
         ui->actionAdd_Items->setDisabled(true);
@@ -157,6 +172,19 @@ void MainWindow::on_actionOrders_triggered()
     ordersDialog->exec();
 }
 
+
+void MainWindow::on_actionSave_triggered()
+{
+    QString tabName = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
+    QString sqlTableName = SqlDatabase::getTableName(tabName);
+
+    QString fileName = tabList[tabName]->getFileName();
+    if(fileName != "") {
+        ExportXml::SaveXMLFile(sqlTableName, fileName);
+    } else {
+        on_actionSave_As_triggered();
+    }
+}
 
 void MainWindow::on_actionSave_As_triggered()
 {
@@ -304,7 +332,11 @@ void MainWindow::on_actionOpen_triggered()
             item = item.nextSibling().toElement();
         }
         ListModel *listModel = new ListModel(this, p_dataModel, QSqlDatabase::database("tempDatabase"));
-        addTab(listModel, tableName);
+        CDocument *doc = new CDocument();
+        doc->setName(tableName);
+        doc->setModel(listModel);
+        doc->setFileName(fileName);
+        addTab(doc);
     }
 }
 

@@ -2,7 +2,7 @@
 
 CDocument::CDocument()
 {
-
+    m_fileName = "";
 }
 
 void CDocument::setModel(ListModel *model)
