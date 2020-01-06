@@ -1,5 +1,5 @@
 #include "listmodel.h"
-#include "ui_categories.h"
+#include "ui_listmodel.h"
 #include "bricklink.h"
 #include "listmodeldelegate.h"
 #include "checkboxdelegate.h"

@@ -127,6 +127,13 @@ QList<int> SqlDatabase::getColorsOfPart(QString item_id)
     return colorList;
 }
 
+/**
+ * Get labels not yet listed in the database
+ *
+ * @param tableName Name of the table to be searched for unknown labels.
+ * @return A list with all new labels in Container format. Returns empty list
+ * when nothing is found.
+ */
 QList<Container> SqlDatabase::getLabels(const QString tableName)
 {
     QList<Container> containerList;
@@ -138,7 +145,6 @@ QList<Container> SqlDatabase::getLabels(const QString tableName)
         Container container(query.value(0).toString(), query.value(1).toString());
         if (!containerListed(container)) {
             containerList.append(container);
-            qDebug() << "New item" << container.getItemID() << "to" << container.getName();
         }
     }
     return containerList;
@@ -184,7 +190,7 @@ QString SqlDatabase::getContainerLabel(const QString item_id)
         return "";
     query.exec();
     while (query.next()) {
-        output = query.value(0).toString();;
+        output = query.value(0).toString();
     }
     query.finish();
     return output;

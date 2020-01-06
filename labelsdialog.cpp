@@ -68,7 +68,11 @@ void LabelsDialog::refreshLabelList()
 
 void LabelsDialog::on_updatePushButton_clicked()
 {
-    SqlDatabase::importLabels(SqlDatabase::getLabels(m_database));
+    QList<Container> newLabels = SqlDatabase::getLabels(m_database);
+    SqlDatabase::importLabels(newLabels);
+    foreach (Container label, newLabels) {
+        qDebug() << "New item" << label.getItemID() << "added to" << label.getName();
+    }
     refreshLabelList();
 }
 
