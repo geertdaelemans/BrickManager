@@ -7,6 +7,7 @@
 #include <QtSql>
 #include <QSqlQuery>
 #include <QSqlQueryModel>
+#include <QMessageBox>
 
 LabelsDialog::LabelsDialog(QWidget *parent, QString database) :
     QDialog(parent),
@@ -69,11 +70,25 @@ void LabelsDialog::refreshLabelList()
 void LabelsDialog::on_updatePushButton_clicked()
 {
     QList<Container> newLabels = SqlDatabase::getLabels(m_database);
-    SqlDatabase::importLabels(newLabels);
-    foreach (Container label, newLabels) {
-        qDebug() << "New item" << label.getItemID() << "added to" << label.getName();
+    if(newLabels.size() > 0) {
+        SqlDatabase::importLabels(newLabels);
+        refreshLabelList();
+        QString messageText = "";
+        foreach (Container label, newLabels) {
+            messageText += "New item " + label.getItemID() + " added to " + label.getName() + "\n";
+        }
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setText("New labels have been added.");
+        msgBox.setDetailedText(messageText);
+        msgBox.exec();
+    } else {
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setText("No new labels have been found.");
+        msgBox.exec();
     }
-    refreshLabelList();
+
 }
 
 void LabelsDialog::on_clearPushButton_clicked()
