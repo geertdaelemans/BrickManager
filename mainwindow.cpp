@@ -9,6 +9,7 @@
 #include "datamodel.h"
 #include "simplepopup.h"
 #include "exportxml.h"
+#include "framework.h"
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -16,7 +17,7 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow), maxFileNr(4)
+    ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     ui->tabWidget->clear();
@@ -204,7 +205,7 @@ void MainWindow::on_actionSave_As_triggered()
         ui->tabWidget->setTabText(ui->tabWidget->currentIndex(), name);
 
         // Add fileName to list of recent files
-        addToRecentFiles(fileName);
+        FrameWork::inst()->addToRecentFiles(fileName);
     }
 }
 
@@ -283,7 +284,7 @@ void MainWindow::loadFile(const QString &fileName)
         }
 
         // Add fileName to list of recent files
-        addToRecentFiles(fileName);
+        FrameWork::inst()->addToRecentFiles(fileName);
 
         // Get file information
         QFileInfo info(file);
@@ -354,7 +355,7 @@ void MainWindow::on_actionOpen_triggered()
     loadFile(fileName);
 }
 
-void MainWindow::openRecent()
+void MainWindow::on_actionOpen_Recent_triggered()
 {
     QAction *action = qobject_cast<QAction *>(sender());
     if (action) {
@@ -459,12 +460,12 @@ void MainWindow::on_tabWidget_tabCloseRequested(int index)
 
 void MainWindow::createActionsAndConnections(){
     QAction* recentFileAction = nullptr;
-    for(auto i = 0; i < maxFileNr; ++i){
+    for(auto i = 0; i < FrameWork::inst()->getMaxNumberOfRecentFiles(); ++i){
         recentFileAction = new QAction(this);
         recentFileAction->setVisible(false);
-        QObject::connect(recentFileAction, SIGNAL(triggered()),
-                         this, SLOT(openRecent()));
-        recentFileActionList.append(recentFileAction);
+        connect(recentFileAction, SIGNAL(triggered()),
+                this, SLOT(on_actionOpen_Recent_triggered()));
+        FrameWork::inst()->addActionToRecentFiles(recentFileAction);
     }
 }
 
@@ -473,46 +474,8 @@ void MainWindow::createMenus() {
     actionOpenRecent->setIcon(QIcon(":/icons/images/22x22/file_open.png"));
     ui->menuFile->insertSeparator(ui->actionSave);
     recentFilesMenu = actionOpenRecent->menu();
-    for(auto i = 0; i < maxFileNr; ++i) {
-        recentFilesMenu->addAction(recentFileActionList.at(i));
+    for(auto i = 0; i < FrameWork::inst()->getMaxNumberOfRecentFiles(); ++i) {
+        recentFilesMenu->addAction(FrameWork::inst()->getActionFromRecentFiles(i)/*recentFileActionList.at(i)*/);
     }
-    updateRecentActionList();
-}
-
-void MainWindow::updateRecentActionList() {
-    QSettings settings;
-    QStringList recentFilePaths =
-            settings.value("cache/recentFiles").toStringList();
-
-    auto itEnd = 0;
-    if(recentFilePaths.size() <= maxFileNr)
-        itEnd = recentFilePaths.size();
-    else
-        itEnd = maxFileNr;
-
-    for (auto i = 0; i < itEnd; ++i) {
-        QString strippedName = QFileInfo(recentFilePaths.at(i)).fileName();
-        recentFileActionList.at(i)->setText(strippedName);
-        recentFileActionList.at(i)->setData(recentFilePaths.at(i));
-        recentFileActionList.at(i)->setVisible(true);
-    }
-
-    for (auto i = itEnd; i < maxFileNr; ++i)
-        recentFileActionList.at(i)->setVisible(false);
-}
-
-void MainWindow::addToRecentFiles(const QString &filePath){
-    setWindowFilePath(filePath);
-
-    QSettings settings;
-    QStringList recentFilePaths =
-            settings.value("cache/recentFiles").toStringList();
-    recentFilePaths.removeAll(filePath);
-    recentFilePaths.prepend(filePath);
-    while (recentFilePaths.size() > maxFileNr)
-        recentFilePaths.removeLast();
-    settings.setValue("cache/recentFiles", recentFilePaths);
-
-    // see note
-    updateRecentActionList();
+    FrameWork::inst()->updateRecentActionList();
 }

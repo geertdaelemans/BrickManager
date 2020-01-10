@@ -8,6 +8,7 @@ HEADERS += \
     container.h \
     cref.h \
     exportxml.h \
+    framework.h \
     labelsdialog.h \
     mainwindow.h \
     ordersdialog.h \
@@ -29,6 +30,7 @@ SOURCES += \
     cdocument.cpp \
     cref.cpp \
     exportxml.cpp \
+    framework.cpp \
     labelsdialog.cpp \
     main.cpp \
     bricklink.cpp \
