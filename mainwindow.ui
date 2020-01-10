@@ -13,6 +13,10 @@
     <height>600</height>
    </rect>
   </property>
+  <property name="windowIcon">
+   <iconset resource="images.qrc">
+    <normaloff>:/icons/images/22x22/brick.png</normaloff>:/icons/images/22x22/brick.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
@@ -139,6 +143,7 @@
    <addaction name="separator"/>
    <addaction name="actionAdd_Items"/>
    <addaction name="separator"/>
+   <addaction name="actionManage_labels"/>
   </widget>
   <action name="actionOrders">
    <property name="text">
@@ -263,6 +268,10 @@
    </property>
   </action>
   <action name="actionManage_labels">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/icons/images/22x22/labels.png</normaloff>:/icons/images/22x22/labels.png</iconset>
+   </property>
    <property name="text">
     <string>Manage Labels...</string>
    </property>

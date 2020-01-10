@@ -110,8 +110,7 @@ void FrameWork::updateRecentActionList() {
         itEnd = maxFileNr;
 
     for (auto i = 0; i < itEnd; ++i) {
-        QString strippedName = QFileInfo(recentFilePaths.at(i)).fileName();
-        recentFileActionList.at(i)->setText(strippedName);
+        recentFileActionList.at(i)->setText(recentFilePaths.at(i));
         recentFileActionList.at(i)->setData(recentFilePaths.at(i));
         recentFileActionList.at(i)->setVisible(true);
     }
