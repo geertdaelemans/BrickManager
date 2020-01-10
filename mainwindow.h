@@ -34,6 +34,7 @@ public slots:
 private slots:
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
+    void openRecent();
     void on_actionSave_As_triggered();
     void on_actionOrders_triggered();
     void on_actionMy_Inventory_triggered();
@@ -54,12 +55,23 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+
+    QMenu* recentFilesMenu;
+    QList<QAction*> recentFileActionList;
+    const int maxFileNr;
+
     CTransfer *m_trans;
     OrdersDialog *ordersDialog;
     SettingsDialog *settingsDialog;
     LabelsDialog *labelsDialog;
     QMap<QString, CDocument*> tabList;
     BrickLink bricklink;
+
+    void createActionsAndConnections();
+    void createMenus();
+    void addToRecentFiles(const QString& filePath);
+    void updateRecentActionList();
+    void loadFile(const QString &fileName);
 };
 
 #endif // MAINWINDOW_H

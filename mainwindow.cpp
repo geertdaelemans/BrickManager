@@ -16,10 +16,13 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow), maxFileNr(4)
 {
     ui->setupUi(this);
     ui->tabWidget->clear();
+
+    createActionsAndConnections();
+    createMenus();
 
     m_trans = new CTransfer();
     connect(m_trans, SIGNAL(updateStatusBar(QString, int)), this, SLOT(updateStatusBar(QString, int)));
@@ -43,6 +46,7 @@ int MainWindow::addTab(ListModel *page, const QString &label)
     newTable->setModel(page);
     newTable->setName(label);
     addTab(newTable);
+    return 0;
 }
 
 /**
@@ -198,6 +202,9 @@ void MainWindow::on_actionSave_As_triggered()
         SqlDatabase::updateTableName(tabName, name);
         tabList[tabName]->setFileName(fileName);
         ui->tabWidget->setTabText(ui->tabWidget->currentIndex(), name);
+
+        // Add fileName to list of recent files
+        addToRecentFiles(fileName);
     }
 }
 
@@ -266,17 +273,17 @@ void MainWindow::openInventoryTab(QList<QString> orderIDs)
     ordersDialog->close();
 }
 
-
-void MainWindow::on_actionOpen_triggered()
+void MainWindow::loadFile(const QString &fileName)
 {
-    QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open File"), "d:\\", tr("Inventory Files (*.bsx)"));
     QFile file(fileName);
     if(!fileName.isEmpty() && !fileName.isNull()) {
         if(!file.open(QIODevice::ReadOnly)) {
             QMessageBox::information(this, "error", file.errorString());
             return;
         }
+
+        // Add fileName to list of recent files
+        addToRecentFiles(fileName);
 
         // Get file information
         QFileInfo info(file);
@@ -340,6 +347,20 @@ void MainWindow::on_actionOpen_triggered()
     }
 }
 
+void MainWindow::on_actionOpen_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Open File"), "d:\\", tr("Inventory Files (*.bsx)"));
+    loadFile(fileName);
+}
+
+void MainWindow::openRecent()
+{
+    QAction *action = qobject_cast<QAction *>(sender());
+    if (action) {
+        loadFile(action->data().toString());
+    }
+}
 
 void MainWindow::on_actionClose_triggered()
 {
@@ -434,4 +455,64 @@ void MainWindow::on_actionAboutQt_triggered()
 void MainWindow::on_tabWidget_tabCloseRequested(int index)
 {
     removeTab(index);
+}
+
+void MainWindow::createActionsAndConnections(){
+    QAction* recentFileAction = nullptr;
+    for(auto i = 0; i < maxFileNr; ++i){
+        recentFileAction = new QAction(this);
+        recentFileAction->setVisible(false);
+        QObject::connect(recentFileAction, SIGNAL(triggered()),
+                         this, SLOT(openRecent()));
+        recentFileActionList.append(recentFileAction);
+    }
+}
+
+void MainWindow::createMenus() {
+    QAction* actionOpenRecent = ui->menuFile->insertMenu(ui->actionSave, new QMenu(tr("Open Recent")));
+    actionOpenRecent->setIcon(QIcon(":/icons/images/22x22/file_open.png"));
+    ui->menuFile->insertSeparator(ui->actionSave);
+    recentFilesMenu = actionOpenRecent->menu();
+    for(auto i = 0; i < maxFileNr; ++i) {
+        recentFilesMenu->addAction(recentFileActionList.at(i));
+    }
+    updateRecentActionList();
+}
+
+void MainWindow::updateRecentActionList() {
+    QSettings settings;
+    QStringList recentFilePaths =
+            settings.value("cache/recentFiles").toStringList();
+
+    auto itEnd = 0;
+    if(recentFilePaths.size() <= maxFileNr)
+        itEnd = recentFilePaths.size();
+    else
+        itEnd = maxFileNr;
+
+    for (auto i = 0; i < itEnd; ++i) {
+        QString strippedName = QFileInfo(recentFilePaths.at(i)).fileName();
+        recentFileActionList.at(i)->setText(strippedName);
+        recentFileActionList.at(i)->setData(recentFilePaths.at(i));
+        recentFileActionList.at(i)->setVisible(true);
+    }
+
+    for (auto i = itEnd; i < maxFileNr; ++i)
+        recentFileActionList.at(i)->setVisible(false);
+}
+
+void MainWindow::addToRecentFiles(const QString &filePath){
+    setWindowFilePath(filePath);
+
+    QSettings settings;
+    QStringList recentFilePaths =
+            settings.value("cache/recentFiles").toStringList();
+    recentFilePaths.removeAll(filePath);
+    recentFilePaths.prepend(filePath);
+    while (recentFilePaths.size() > maxFileNr)
+        recentFilePaths.removeLast();
+    settings.setValue("cache/recentFiles", recentFilePaths);
+
+    // see note
+    updateRecentActionList();
 }
