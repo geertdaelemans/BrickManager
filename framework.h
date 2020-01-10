@@ -4,6 +4,9 @@
 #include <QObject>
 #include <QAction>
 
+#include "datamodel.h"
+#include "cdocument.h"
+
 class FrameWork : public QObject
 {
     Q_OBJECT
@@ -12,6 +15,8 @@ public:
     FrameWork();
 
     static FrameWork *inst();
+
+    CDocument *loadFile(QWidget *parent, const QString &fileName);
 
     void updateRecentActionList();
     void addToRecentFiles(const QString &filePath);

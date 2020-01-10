@@ -274,92 +274,24 @@ void MainWindow::openInventoryTab(QList<QString> orderIDs)
     ordersDialog->close();
 }
 
-void MainWindow::loadFile(const QString &fileName)
-{
-    QFile file(fileName);
-    if(!fileName.isEmpty() && !fileName.isNull()) {
-        if(!file.open(QIODevice::ReadOnly)) {
-            QMessageBox::information(this, "error", file.errorString());
-            return;
-        }
-
-        // Add fileName to list of recent files
-        FrameWork::inst()->addToRecentFiles(fileName);
-
-        // Get file information
-        QFileInfo info(file);
-        QString tableName = info.baseName();
-
-        //The QDomDocument class represents an XML document.
-        QDomDocument xmlInventory;
-
-        // Set data into the QDomDocument before processing
-        xmlInventory.setContent(&file);
-        file.close();
-
-        // Extract the root markup
-        QDomElement root = xmlInventory.documentElement();              // BrickStockXML
-        QDomElement inventory = root.firstChild().toElement();          // Inventory
-        QDomElement item = inventory.firstChild().toElement();          // Item
-
-        // Prepare data model
-        QString sqlTableName = SqlDatabase::getUniqueTableName(&tableName);
-        DataModel *p_dataModel = new DataModel(Tables::brickstock, sqlTableName);
-        p_dataModel->initiateSqlTableAuto("tempDatabase");
-
-        // Read each child of the Inventory node
-        while (!item.isNull()) {
-
-            // Prepare fields
-            QMap<QString, QVariant> fields;
-            if (item.tagName() == "Item") {
-                QDomElement field = item.firstChild().toElement();
-                // Read Name and value
-                while (!field.isNull()) {
-                    fields[field.tagName()] = field.firstChild().toText().data();
-                    if (fields[field.tagName()].isNull()) {
-                        fields[field.tagName()] = QVariant(1);
-                    }
-                    // Next field
-                    field = field.nextSibling().toElement();
-                }
-            }
-
-            // Set original quantity to current quantity, if not already set
-            if (!fields["OrigQty"].isValid())
-                fields["OrigQty"] = fields["Qty"];
-
-            // Set original unit price to current unit price, if not already set
-            if (!fields["OrigPrice"].isValid())
-                fields["OrigPrice"] = fields["Price"];
-
-            // Add collected fields to SQL database
-            QSqlError error = p_dataModel->addItemToTable(fields);
-
-            // Next sibling
-            item = item.nextSibling().toElement();
-        }
-        ListModel *listModel = new ListModel(this, p_dataModel, QSqlDatabase::database("tempDatabase"));
-        CDocument *doc = new CDocument();
-        doc->setName(tableName);
-        doc->setModel(listModel);
-        doc->setFileName(fileName);
-        addTab(doc);
-    }
-}
-
 void MainWindow::on_actionOpen_triggered()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Open File"), "d:\\", tr("Inventory Files (*.bsx)"));
-    loadFile(fileName);
+    CDocument *doc = FrameWork::inst()->loadFile(this, fileName);
+    if(doc) {
+        addTab(doc);
+    }
 }
 
 void MainWindow::on_actionOpen_Recent_triggered()
 {
     QAction *action = qobject_cast<QAction *>(sender());
     if (action) {
-        loadFile(action->data().toString());
+        CDocument *doc = FrameWork::inst()->loadFile(this, action->data().toString());
+        if(doc) {
+            addTab(doc);
+        }
     }
 }
 
