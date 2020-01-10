@@ -33,7 +33,7 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
-          <widget class="QGroupBox" name="groupBox">
+          <widget class="QGroupBox" name="ColorFilters">
            <property name="title">
             <string>Color Filters</string>
            </property>
@@ -51,6 +51,43 @@
                <string>Include Modulex colors</string>
               </property>
              </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="Paths">
+           <property name="title">
+            <string>Paths</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_8">
+            <item>
+             <layout class="QHBoxLayout" name="layDocumentDir">
+              <item>
+               <widget class="QLabel" name="lblDocumentDir">
+                <property name="text">
+                 <string>Document directory</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="documentDir"/>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnDocumentDir">
+                <property name="focusPolicy">
+                 <enum>Qt::NoFocus</enum>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset resource="images.qrc">
+                  <normaloff>:/icons/images/22x22/file_open.png</normaloff>:/icons/images/22x22/file_open.png</iconset>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
           </widget>
@@ -254,7 +291,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="images.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

@@ -4,6 +4,7 @@
 #include "sqldatabase.h"
 #include "ui_additemdialog.h"
 #include "bricklink.h"
+#include "config.h"
 
 #include <QPixmap>
 
@@ -86,12 +87,11 @@ void AddItemDialog::setColorFilter(QString itemName)
 
     // Set filter to include BrickArm and/or Modulex colors
     if (!reducedList) {
-        QSettings settings;
-        if(!settings.value("filter/includeBrickArmsColors").toBool() && !settings.value("filter/includeModulexColors").toBool()) {
+        if(!Config::inst()->includeBrickArmsColors() && !Config::inst()->includeModulexColors()) {
             colorsModel->setFilter(QString("color_type NOT LIKE '%%1%' AND color_type NOT LIKE '%%2%'").arg("BrickArms").arg("Modulex"));
-        } else if(!settings.value("filter/includeBrickArmsColors").toBool()) {
+        } else if(!Config::inst()->includeBrickArmsColors()) {
             colorsModel->setFilter(QString("color_type NOT LIKE '%%1%'").arg("BrickArms"));
-        } else if(!settings.value("filter/includeModulexColors").toBool()) {
+        } else if(!Config::inst()->includeModulexColors()) {
             colorsModel->setFilter(QString("color_type NOT LIKE '%%1%'").arg("Modulex"));
         }
     }

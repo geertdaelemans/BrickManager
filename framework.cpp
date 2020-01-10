@@ -2,8 +2,8 @@
 #include "sqldatabase.h"
 #include "datamodel.h"
 #include "listmodel.h"
+#include "config.h"
 
-#include <QSettings>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDomDocument>
@@ -101,9 +101,7 @@ CDocument *FrameWork::loadFile(QWidget* parent, const QString &fileName)
 
 
 void FrameWork::updateRecentActionList() {
-    QSettings settings;
-    QStringList recentFilePaths =
-            settings.value("cache/recentFiles").toStringList();
+    QStringList recentFilePaths = Config::inst()->getRecentFiles();
 
     auto itEnd = 0;
     if(recentFilePaths.size() <= maxFileNr)
@@ -123,18 +121,14 @@ void FrameWork::updateRecentActionList() {
 }
 
 void FrameWork::addToRecentFiles(const QString &filePath){
-//    setWindowFilePath(filePath);
-
-    QSettings settings;
-    QStringList recentFilePaths =
-            settings.value("cache/recentFiles").toStringList();
+    QStringList recentFilePaths = Config::inst()->getRecentFiles();
     recentFilePaths.removeAll(filePath);
     recentFilePaths.prepend(filePath);
-    while (recentFilePaths.size() > maxFileNr)
+    while (recentFilePaths.size() > maxFileNr) {
         recentFilePaths.removeLast();
-    settings.setValue("cache/recentFiles", recentFilePaths);
+    }
+    Config::inst()->setRecentFiles(recentFilePaths);
 
-    // see note
     updateRecentActionList();
 }
 

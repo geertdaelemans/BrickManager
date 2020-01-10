@@ -1,9 +1,11 @@
 #include "settingsdialog.h"
 #include "bricklink.h"
 #include "ui_settingsdialog.h"
+#include "config.h"
 
 #include <QtCore>
 #include <QMessageBox>
+#include <QFileDialog>
 
 SettingsDialog::SettingsDialog(QWidget *parent) :
     QDialog(parent),
@@ -17,8 +19,9 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     QSettings settings;
 
     // GENERAL panel
-    ui->checkBoxBrickArms->setChecked(settings.value("filter/includeBrickArmsColors").toBool());
-    ui->checkBoxModulex->setChecked(settings.value("filter/includeModulexColors").toBool());
+    ui->checkBoxBrickArms->setChecked(Config::inst()->includeBrickArmsColors());
+    ui->checkBoxModulex->setChecked(Config::inst()->includeModulexColors());
+    ui->documentDir->setText(Config::inst()->getDocumentDir());
 
     // CONNECTION panel
     // Retrieve BrickLink Login credentials
@@ -41,8 +44,9 @@ SettingsDialog::~SettingsDialog()
 void SettingsDialog::on_buttonBox_accepted()
 {
     QSettings settings;
-    settings.setValue("filter/includeBrickArmsColors", ui->checkBoxBrickArms->checkState());
-    settings.setValue("filter/includeModulexColors", ui->checkBoxModulex->checkState());
+    Config::inst()->setFilterBrickArmsColors(ui->checkBoxBrickArms->checkState());
+    Config::inst()->setFilterModulexColors(ui->checkBoxModulex->checkState());
+    Config::inst()->setDocumentDir(ui->documentDir->text());
     settings.setValue("bricklinklogin/userName", ui->userName->text());
     settings.setValue("bricklinklogin/passWord", ui->passWord->text());
     settings.setValue("credentials/consumerKey", ui->consumerKey->text());
@@ -57,5 +61,15 @@ void SettingsDialog::on_btnCheckConnection_clicked()
     BrickLink brickLink;
     if(brickLink.checkConnection(this)) {
         QMessageBox::information(this, "Connection", "Connection validated.");
+    }
+}
+
+void SettingsDialog::on_btnDocumentDir_clicked()
+{
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+        Config::inst()->getDocumentDir(),
+        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    if(dir != "") {
+        ui->documentDir->setText(dir);
     }
 }

@@ -19,6 +19,8 @@ private slots:
     void on_buttonBox_accepted();
     void on_btnCheckConnection_clicked();
 
+    void on_btnDocumentDir_clicked();
+
 private:
     Ui::SettingsDialog *ui;
 };

@@ -10,6 +10,7 @@
 #include "simplepopup.h"
 #include "exportxml.h"
 #include "framework.h"
+#include "config.h"
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -196,7 +197,10 @@ void MainWindow::on_actionSave_As_triggered()
     QString tabName = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
     QString sqlTableName = SqlDatabase::getTableName(tabName);
 
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File as"), QString("d:\\%1").arg(tabName), tr("BrickStock XML Data (*.bsx)"));
+    QString fileName = QFileDialog::getSaveFileName(this,
+        tr("Save File as"),
+        QString("%1\\%2").arg(Config::inst()->getDocumentDir()).arg(tabName),
+        tr("BrickStock XML Data (*.bsx)"));
     if (fileName != "") {
         ExportXml::SaveXMLFile(sqlTableName, fileName);
         QString name = QFileInfo(fileName).baseName().toLatin1();
@@ -277,7 +281,9 @@ void MainWindow::openInventoryTab(QList<QString> orderIDs)
 void MainWindow::on_actionOpen_triggered()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open File"), "d:\\", tr("Inventory Files (*.bsx)"));
+        tr("Open File"),
+        QString("%1\\").arg(Config::inst()->getDocumentDir()),
+        tr("Inventory Files (*.bsx)"));
     CDocument *doc = FrameWork::inst()->loadFile(this, fileName);
     if(doc) {
         addTab(doc);

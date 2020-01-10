@@ -5,6 +5,7 @@ CONFIG -= app_bundle
 HEADERS += \
     bricklink.h \
     cdocument.h \
+    config.h \
     container.h \
     cref.h \
     exportxml.h \
@@ -28,6 +29,7 @@ HEADERS += \
 
 SOURCES += \
     cdocument.cpp \
+    config.cpp \
     cref.cpp \
     exportxml.cpp \
     framework.cpp \
