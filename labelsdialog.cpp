@@ -75,7 +75,7 @@ void LabelsDialog::on_updatePushButton_clicked()
         refreshLabelList();
         QString messageText = "";
         foreach (Container label, newLabels) {
-            messageText += "New item " + label.getItemID() + " added to " + label.getName() + "\n";
+            messageText += label.getItemID() + " -> " + label.getName() + "\n";
         }
         QMessageBox msgBox;
         msgBox.setIcon(QMessageBox::Information);
@@ -95,4 +95,21 @@ void LabelsDialog::on_clearPushButton_clicked()
 {
     SqlDatabase::clearAllLabels();
     refreshLabelList();
+}
+
+void LabelsDialog::on_deletePushButton_clicked()
+{
+    QItemSelectionModel *selections = ui->tableView->selectionModel();
+    QModelIndexList selected = selections->selectedIndexes();
+    if (selected.size() != 0) {
+        int row = selected.begin()->row();
+        int index = ui->tableView->model()->data(ui->tableView->model()->index(row, 0)).toInt();
+        SqlDatabase::deleteLabel(index);
+        refreshLabelList();
+        if (row < ui->tableView->model()->rowCount()) {
+            ui->tableView->selectRow(row);
+        } else {
+            ui->tableView->selectRow(row - 1);
+        }
+    }
 }

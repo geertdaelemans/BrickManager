@@ -22,7 +22,7 @@ QString SqlDatabase::getColorById(int color_id)
         return "Color not found";
     q.exec();
     while (q.next()) {
-        output = q.value(0).toString();;
+        output = q.value(0).toString();
     }
     q.finish();
     return output;
@@ -136,15 +136,18 @@ QList<int> SqlDatabase::getColorsOfPart(QString item_id)
  */
 QList<Container> SqlDatabase::getLabels(const QString tableName)
 {
+    qDebug() << "getLabels";
     QList<Container> containerList;
     QSqlQuery query(QSqlDatabase::database("tempDatabase"));
     if (!query.prepare("SELECT DISTINCT remarks, item_no FROM " + tableName + " WHERE remarks != ''"))
         return containerList;
     query.exec();
     while (query.next()) {
-        Container container(query.value(0).toString(), query.value(1).toString());
-        if (!containerListed(container)) {
-            containerList.append(container);
+        if (!query.value(0).toString().endsWith("stock")) {
+            Container container(query.value(0).toString(), query.value(1).toString());
+            if (!containerListed(container)) {
+                containerList.append(container);
+            }
         }
     }
     return containerList;
@@ -214,6 +217,14 @@ void SqlDatabase::updateLabels(const QString table)
         }
     }
     queryUpdate.finish();
+}
+
+void SqlDatabase::deleteLabel(const int index)
+{
+    QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
+    if (!q.prepare(QString("DELETE FROM storage WHERE id = %1").arg(index)))
+        qFatal("Failed to execute sql query: %s, Error: %s", qPrintable(q.lastQuery()), qPrintable(q.lastError().text()));
+    q.exec();
 }
 
 void SqlDatabase::clearAllLabels()

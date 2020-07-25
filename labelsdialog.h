@@ -22,6 +22,8 @@ private slots:
     void on_updatePushButton_clicked();
     void on_clearPushButton_clicked();
 
+    void on_deletePushButton_clicked();
+
 private:
     Ui::LabelsDialog *ui;
     QSqlTableModel *labelsModel;

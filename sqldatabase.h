@@ -18,6 +18,7 @@ public:
     static QString getTableName(QString name);
     static void updateTableName(QString oldName, QString newName);
     static void removeTable(QString name);
+    static void deleteLabel(const int row);
     static void clearAllLabels();
     static void clearTable(QString tableName);
     static QList<Container> getLabels(const QString tableName);

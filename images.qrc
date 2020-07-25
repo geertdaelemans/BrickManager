@@ -12,6 +12,7 @@
         <file>images/22x22/file_save.png</file>
         <file>images/22x22/labels.png</file>
         <file>images/22x22/brick.png</file>
+        <file>images/22x22/remove.png</file>
     </qresource>
     <qresource prefix="/">
         <file>images/no_image.jpg</file>
