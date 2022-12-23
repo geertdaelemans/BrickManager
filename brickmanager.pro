@@ -71,7 +71,9 @@ RESOURCES += \
     images.qrc \
     auth.qrc
 
-unix|win32: LIBS += -L$$PWD/../../libs/curl-7.64.0-win32-mingw/lib/ -llibcurl.dll
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../libs/curl-7.87.0-win32-mingw/lib/ -llibcurl.dll
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../libs/curl-7.87.0-win32-mingw/lib/ -llibcurl.dlld
+else:unix: LIBS += -L$$PWD/../../libs/curl-7.87.0-win32-mingw/lib/ -llibcurl.dll
 
-INCLUDEPATH += $$PWD/../../libs/curl-7.64.0-win32-mingw/include
-DEPENDPATH += $$PWD/../../libs/curl-7.64.0-win32-mingw/include
+INCLUDEPATH += $$PWD/../../libs/curl-7.87.0-win32-mingw/include
+DEPENDPATH += $$PWD/../../libs/curl-7.87.0-win32-mingw/include

@@ -241,7 +241,7 @@ void CTransfer::run()
 //				 cApp-> sysVersion ( ) + "; http://" +
 //	             cApp-> appURL ( ) + ")";
     QString ua = "BrickStore/1.2.12 (Windows 8; http://www.brickforge.de/software/brickstore)";
-    QFile capath(":/cacert.pem");
+
     qDebug("CTransfer::run()");
     ::curl_easy_setopt(m_curl, CURLOPT_COOKIEFILE, "cookies.txt");
     ::curl_easy_setopt(m_curl, CURLOPT_COOKIEFILE, "");
@@ -261,7 +261,7 @@ void CTransfer::run()
     ::curl_easy_setopt(m_curl, CURLOPT_SSLCERTTYPE, "PEM");
     ::curl_easy_setopt(m_curl, CURLOPT_SSL_VERIFYPEER, 1L);
 //  ::curl_easy_setopt(m_curl, CURLOPT_SSL_VERIFYPEER, FALSE);
-    ::curl_easy_setopt(m_curl, CURLOPT_CAINFO, "d:\\cacert.pem");
+    ::curl_easy_setopt(m_curl, CURLOPT_CAINFO, "cacert.pem");
     ::curl_easy_setopt(m_curl, CURLOPT_COOKIEJAR, "cookies.txt");
     QString url;
     QByteArray query;
@@ -291,7 +291,7 @@ void CTransfer::run()
             else
                 ::curl_easy_setopt(m_curl, CURLOPT_PROXY, 0);
 
-            qDebug("Running job: %i", job->m_id);
+            qDebug() << "Running job:" << job->m_id << job->m_name;
 
             if (job->m_http_method == Job::Get) {
 
@@ -358,8 +358,10 @@ void CTransfer::run()
 
         if (m_active_job == job) {
             job->m_result = res;
-            if (res != CURLE_OK)
+            if (res != CURLE_OK) {
                 job->m_error = ::curl_easy_strerror(res);
+                qDebug() << "CURL error:" << job->m_error;
+            }
             job->m_respcode = respcode;
             job->m_effective_url = effurl;
             job->m_filetime = time_t((filetime != -1) ? filetime : 0);

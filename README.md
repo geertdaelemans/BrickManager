@@ -1,12 +1,19 @@
 # BrickManager
 A tool to manage my LEGO brick collection.
 
+## Installation
+
+### BrickLink
 In order to get this code snippet to work, you have to first set BrickLink key/secret pairs in the settings diaglog (Extras > Settings... > Connection).
 You can apply for these values on the Bricklink.com site (https://www.bricklink.com/v2/api/register_consumer.page).
 
-In order to get the software to compile you will need ssleay32.dll and libeay32.dll in your workspace (required for SSL support).
+### CURL support
+Download the latest curl version on https://curl.se/windows/. 
 
-Currently supported features:
+In order to get the software to compile you will need libcurl.dll, libcrypto-1_1.dll and libssl-1_1.dll in your workspace (required for SSL support).
+Also include a recent CA certificate in the main root of the workspace. You can find the certificate at: https://curl.se/ca/cacert.pem.
+
+## Currently supported features:
 * Open BrickStock files (*.bsx)
 * Save As... BrickStock files (*.bsx)
 * Import your complete inventory from BrickLink
