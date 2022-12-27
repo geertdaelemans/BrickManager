@@ -13,6 +13,8 @@ Download the latest curl version on https://curl.se/windows/.
 In order to get the software to compile you will need libcurl.dll, libcrypto-1_1.dll and libssl-1_1.dll in your workspace (required for SSL support).
 Also include a recent CA certificate in the main root of the workspace. You can find the certificate at: https://curl.se/ca/cacert.pem.
 
+In order for the 64-bit version to work you need to install Win64OpenSSL version 1.1.1g.
+
 ## Currently supported features:
 * Open BrickStock files (*.bsx)
 * Save As... BrickStock files (*.bsx)

@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include "sqldatabase.h"
 
 #include <QApplication>
 #include <QWindow>
@@ -15,6 +14,12 @@ int main(int argc, char **argv)
 
     MainWindow mainWindow;
     mainWindow.showMaximized();
+
+    qDebug() << "SSL checks";
+    qDebug() << "==========";
+    qDebug() << "sslLibraryBuildVersionString" << QSslSocket::sslLibraryBuildVersionString();
+    qDebug() << "supportsSsl" << QSslSocket::supportsSsl();
+    qDebug() << "sslLibraryVersionString" << QSslSocket::sslLibraryVersionString();
 
     return app.exec();
 }

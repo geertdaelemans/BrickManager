@@ -14,7 +14,10 @@ ProgressDialog::ProgressDialog(QWidget *parent) :
 
     m_message_progress = false;
 
-    int minwidth = fontMetrics().width('m') * 40;
+    QFont font;
+    font.setFamily(font.defaultFamily());
+    QFontMetrics fm(font);
+    int minwidth = fm.horizontalAdvance('m') * 40;
 
     QVBoxLayout *lay = new QVBoxLayout(this);
     lay->setMargin(11);

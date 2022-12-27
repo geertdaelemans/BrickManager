@@ -1,4 +1,5 @@
 #include "lzmadec.h"
+#include "qglobal.h"
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
@@ -210,10 +211,6 @@ typedef struct {
 #include <config.h>
 #endif
 
-#ifdef _WIN32
-#pragma warning( disable: 4100 )
-#endif
-
 /* FIXME DEBUG */
 #include <stdio.h>
 
@@ -366,14 +363,18 @@ static void *
 lzmadec_alloc (__attribute__ ((unused)) void *opaque,
 	size_t nmemb, size_t size)
 {
-	return (malloc (nmemb * size)); /* No need to zero the memory. */
+    Q_UNUSED(opaque);
+
+    return (malloc (nmemb * size)); /* No need to zero the memory. */
 }
 
 /* Default function for freeing memory */
 static void
 lzmadec_free (__attribute__ ((unused)) void *opaque, void *addr)
 {
-	free (addr);
+    Q_UNUSED(opaque);
+
+    free (addr);
 }
 
 

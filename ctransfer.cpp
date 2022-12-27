@@ -8,7 +8,6 @@
 
 #include "lzmadec.h"
 #include "datamodel.h"
-#include "sqldatabase.h"
 #include "bricklink.h"
 
 bool CTransfer::s_global_init = false;
@@ -247,7 +246,7 @@ void CTransfer::run()
     ::curl_easy_setopt(m_curl, CURLOPT_COOKIEFILE, "");
     ::curl_easy_setopt(m_curl, CURLOPT_VERBOSE, 0);
     ::curl_easy_setopt(m_curl, CURLOPT_NOPROGRESS, 0);
-    ::curl_easy_setopt(m_curl, CURLOPT_PROGRESSFUNCTION, progress_curl);
+    ::curl_easy_setopt(m_curl, CURLOPT_XFERINFOFUNCTION, progress_curl);
     ::curl_easy_setopt(m_curl, CURLOPT_PROGRESSDATA, this);
     ::curl_easy_setopt(m_curl, CURLOPT_NOSIGNAL, 1);
     ::curl_easy_setopt(m_curl, CURLOPT_FOLLOWLOCATION, 1);
@@ -360,7 +359,12 @@ void CTransfer::run()
             job->m_result = res;
             if (res != CURLE_OK) {
                 job->m_error = ::curl_easy_strerror(res);
-                qDebug() << "CURL error:" << job->m_error;
+                QMessageBox msgBox;
+                msgBox.setWindowTitle("Critical Error");
+                msgBox.setIcon(QMessageBox::Critical);
+                msgBox.setText(job->m_error);
+                msgBox.setInformativeText("It is quite likely the <b>cacert.pem</b> file is missing in the run directory.");
+                msgBox.exec();
             }
             job->m_respcode = respcode;
             job->m_effective_url = effurl;
@@ -776,7 +780,7 @@ void CTransfer::gotten(CTransfer::Job* job)
     }
 
     // TAB DELIMITED INPUT
-    else {
+    else if (job->m_type != Job::NoReturn) {
         if (job->m_data) {
 
             // Testing for Log-in OK
