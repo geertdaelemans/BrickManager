@@ -61,7 +61,7 @@ void CAsciiRefCacheBase::releaseFor ( const CRef *ref )
 		while ( m_no_ref. count ( ) > m_cache_size ) {
             const CRef *del = m_no_ref. takeAt ( 0 );
 
-            QHashIterator<QString, CRef*> i(m_dict);
+            QMultiHashIterator<QString, CRef*> i(m_dict);
             while (i.hasNext()) {
                 i.next();
                 if (i.value() == del) {

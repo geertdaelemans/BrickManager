@@ -8,6 +8,7 @@
 #include <QMenu>
 #include <QWidgetAction>
 #include <QMessageBox>
+#include <QItemDelegate>
 
 OrdersDialog::OrdersDialog(QWidget *parent) :
     QDialog(parent),
@@ -51,7 +52,7 @@ OrdersDialog::OrdersDialog(QWidget *parent) :
     proxyModel->sort(p_dataModel->getSortColumn(), p_dataModel->getSortOrder());
 
     // Set delegates
-    QItemDelegate *delegate = new ListModelDelegate(this);
+    QAbstractItemDelegate *delegate = new ListModelDelegate(this);
     ui->view->setItemDelegate(delegate);
 
     // Design the model and hide columns not needed:

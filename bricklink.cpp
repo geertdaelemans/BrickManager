@@ -179,7 +179,7 @@ QString BrickLink::getItemInformation(QString type, QString no)
 
     if (reply->error() == QNetworkReply::NoError) {
         QJsonArray array = BrickLink::validateBricklinkResponse(reply);
-        foreach(const QJsonValue &batch, array) {
+        for (const auto &batch: array) {
             return batch.toString();
         }
     }
@@ -192,10 +192,10 @@ void BrickLink::parseJsonOrderItem(int orderID)
     model->initiateSqlTable();
     QJsonArray batchArray = BrickLink::validateBricklinkResponse(sender());
     int batchNumber = 0;
-    foreach(const QJsonValue &batch, batchArray) {
+    for (const auto &batch: batchArray) {
         batchNumber++;
         QJsonArray itemArray = batch.toArray();
-        foreach(const QJsonValue &item, itemArray) {
+        for (const auto &item: itemArray) {
             QJsonObject object = item.toObject();
             QMap<QString, QVariant> fields;
             fields["inventory_id"] = object.value("inventory_id").toVariant();

@@ -54,7 +54,7 @@ AddItemDialog::AddItemDialog(QWidget *parent) :
     ui->colorsListView->setModelColumn(colorIdx);
 
     // Apply delegates
-    QItemDelegate *delegate = new ListModelDelegate(this);
+    QAbstractItemDelegate *delegate = new ListModelDelegate(this);
     ui->colorsListView->setItemDelegate(delegate);
     ui->categoriesListView->setItemDelegate(delegate);
 

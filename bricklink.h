@@ -159,7 +159,7 @@ public:
 //		const Category **allCategories ( ) const { return m_categories; }
 //		bool hasCategory ( const Category *cat ) const;
         bool hasInventory ( ) const              { return ( m_last_inv_update >= 0 ); }
-        QDateTime inventoryUpdated ( ) const     { QDateTime dt; if ( m_last_inv_update >= 0 ) dt.setTime_t ( m_last_inv_update ); return dt; }
+        QDateTime inventoryUpdated ( ) const     { QDateTime dt; if ( m_last_inv_update >= 0 ) dt.setSecsSinceEpoch( m_last_inv_update ); return dt; }
 //		const Color *defaultColor ( ) const      { return m_color; }
         double weight ( ) const                  { return m_weight; }
         int yearReleased ( ) const               { return m_year ? m_year + 1900 : 0; }

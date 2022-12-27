@@ -42,7 +42,7 @@ public:
         QByteArray *data ( ) const       { return m_data; }
         QString contentType ( ) const    { return m_contentType; }
         void *userObject ( ) const       { return m_userobject; }
-        QDateTime lastModified ( ) const { QDateTime d; d.setTime_t ( m_filetime ); return d; }
+        QDateTime lastModified ( ) const { QDateTime d; d.setSecsSinceEpoch( m_filetime ); return d; }
         bool notModifiedSince ( ) const  { return m_not_modified; }
         enum returnType {Login, Catalog, PartColor, Images, NoReturn};
         enum httpMethod {Get, Post};

@@ -20,7 +20,7 @@ ProgressDialog::ProgressDialog(QWidget *parent) :
     int minwidth = fm.horizontalAdvance('m') * 40;
 
     QVBoxLayout *lay = new QVBoxLayout(this);
-    lay->setMargin(11);
+    lay->setContentsMargins(11, 11, 11, 11);
     lay->setSpacing(6);
 
     m_header = new QLabel(this);
@@ -41,7 +41,7 @@ ProgressDialog::ProgressDialog(QWidget *parent) :
     lay->addWidget(m_progress_container);
 
     QHBoxLayout *play = new QHBoxLayout(m_progress_container);
-    play->setMargin(0);
+    play->setContentsMargins(0, 0, 0, 0);
     play->setSpacing(6);
 
     m_progress = new QProgressBar(m_progress_container);

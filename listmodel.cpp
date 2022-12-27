@@ -38,7 +38,7 @@ ListModel::ListModel(QWidget *parent, DataModel *tableModel, QSqlDatabase databa
     }
 
     // Apply delegates
-    QItemDelegate *delegate = new ListModelDelegate(this);
+    QAbstractItemDelegate *delegate = new ListModelDelegate(this);
     ui->tableView->setItemDelegate(delegate);
     ui->tableView->setItemDelegateForColumn( model->fieldIndex("is_retain"), new DELEGATE::CheckBoxDelegate( this ) );
     ui->tableView->setItemDelegateForColumn( model->fieldIndex("is_stock_room"), new DELEGATE::CheckBoxDelegate( this ) );

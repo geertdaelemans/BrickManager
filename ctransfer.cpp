@@ -181,7 +181,7 @@ CTransfer::Job *CTransfer::retrieve(Job::httpMethod method, const QByteArray &ur
         m_in_queue.append(job);
     m_queue_cond.wakeOne();
 
-    qDebug("waking up thread... (%d in list)", m_in_queue.count());
+    qDebug("waking up thread... (%lld in list)", m_in_queue.count());
 
     m_queue_lock.unlock();
 
@@ -359,6 +359,7 @@ void CTransfer::run()
             job->m_result = res;
             if (res != CURLE_OK) {
                 job->m_error = ::curl_easy_strerror(res);
+                // TODO: The next part creates a segmentation fault, but at least is manages to warn the user before it happens
                 QMessageBox msgBox;
                 msgBox.setWindowTitle("Critical Error");
                 msgBox.setIcon(QMessageBox::Critical);
@@ -937,7 +938,8 @@ void CTransfer::pictureJobFinished(CTransfer::Job *j) {
             ok = (jerror.error == QJsonParseError::NoError) && (jsonResponse.object()["meta"].toObject()["code"].toInt() == 200);
             if(ok) {
                 QJsonArray pgData = jsonResponse.object()["data"].toArray();
-                foreach(QJsonValue value, pgData) {
+//                foreach(QJsonValue value, pgData) {
+                for (const auto &value: pgData) {
                     QJsonObject obj = value.toObject();
                     QJsonObject item = obj["item"].toObject();
 
