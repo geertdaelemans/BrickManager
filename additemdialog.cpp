@@ -30,8 +30,8 @@ AddItemDialog::AddItemDialog(QWidget *parent) :
     ui->w_item_types->setCurrentIndex(6);
 
     connect(ui->w_item_types, SIGNAL(currentTextChanged(QString)), this, SLOT(updateCategories(QString)));
-    connect(ui->priceInput, SIGNAL(valueChanged(QString)), this, SLOT(updateTotalCost()));
-    connect(ui->quantityInput, SIGNAL(valueChanged(QString)), this, SLOT(updateTotalCost()));
+    connect(ui->priceInput, SIGNAL(valueChanged(double)), this, SLOT(updateTotalCost()));
+    connect(ui->quantityInput, SIGNAL(valueChanged(int)), this, SLOT(updateTotalCost()));
 
     // Create the data models
     DataModel *colorsDataModel = new DataModel(Tables::colors);

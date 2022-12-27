@@ -290,7 +290,7 @@ void MainWindow::on_actionOpen_triggered()
     }
 }
 
-void MainWindow::on_actionOpen_Recent_triggered()
+void MainWindow::openRecentFile()
 {
     QAction *action = qobject_cast<QAction *>(sender());
     if (action) {
@@ -402,7 +402,7 @@ void MainWindow::createActionsAndConnections(){
         recentFileAction = new QAction(this);
         recentFileAction->setVisible(false);
         connect(recentFileAction, SIGNAL(triggered()),
-                this, SLOT(on_actionOpen_Recent_triggered()));
+                this, SLOT(openRecentFile()));
         FrameWork::inst()->addActionToRecentFiles(recentFileAction);
     }
 }

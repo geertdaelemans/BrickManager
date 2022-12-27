@@ -34,7 +34,7 @@ public slots:
 private slots:
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
-    void on_actionOpen_Recent_triggered();
+    void openRecentFile();
     void on_actionSave_As_triggered();
     void on_actionOrders_triggered();
     void on_actionMy_Inventory_triggered();

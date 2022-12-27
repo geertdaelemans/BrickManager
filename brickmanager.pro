@@ -71,6 +71,8 @@ RESOURCES += \
     images.qrc \
     auth.qrc
 
+RC_ICONS = BrickManager.ico
+
 unix|win32: contains(QT_ARCH, i386) {
     LIBS += -L$$PWD/../../libs/curl-7.87.0-win32-mingw/lib/ -llibcurl.dll
     INCLUDEPATH += $$PWD/../../libs/curl-7.87.0-win32-mingw/include
