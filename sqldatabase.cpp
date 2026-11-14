@@ -157,8 +157,14 @@ void SqlDatabase::importLabels(QList<Container> containers)
 {
     QSqlDatabase::database("catalogDatabase").transaction();
     for (int i = 0; i < containers.length(); i++) {
-        QString queryString = QString("REPLACE INTO storage (name, sort, item_id) VALUES (:name, :sort, :item_id)");
+        QString deleteString = QString("DELETE FROM storage WHERE item_id = :item_id");
         QSqlQuery q(QSqlDatabase::database("catalogDatabase"));
+        if (!q.prepare(deleteString))
+            qDebug() << "SqlDatabase::importLabels" << q.lastError() << deleteString;
+        q.bindValue(":item_id", containers[i].getItemID());
+        q.exec();
+
+        QString queryString = QString("REPLACE INTO storage (name, sort, item_id) VALUES (:name, :sort, :item_id)");
         if (!q.prepare(queryString))
             qDebug() << "SqlDatabase::importLabels" << q.lastError() << queryString;
         q.bindValue(":name", containers[i].getName());
